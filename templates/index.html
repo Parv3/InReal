@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INREAL // TELEMETRY RADAR [OP-1]</title>
+  <title>InReal // Robotics & AI Opportunity Radar</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -17,24 +17,17 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Inter"', '-apple-system', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           },
           colors: {
-            chassis: {
-              DEFAULT: '#F5F5F0',
-              bone: '#FFFFFF',
-              metal: '#E8E8E0',
-              border: '#D0D0C6',
-              darkBorder: '#1E2024',
-              ink: '#141517',
-              muted: '#686B73',
-            },
-            signal: {
-              orange: '#FF5C00',
-              amber: '#F59E0B',
-              green: '#10B981',
-              dark: '#0F1117',
+            brand: {
+              blue: '#2563EB',
+              indigo: '#4F46E5',
+              violet: '#7C3AED',
+              emerald: '#059669',
+              amber: '#D97706',
+              rose: '#E11D48',
             }
           }
         }
@@ -43,190 +36,188 @@
   </script>
 
   <style>
-    /* Teenage Engineering / Linear Hardware Aesthetic */
+    /* Translucent Glassmorphism & Flat iOS-Grade Design */
     :root {
-      --bg-chassis: #F5F5F0;
-      --border-hard: 1.5px solid #1E2024;
-      --border-subtle: 1.5px solid #D5D5CA;
-      --ink: #141517;
-      --signal-orange: #FF5C00;
+      --bg-gradient: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
+                         radial-gradient(circle at 85% 20%, rgba(236, 72, 153, 0.07) 0%, transparent 40%),
+                         radial-gradient(circle at 50% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+                         #F8FAFC;
     }
 
     body {
-      background-color: var(--bg-chassis);
-      color: var(--ink);
-      font-family: 'Inter', sans-serif;
-      /* Subtle millimeter engineering grid */
-      background-image: 
-        linear-gradient(to right, rgba(20, 21, 23, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(20, 21, 23, 0.04) 1px, transparent 1px);
-      background-size: 24px 24px;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
     }
 
-    /* Tactile hardware modules */
-    .hardware-module {
-      background: #FFFFFF;
-      border: 1.5px solid #1E2024;
-      border-radius: 8px;
-      box-shadow: 3px 3px 0px #1E2024;
-      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .hardware-module:hover {
-      transform: translate(-1.5px, -1.5px);
-      box-shadow: 4.5px 4.5px 0px #1E2024;
+    /* Glassmorphic Surfaces with Pristine iOS Frosted Blur */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+      border-radius: 20px;
     }
 
-    /* Tactile button */
-    .tactile-btn {
-      background: #FFFFFF;
-      border: 1.5px solid #1E2024;
-      border-radius: 6px;
-      box-shadow: 2px 2px 0px #1E2024;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      transition: all 0.12s ease;
-    }
-    .tactile-btn:hover {
-      background: #F0F0E8;
-      transform: translate(-1px, -1px);
-      box-shadow: 3px 3px 0px #1E2024;
-    }
-    .tactile-btn:active {
-      transform: translate(1.5px, 1.5px);
-      box-shadow: 0.5px 0.5px 0px #1E2024;
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px) saturate(170%);
+      -webkit-backdrop-filter: blur(16px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+      border-radius: 18px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .tactile-btn-primary {
-      background: #FF5C00;
-      color: #FFFFFF;
-      border: 1.5px solid #1E2024;
-      box-shadow: 2px 2px 0px #1E2024;
-    }
-    .tactile-btn-primary:hover {
-      background: #E05200;
-      color: #FFFFFF;
+    .glass-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 18px 36px -12px rgba(37, 99, 235, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
     }
 
-    /* Segmented hardware rocker switches */
-    .rocker-switch {
-      background: #E8E8E0;
-      border: 1.5px solid #1E2024;
-      border-radius: 6px;
-      padding: 2px;
+    /* Flat Illustration Clean Color Blocks */
+    .flat-badge {
       display: inline-flex;
-      gap: 2px;
-    }
-
-    .rocker-item {
-      padding: 5px 12px;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 10px;
       font-size: 11px;
       font-weight: 700;
-      text-transform: uppercase;
-      color: #686B73;
+      letter-spacing: -0.01em;
+    }
+
+    /* Translucent Interactive Buttons */
+    .glass-btn {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      transition: all 0.18s ease;
+    }
+    .glass-btn:hover {
+      background: rgba(255, 255, 255, 0.98);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px -3px rgba(15, 23, 42, 0.08);
+    }
+    .glass-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+    }
+
+    .glass-btn-primary {
+      background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 6px 18px -4px rgba(37, 99, 235, 0.35);
+    }
+    .glass-btn-primary:hover {
+      background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%);
+      box-shadow: 0 8px 22px -4px rgba(37, 99, 235, 0.45);
+      color: #FFFFFF;
+    }
+
+    /* Segmented Control Pill Group (Apple iOS style) */
+    .pill-segmented-group {
+      background: rgba(226, 232, 240, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 3px;
+      border-radius: 14px;
+      display: inline-flex;
+      gap: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .pill-segmented-item {
+      padding: 6px 14px;
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748B;
       cursor: pointer;
-      transition: all 0.12s ease;
+      transition: all 0.16s ease;
+      white-space: nowrap;
     }
-    .rocker-item:hover {
-      color: #141517;
+    .pill-segmented-item:hover {
+      color: #0F172A;
     }
-    .rocker-item.active {
+    .pill-segmented-item.active {
       background: #FFFFFF;
-      color: #141517;
-      border: 1px solid #1E2024;
-      box-shadow: 1px 1px 0px #1E2024;
+      color: #0F172A;
+      box-shadow: 0 3px 10px -2px rgba(15, 23, 42, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
     }
 
-    /* Screws & mechanical fixtures */
-    .hardware-screw {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      border: 1px solid #A8A89C;
-      background: #E8E8E0;
-      position: relative;
-    }
-    .hardware-screw::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 1px;
-      right: 1px;
-      height: 1px;
-      background: #808070;
-      transform: translateY(-50%) rotate(45deg);
-    }
-
-    /* Scrollbars */
+    /* Custom scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #E8E8E0; border-left: 1.5px solid #1E2024; }
-    ::-webkit-scrollbar-thumb { background: #1E2024; border-radius: 0px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
   </style>
 </head>
 
-<body class="bg-[#F5F5F0] min-h-screen text-[#141517] flex flex-col relative antialiased selection:bg-[#FF5C00] selection:text-white">
+<body class="min-h-screen text-[#0F172A] flex flex-col relative antialiased selection:bg-blue-600 selection:text-white">
 
-  <!-- Interactive 3D Wireframe Topographical Radar Canvas -->
-  <canvas id="topo-radar-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-45"></canvas>
+  <!-- Interactive 3D Flat Geometric Mesh Background Canvas -->
+  <canvas id="topo-radar-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
 
-  <!-- Notification Banner -->
-  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-[#FFFFFF] border-2 border-[#1E2024] p-4 rounded-md shadow-[4px_4px_0px_#1E2024]">
+  <!-- Translucent Notification Banner -->
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full glass-panel p-4 shadow-xl border-l-4 border-l-blue-600">
     <div class="flex items-start gap-3">
-      <div class="w-7 h-7 bg-[#FF5C00] text-white flex items-center justify-center font-mono font-bold text-xs border border-[#1E2024]">
-        !
+      <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
+        <i class="ph ph-info font-bold"></i>
       </div>
-      <div class="flex-1 font-mono">
-        <h4 id="action-title" class="font-bold text-xs uppercase tracking-wider text-[#141517]">SYS_NOTIFICATION</h4>
-        <p id="action-message" class="text-xs text-[#686B73] mt-0.5 font-sans font-medium">Verification required in browser window.</p>
+      <div class="flex-1">
+        <h4 id="action-title" class="font-bold text-xs uppercase tracking-wide text-slate-800">Notification</h4>
+        <p id="action-message" class="text-xs text-slate-600 mt-0.5 font-medium leading-relaxed">Action required in browser window.</p>
       </div>
-      <button id="action-dismiss-btn" class="tactile-btn px-3 py-1 text-xs">
-        ACK
+      <button id="action-dismiss-btn" class="glass-btn px-3 py-1.5 text-xs text-slate-700">
+        Dismiss
       </button>
     </div>
   </div>
 
-  <!-- Hardware Synthesizer Header -->
-  <header class="sticky top-0 z-30 w-full bg-[#F5F5F0]/95 backdrop-blur-md border-b-2 border-[#1E2024]">
-    <div class="max-w-7xl mx-auto px-6 h-18 py-3 flex items-center justify-between gap-4">
+  <!-- Translucent Frosted Glass Header -->
+  <header class="sticky top-0 z-30 w-full bg-white/70 backdrop-blur-xl border-b border-white/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-6 h-18 py-3.5 flex items-center justify-between gap-4">
       
-      <!-- Brand & Instrument Markings -->
-      <div class="flex items-center gap-4">
-        <div class="w-10 h-10 bg-[#FF5C00] border-2 border-[#1E2024] rounded-md shadow-[2px_2px_0px_#1E2024] flex items-center justify-center text-white">
-          <i class="ph ph-cpu text-2xl font-bold"></i>
+      <!-- Brand & Flat Geometric Logo -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-md shadow-blue-500/20 flex items-center justify-center text-white">
+          <i class="ph ph-compass-tool text-xl font-bold"></i>
         </div>
         <div>
-          <div class="flex items-center gap-2.5">
-            <span class="font-mono text-xl font-extrabold tracking-tight text-[#141517]">INREAL</span>
-            <span class="px-2 py-0.5 bg-[#E8E8E0] border border-[#1E2024] rounded text-[10px] font-mono font-bold tracking-widest text-[#141517]">OP-1.RADAR</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">InReal</span>
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-100/80 rounded-full text-[11px] font-bold">Radar 2.0</span>
           </div>
-          <div class="flex items-center gap-2 mt-0.5 font-mono text-[11px] text-[#686B73]">
-            <span>TELEMETRY RIG</span>
-            <span>&bull;</span>
-            <span class="text-[#141517] font-semibold">[AUTONOMOUS AI HARVESTER]</span>
-          </div>
+          <div class="text-[12px] text-slate-500 font-medium">Autonomous Robotics & AI Opportunity Engine</div>
         </div>
       </div>
 
-      <!-- Controls & LED Pill Indicators -->
-      <div class="flex items-center gap-3">
-        <!-- Physical LED status indicator -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 bg-[#FFFFFF] border-1.5 border-[#1E2024] rounded-md text-xs font-mono font-bold shadow-[2px_2px_0px_#1E2024]">
-          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-[#10B981] border border-[#1E2024]"></span>
-          <span id="scraper-status-text" class="text-[11px] tracking-wider uppercase">[SYS_OK]</span>
+      <!-- Controls & Translucent LED Status Indicators -->
+      <div class="flex items-center gap-2.5">
+        <!-- Status Pill Indicator -->
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 glass-btn text-xs font-semibold text-slate-700">
+          <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400"></span>
+          <span id="scraper-status-text" class="text-[11px]">System Ready</span>
         </div>
 
-        <button id="open-logs-btn" class="tactile-btn px-3.5 py-2 flex items-center gap-1.5">
-          <i class="ph ph-terminal text-sm"></i>
-          <span class="hidden md:inline">CONSOLE</span>
+        <button id="open-logs-btn" class="glass-btn px-3.5 py-2 flex items-center gap-1.5 text-slate-700">
+          <i class="ph ph-terminal-window text-base text-slate-500"></i>
+          <span class="hidden md:inline">Console</span>
         </button>
 
-        <button id="trigger-scrape-btn" class="tactile-btn tactile-btn-primary px-4 py-2 flex items-center gap-1.5">
-          <i class="ph ph-play text-sm"></i>
-          <span>SWEEP RADAR</span>
+        <button id="trigger-scrape-btn" class="glass-btn glass-btn-primary px-4 py-2 flex items-center gap-1.5">
+          <i class="ph ph-broadcast text-base"></i>
+          <span>Sweep Feeds</span>
         </button>
       </div>
     </div>
@@ -235,224 +226,237 @@
   <!-- Main Content Layout -->
   <main class="relative z-10 max-w-7xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
 
-    <!-- Instrument Telemetry Modules -->
+    <!-- Translucent Overview Metric Cards with Flat Color Blocks -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="hardware-module p-4 flex flex-col justify-between relative">
+      <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
-          <span class="font-mono text-[10px] font-bold text-[#686B73] tracking-widest uppercase">[CH.01 / RECORDS]</span>
-          <div class="hardware-screw"></div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Positions</span>
+          <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i class="ph ph-database text-base"></i>
+          </div>
         </div>
-        <div class="font-mono text-3xl font-extrabold text-[#141517]" id="stat-total-jobs">0</div>
-        <div class="text-xs font-mono text-[#686B73] mt-1 font-semibold">HARVESTED POSITIONS</div>
+        <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-total-jobs">0</div>
+        <div class="text-xs text-slate-500 mt-1 font-medium">Active indexed openings</div>
       </div>
 
-      <div class="hardware-module p-4 flex flex-col justify-between relative">
+      <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
-          <span class="font-mono text-[10px] font-bold text-[#FF5C00] tracking-widest uppercase">[CH.02 / SIGNAL]</span>
-          <div class="hardware-screw"></div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">New This Cycle</span>
+          <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+            <i class="ph ph-sparkle text-base"></i>
+          </div>
         </div>
-        <div class="font-mono text-3xl font-extrabold text-[#FF5C00]" id="stat-new-jobs">0</div>
-        <div class="text-xs font-mono text-[#686B73] mt-1 font-semibold">CYCLE DETECTIONS</div>
+        <div class="text-3xl font-extrabold text-amber-600 tracking-tight" id="stat-new-jobs">0</div>
+        <div class="text-xs text-slate-500 mt-1 font-medium">Fresh telemetry sweeps</div>
       </div>
 
-      <div class="hardware-module p-4 flex flex-col justify-between relative">
+      <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
-          <span class="font-mono text-[10px] font-bold text-[#10B981] tracking-widest uppercase">[CH.03 / FUNDED]</span>
-          <div class="hardware-screw"></div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funded Roles</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <i class="ph ph-currency-circle-dollar text-base"></i>
+          </div>
         </div>
-        <div class="font-mono text-3xl font-extrabold text-[#10B981]" id="stat-paid-jobs">0</div>
-        <div class="text-xs font-mono text-[#686B73] mt-1 font-semibold">VERIFIED STIPENDS</div>
+        <div class="text-3xl font-extrabold text-emerald-600 tracking-tight" id="stat-paid-jobs">0</div>
+        <div class="text-xs text-slate-500 mt-1 font-medium">Verified competitive stipend</div>
       </div>
 
-      <div class="hardware-module p-4 flex flex-col justify-between relative">
+      <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
-          <span class="font-mono text-[10px] font-bold text-[#686B73] tracking-widest uppercase">[CH.04 / RIG]</span>
-          <div class="hardware-screw"></div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tracked Sources</span>
+          <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <i class="ph ph-rss text-base"></i>
+          </div>
         </div>
-        <div class="font-mono text-3xl font-extrabold text-[#141517]">16+</div>
-        <div class="text-xs font-mono text-[#686B73] mt-1 font-semibold">ACTIVE FEEDS</div>
+        <div class="text-3xl font-extrabold text-slate-900 tracking-tight">16+</div>
+        <div class="text-xs text-slate-500 mt-1 font-medium">Global AI & robotics portals</div>
       </div>
     </section>
 
-    <!-- Control Deck / Rocker Filter Section -->
-    <section class="hardware-module p-5 flex flex-col gap-4">
+    <!-- Translucent Control Deck / Filter Deck -->
+    <section class="glass-panel p-5 flex flex-col gap-4">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
-        <!-- Search Input with Terminal Prefix -->
+        <!-- Search Input with Frosted Inner Field -->
         <div class="relative flex-1">
-          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-xs font-bold text-[#686B73]">&gt;</span>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="FILTER BY ROLE, INSTITUTION (DEEPMIND, GOOGLE), OR STACK (PYTORCH, CUDA)..." 
-            class="w-full bg-[#F5F5F0] border-1.5 border-[#1E2024] rounded-md pl-8 pr-16 py-2.5 font-mono text-xs text-[#141517] placeholder-[#686B73] focus:outline-none focus:bg-[#FFFFFF] transition font-bold"
+            placeholder="Search by role, company (Google, DeepMind, Figure), or tech stack (PyTorch, ROS, CUDA)..." 
+            class="w-full bg-white/70 border border-slate-200/80 rounded-xl pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition font-medium"
           >
-          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#686B73] bg-[#E8E8E0] px-1.5 py-0.5 border border-[#1E2024] font-bold rounded hidden sm:inline">⌘K</span>
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100/90 px-2 py-0.5 rounded-md font-semibold hidden sm:inline">⌘K</span>
         </div>
 
-        <!-- Secondary Controls -->
+        <!-- Filter Dropdowns & Quick Actions -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <select id="source-filter" class="bg-[#F5F5F0] border-1.5 border-[#1E2024] font-mono text-xs font-bold px-3 py-2.5 rounded-md focus:outline-none uppercase">
-            <option value="all">ALL SOURCES</option>
+          <select id="source-filter" class="glass-btn px-3 py-2.5 text-xs text-slate-700 font-semibold focus:outline-none cursor-pointer">
+            <option value="all">All Sources</option>
           </select>
 
-          <button id="filter-bookmarks-btn" class="tactile-btn px-3.5 py-2.5 flex items-center gap-1.5">
-            <i class="ph ph-bookmark-simple text-sm text-[#FF5C00]"></i>
-            <span>SAVED (<span id="bookmark-count">0</span>)</span>
+          <button id="filter-bookmarks-btn" class="glass-btn px-3.5 py-2.5 flex items-center gap-1.5 text-slate-700">
+            <i class="ph ph-bookmark-simple text-base text-rose-500"></i>
+            <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="tactile-btn px-3.5 py-2.5 flex items-center gap-1">
+          <button id="reset-filters-btn" class="glass-btn px-3 py-2.5 flex items-center gap-1 text-slate-600 hover:text-slate-900">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-            <span>RESET</span>
+            <span>Reset</span>
           </button>
         </div>
       </div>
 
-      <!-- Tactile Rocker Switch Selectors -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-1.5 border-[#E8E8E0]">
+      <!-- Segmented Control Rockers (Apple iOS-inspired Flat Design) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60">
         <!-- Region Switches -->
         <div class="flex items-center gap-2">
-          <span class="font-mono text-[10px] font-bold text-[#686B73] uppercase tracking-wider mr-1">REGION:</span>
-          <div class="rocker-switch" id="location-tabs">
-            <button class="rocker-item active" data-val="all">ALL (<span id="count-all">0</span>)</button>
-            <button class="rocker-item" data-val="India">INDIA (<span id="count-india">0</span>)</button>
-            <button class="rocker-item" data-val="Remote">REMOTE (<span id="count-remote">0</span>)</button>
-            <button class="rocker-item" data-val="International">GLOBAL (<span id="count-global">0</span>)</button>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Region:</span>
+          <div class="pill-segmented-group" id="location-tabs">
+            <button class="pill-segmented-item active" data-val="all">All (<span id="count-all">0</span>)</button>
+            <button class="pill-segmented-item" data-val="India">India (<span id="count-india">0</span>)</button>
+            <button class="pill-segmented-item" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
+            <button class="pill-segmented-item" data-val="International">Global (<span id="count-global">0</span>)</button>
           </div>
         </div>
 
         <!-- Stipend Threshold Rockers -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <span class="font-mono text-[10px] font-bold text-[#686B73] uppercase tracking-wider mr-1">STIPEND:</span>
-          <div class="rocker-switch" id="stipend-filters">
-            <button class="rocker-item active" data-val="all">ANY</button>
-            <button class="rocker-item" data-val="paid">PAID ONLY</button>
-            <button class="rocker-item" data-val="20k">&gt; ₹20,000</button>
-            <button class="rocker-item" data-val="50k">&gt; ₹50,000</button>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Stipend:</span>
+          <div class="pill-segmented-group" id="stipend-filters">
+            <button class="pill-segmented-item active" data-val="all">Any</button>
+            <button class="pill-segmented-item" data-val="paid">Paid Only</button>
+            <button class="pill-segmented-item" data-val="20k">&gt; ₹20k</button>
+            <button class="pill-segmented-item" data-val="50k">&gt; ₹50k</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Cards Grid -->
+    <!-- Translucent Card Grid Section -->
     <section class="w-full">
       <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Injected via JavaScript -->
       </div>
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden hardware-module p-12 text-center flex-col items-center justify-center">
-        <i class="ph ph-broadcast text-3xl mb-2 text-[#FF5C00]"></i>
-        <h3 class="font-mono text-base font-bold text-[#141517] uppercase">[ZERO_SIGNAL_MATCHED]</h3>
-        <p class="font-mono text-xs text-[#686B73] mt-1 max-w-sm">No telemetry records match current parameter threshold.</p>
-        <button id="empty-reset-btn" class="mt-4 tactile-btn px-4 py-2 text-xs">RESET PARAMS</button>
+      <div id="empty-state" class="hidden glass-panel p-12 text-center flex-col items-center justify-center">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+          <i class="ph ph-magnifying-glass text-2xl"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-900">No Matching Opportunities</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm font-medium">Try broadening your search keywords or resetting region and stipend filters.</p>
+        <button id="empty-reset-btn" class="mt-4 glass-btn px-4 py-2 text-xs text-slate-800">Clear All Filters</button>
       </div>
     </section>
   </main>
 
-  <!-- Slide-Over Inspection Drawer -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#141517]/40 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#F5F5F0] border-l-2 border-[#1E2024] p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
+  <!-- Translucent Slide-Over Detail Drawer -->
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-slate-900/25 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white/90 backdrop-blur-2xl border-l border-white p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-4 border-b-2 border-[#1E2024]">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200/80">
         <div class="flex items-center gap-2">
-          <span id="drawer-match-badge" class="px-2.5 py-0.5 bg-[#FF5C00] text-white border border-[#1E2024] rounded text-[10px] font-mono font-bold">98% MATCH</span>
-          <span id="drawer-org-badge" class="px-2.5 py-0.5 bg-[#FFFFFF] border border-[#1E2024] rounded text-[10px] font-mono font-bold text-[#141517]">COMPANY</span>
+          <span id="drawer-match-badge" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold">98% Match</span>
+          <span id="drawer-org-badge" class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Company</span>
         </div>
-        <button id="close-drawer-btn" class="p-1 hover:bg-[#FFFFFF] border border-[#1E2024] rounded transition">
+        <button id="close-drawer-btn" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
 
       <div class="py-5 flex-1 flex flex-col gap-5">
         <div>
-          <h2 id="drawer-role-title" class="text-xl font-extrabold leading-snug text-[#141517] tracking-tight">ROLE TITLE</h2>
-          <div id="drawer-company-name" class="text-sm font-mono font-bold text-[#FF5C00] mt-1 uppercase">COMPANY</div>
-          <div class="flex items-center gap-4 text-xs font-mono text-[#686B73] mt-3 font-semibold">
-            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">LOCATION</span></span>
-            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">DURATION</span></span>
+          <h2 id="drawer-role-title" class="text-xl font-bold leading-snug text-slate-900 tracking-tight">Role Title</h2>
+          <div id="drawer-company-name" class="text-sm font-bold text-blue-600 mt-1">Company Name</div>
+          <div class="flex items-center gap-4 text-xs text-slate-500 mt-3 font-medium">
+            <span class="flex items-center gap-1.5"><i class="ph ph-map-pin text-slate-400"></i> <span id="drawer-location">Location</span></span>
+            <span class="flex items-center gap-1.5"><i class="ph ph-clock text-slate-400"></i> <span id="drawer-duration">Duration</span></span>
           </div>
         </div>
 
-        <div class="p-4 bg-[#FFFFFF] border-1.5 border-[#1E2024] rounded-md shadow-[2px_2px_0px_#1E2024] flex items-center justify-between">
+        <div class="p-4 glass-card flex items-center justify-between">
           <div>
-            <div class="text-[10px] font-mono text-[#686B73] uppercase font-bold">STIPEND SPEC</div>
-            <div id="drawer-stipend" class="font-mono text-base font-extrabold text-[#10B981] mt-0.5">-</div>
+            <div class="text-[11px] text-slate-500 uppercase font-bold tracking-wide">Compensation</div>
+            <div id="drawer-stipend" class="text-base font-extrabold text-emerald-600 mt-0.5">-</div>
           </div>
           <div class="text-right">
-            <div class="text-[10px] font-mono text-[#686B73] uppercase font-bold">SUBMISSION DEADLINE</div>
-            <div id="drawer-deadline" class="text-xs font-mono font-bold text-[#141517] mt-0.5">ROLLING</div>
+            <div class="text-[11px] text-slate-500 uppercase font-bold tracking-wide">Deadline</div>
+            <div id="drawer-deadline" class="text-xs font-bold text-slate-800 mt-0.5">Rolling</div>
           </div>
         </div>
 
         <div>
-          <h4 class="font-mono text-xs uppercase font-bold text-[#141517] mb-2">[QUALIFICATIONS & STACK]</h4>
+          <h4 class="text-xs uppercase font-bold text-slate-700 mb-2.5">Skills & Qualifications</h4>
           <div id="drawer-skills-list" class="flex flex-wrap gap-1.5"></div>
         </div>
 
-        <div class="text-xs font-mono text-[#686B73] border-t-1.5 border-[#E8E8E0] pt-4 space-y-1">
-          <div>FEED PORTAL: <span id="drawer-source" class="font-bold text-[#141517]">PORTAL</span></div>
-          <div>TIMESTAMP: <span id="drawer-date" class="font-bold text-[#141517]">-</span></div>
+        <div class="text-xs text-slate-500 border-t border-slate-200/80 pt-4 space-y-1 font-medium">
+          <div>Source Platform: <span id="drawer-source" class="font-bold text-slate-700">Portal</span></div>
+          <div>Scraped: <span id="drawer-date" class="font-bold text-slate-700">-</span></div>
         </div>
       </div>
 
-      <div class="pt-4 border-t-2 border-[#1E2024] flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-2.5 tactile-btn bg-white">
-          <i class="ph ph-bookmark text-base text-[#FF5C00]"></i>
+      <div class="pt-4 border-t border-slate-200/80 flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 glass-btn">
+          <i class="ph ph-bookmark text-base text-rose-500"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 tactile-btn tactile-btn-primary text-center text-xs font-bold flex items-center justify-center gap-1.5">
-          <span>APPLY ON SOURCE PORTAL</span>
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 glass-btn glass-btn-primary text-center text-xs font-bold flex items-center justify-center gap-1.5">
+          <span>Apply on Official Portal</span>
           <i class="ph ph-arrow-up-right text-xs"></i>
         </a>
       </div>
     </div>
   </div>
 
-  <!-- Telemetry Slide Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#FFFFFF] border-t-2 border-l-2 border-[#1E2024] shadow-2xl z-40 hidden transition-all duration-200">
-    <div class="p-3 bg-[#F5F5F0] border-b-2 border-[#1E2024] flex items-center justify-between font-mono">
-      <span class="text-xs font-bold uppercase tracking-wider">[OP-1 // LOG CONSOLE]</span>
-      <button id="close-logs-btn" class="p-1 hover:bg-[#FFFFFF] border border-[#1E2024] rounded">
-        <i class="ph ph-x"></i>
+  <!-- Translucent Scraper Telemetry Console -->
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-white/95 backdrop-blur-2xl border-t border-l border-white/90 rounded-tl-2xl shadow-2xl z-40 hidden transition-all duration-200">
+    <div class="p-3.5 bg-slate-50/80 border-b border-slate-200/70 rounded-tl-2xl flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        <span class="text-xs font-bold text-slate-800">Scraper Activity Feed</span>
+      </div>
+      <button id="close-logs-btn" class="w-6 h-6 rounded-lg hover:bg-slate-200/80 flex items-center justify-center text-slate-500">
+        <i class="ph ph-x text-sm"></i>
       </button>
     </div>
-    <div id="logs-content" class="p-3 text-xs text-[#141517] max-h-60 overflow-y-auto font-mono bg-[#FFFFFF] space-y-1"></div>
+    <div id="logs-content" class="p-3.5 text-xs text-slate-700 max-h-60 overflow-y-auto font-mono bg-white/80 space-y-1 leading-relaxed"></div>
   </div>
 
-  <!-- Scraper Configuration Modal -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-[#141517]/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="hardware-module max-w-md w-full p-6 bg-[#FFFFFF]">
-      <div class="flex items-center justify-between pb-3 border-b-2 border-[#1E2024]">
-        <h3 class="font-mono text-sm font-bold text-[#141517] uppercase tracking-wider">[CONFIGURE HARVEST FLEET]</h3>
-        <button id="close-config-btn" class="p-1 hover:bg-[#F5F5F0] border border-[#1E2024] rounded">
+  <!-- Translucent Scraper Config Modal -->
+  <div id="scrape-config-modal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200/80">
+        <h3 class="text-sm font-bold text-slate-900">Configure Scraping Fleet</h3>
+        <button id="close-config-btn" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
 
-      <form id="scrape-config-form" class="mt-4 space-y-4 font-mono">
+      <form id="scrape-config-form" class="mt-4 space-y-4 text-xs font-medium">
         <div>
-          <label class="text-xs font-bold text-[#141517] block mb-1.5 uppercase">[TARGET REGIONS]</label>
-          <div class="grid grid-cols-3 gap-2 text-xs">
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="regions" value="india" checked> INDIA</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="usa" value="usa" checked> USA</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="europe" value="europe" checked> EUROPE</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="remote" value="remote" checked> REMOTE</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="worldwide" value="worldwide" checked> GLOBAL</label>
+          <label class="font-bold text-slate-700 block mb-2">Target Geographic Regions</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="usa" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[#141517] block mb-1.5 uppercase">[FEED PLATFORMS]</label>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LINKEDIN</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> INTERNSHALA</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> UNSTOP</label>
-            <label class="flex items-center gap-1.5 p-1.5 bg-[#F5F5F0] border border-[#1E2024] rounded cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> BIG TECH</label>
+          <label class="font-bold text-slate-700 block mb-2">Target Feeds & Platforms</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2.5 tactile-btn tactile-btn-primary text-xs font-bold transition mt-2">
-          EXECUTE HARVEST FLEET
+        <button type="submit" class="w-full py-2.5 glass-btn glass-btn-primary text-xs font-bold transition mt-2">
+          Start Harvesting
         </button>
       </form>
     </div>

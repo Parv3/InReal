@@ -1,11 +1,7 @@
 /**
  * InReal Dashboard
- * Tactile Neo-Brutalist Hardware (Teenage Engineering × Linear)
- * Features:
- * - Low-latency Three.js Topographical Wireframe Radar Terrain
- * - Tactile Hardware Modules with Precision Screws & Telemetry Brackets
- * - Segmented Rocker Switches & Physical LED Pill Indicators
- * - Keyboard shortcuts, slide-over telemetry inspection drawer & live scraping fleet
+ * Aesthetic: Glassmorphism & Translucent Style paired with Flat Illustration
+ * (Bold Geometry, Clean Color Blocks, Minimal Shading, iOS-grade Frosted Glass Clarity)
  */
 
 let allInternships = [];
@@ -16,8 +12,18 @@ let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
+// Flat clean color blocks for category tags & badges
+const flatColorThemes = [
+  { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-500', border: 'border-blue-100' },
+  { bg: 'bg-indigo-50', text: 'text-indigo-600', dot: 'bg-indigo-500', border: 'border-indigo-100' },
+  { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-500', border: 'border-emerald-100' },
+  { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', border: 'border-amber-100' },
+  { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-500', border: 'border-rose-100' },
+  { bg: 'bg-purple-50', text: 'text-purple-600', dot: 'bg-purple-500', border: 'border-purple-100' }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
-  initTopoRadarCanvas();
+  initGlassTranslucentBackground();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -26,57 +32,75 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. Three.js Interactive Topographical Wireframe Radar
-// Subtle engineering grid / point-cloud elevation reacting to cursor
+// 1. Interactive Translucent 3D Floating Geometric Canvas
+// Soft pastel floating mesh & light spheres interacting with pointer
 // ==========================================
-function initTopoRadarCanvas() {
+function initGlassTranslucentBackground() {
   const canvas = document.getElementById('topo-radar-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, -28, 22);
-  camera.lookAt(0, 4, 0);
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 40);
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Topographical terrain mesh
-  const cols = 56;
-  const rows = 42;
-  const planeGeo = new THREE.PlaneGeometry(80, 60, cols, rows);
-  
-  // Wireframe material in technical slate with micro transparency
-  const wireMaterial = new THREE.MeshBasicMaterial({
-    color: 0x1E2024,
+  // Floating geometric primitives in flat soft pastel colors
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const materials = [
+    new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.12 }),
+    new THREE.MeshBasicMaterial({ color: 0x8B5CF6, transparent: true, opacity: 0.10 }),
+    new THREE.MeshBasicMaterial({ color: 0x10B981, transparent: true, opacity: 0.10 }),
+    new THREE.MeshBasicMaterial({ color: 0xEC4899, transparent: true, opacity: 0.08 }),
+  ];
+
+  const meshes = [];
+
+  // Soft geometric shapes: Icosahedrons, Torus, Octahedrons
+  for (let i = 0; i < 18; i++) {
+    const geo = (i % 3 === 0) 
+      ? new THREE.IcosahedronGeometry(Math.random() * 2.5 + 1.5, 0)
+      : (i % 3 === 1) 
+        ? new THREE.TorusGeometry(Math.random() * 2 + 1.2, 0.45, 12, 24)
+        : new THREE.OctahedronGeometry(Math.random() * 2 + 1.2, 0);
+
+    const mat = materials[i % materials.length];
+    const mesh = new THREE.Mesh(geo, mat);
+
+    mesh.position.set(
+      (Math.random() - 0.5) * 55,
+      (Math.random() - 0.5) * 40,
+      (Math.random() - 0.5) * 15
+    );
+
+    mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+    mesh.userData = {
+      rotX: (Math.random() - 0.5) * 0.008,
+      rotY: (Math.random() - 0.5) * 0.008,
+      floatSpeed: Math.random() * 0.5 + 0.3,
+      startY: mesh.position.y
+    };
+
+    group.add(mesh);
+    meshes.push(mesh);
+  }
+
+  // Soft connected wireframe plane at the back
+  const planeGeo = new THREE.PlaneGeometry(80, 50, 24, 18);
+  const planeMat = new THREE.MeshBasicMaterial({
+    color: 0x6366F1,
     wireframe: true,
     transparent: true,
-    opacity: 0.22
+    opacity: 0.06
   });
+  const backgroundPlane = new THREE.Mesh(planeGeo, planeMat);
+  backgroundPlane.position.z = -10;
+  scene.add(backgroundPlane);
 
-  const terrainMesh = new THREE.Mesh(planeGeo, wireMaterial);
-  scene.add(terrainMesh);
-
-  // Secondary subtle radar scan point cloud
-  const pointsGeo = new THREE.BufferGeometry();
-  const pointsCount = cols * rows;
-  const posArray = new Float32Array(pointsCount * 3);
-  for (let i = 0; i < pointsCount * 3; i++) {
-    posArray[i] = planeGeo.attributes.position.array[i];
-  }
-  pointsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-
-  const pointsMaterial = new THREE.PointsMaterial({
-    size: 0.45,
-    color: 0xFF5C00,
-    transparent: true,
-    opacity: 0.35
-  });
-  const pointsMesh = new THREE.Points(pointsGeo, pointsMaterial);
-  scene.add(pointsMesh);
-
-  // Mouse interaction state
   let targetMouseX = 0;
   let targetMouseY = 0;
   let curMouseX = 0;
@@ -97,38 +121,19 @@ function initTopoRadarCanvas() {
 
   function animate() {
     requestAnimationFrame(animate);
-
     const elapsed = clock.getElapsedTime();
-    curMouseX += (targetMouseX - curMouseX) * 0.05;
-    curMouseY += (targetMouseY - curMouseY) * 0.05;
 
-    // Gentle camera parallax
-    camera.position.x = curMouseX * 5;
-    camera.position.y = -28 + curMouseY * 3;
-    camera.lookAt(0, 4, 0);
+    curMouseX += (targetMouseX - curMouseX) * 0.04;
+    curMouseY += (targetMouseY - curMouseY) * 0.04;
 
-    // Dynamic wave elevation simulation on terrain vertices
-    const position = planeGeo.attributes.position;
-    const ptPosition = pointsGeo.attributes.position;
+    group.rotation.y = curMouseX * 0.15;
+    group.rotation.x = -curMouseY * 0.15;
 
-    for (let i = 0; i < position.count; i++) {
-      const u = position.getX(i);
-      const v = position.getY(i);
-
-      // Distance from mouse projection center
-      const dx = u - (curMouseX * 25);
-      const dy = v - (curMouseY * 20);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const ripple = Math.sin(dist * 0.3 - elapsed * 1.5) * Math.exp(-dist * 0.08) * 2.2;
-      const ambientWave = Math.sin(u * 0.12 + elapsed * 0.8) * Math.cos(v * 0.15 + elapsed * 0.6) * 0.8;
-
-      const z = ripple + ambientWave;
-      position.setZ(i, z);
-      ptPosition.setZ(i, z);
-    }
-
-    position.needsUpdate = true;
-    ptPosition.needsUpdate = true;
+    meshes.forEach((m) => {
+      m.rotation.x += m.userData.rotX;
+      m.rotation.y += m.userData.rotY;
+      m.position.y = m.userData.startY + Math.sin(elapsed * m.userData.floatSpeed) * 1.5;
+    });
 
     renderer.render(scene, camera);
   }
@@ -137,7 +142,7 @@ function initTopoRadarCanvas() {
 }
 
 // ==========================================
-// 2. Data Fetching & Telemetry Statistics
+// 2. Data Fetching & Overview Metrics
 // ==========================================
 async function loadData() {
   try {
@@ -157,11 +162,11 @@ function populateSourceFilter(internships) {
   const sourceSelect = document.getElementById('source-filter');
   if (!sourceSelect) return;
   const sources = new Set(internships.map(i => i.source_platform).filter(Boolean));
-  sourceSelect.innerHTML = '<option value="all">ALL SOURCES</option>';
+  sourceSelect.innerHTML = '<option value="all">All Sources</option>';
   sources.forEach(src => {
     const opt = document.createElement('option');
     opt.value = src;
-    opt.textContent = src.toUpperCase();
+    opt.textContent = src;
     sourceSelect.appendChild(opt);
   });
 }
@@ -194,8 +199,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Hardware Module Card Grid Rendering
-// Teenage Engineering / Linear Telemetry Aesthetic
+// 3. Card Grid Rendering with Translucent Glass & Flat Color Blocks
 // ==========================================
 function applyFiltersAndRender() {
   const searchInput = document.getElementById('search-input');
@@ -255,66 +259,62 @@ function renderListings(items) {
 
   container.innerHTML = items.map((item, idx) => {
     const isBookmarked = bookmarks.includes(item.id);
-    const score = item.match_score || 96;
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
-    const channelId = String(idx + 1).padStart(2, '0');
+    const theme = flatColorThemes[idx % flatColorThemes.length];
 
     return `
       <article 
-        class="hardware-module p-5 flex flex-col justify-between cursor-pointer group relative bg-[#FFFFFF]"
+        class="glass-card p-6 flex flex-col justify-between cursor-pointer group"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Hardware Header: Channel index, Platform Tag, Mechanical Screw -->
-          <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E8E0]">
+          <!-- Header: Source Flat Color Block & Bookmark -->
+          <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
-              <span class="font-mono text-[10px] font-bold text-[#686B73] tracking-widest">[CH.${channelId}]</span>
-              <span class="px-2 py-0.5 bg-[#F5F5F0] border border-[#1E2024] rounded text-[10px] font-mono font-bold uppercase tracking-wider text-[#141517]">
-                ${escapeHtml(item.source_platform || 'RADAR')}
+              <span class="flat-badge ${theme.bg} ${theme.text} border ${theme.border}">
+                <span class="w-1.5 h-1.5 rounded-full ${theme.dot}"></span>
+                ${escapeHtml(item.source_platform || 'Portal')}
               </span>
-              ${item.is_new ? '<span class="px-1.5 py-0.5 bg-[#FF5C00] text-white rounded text-[9px] font-mono font-bold tracking-wider">NEW</span>' : ''}
+              ${item.is_new ? '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md text-[11px] font-bold">New</span>' : ''}
             </div>
 
-            <div class="flex items-center gap-2">
-              <button 
-                type="button" 
-                class="w-7 h-7 rounded border border-[#1E2024] bg-[#FFFFFF] hover:bg-[#F5F5F0] flex items-center justify-center transition"
-                onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
-                title="Toggle Telemetry Bookmark"
-              >
-                <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#FF5C00]' : 'ph-bookmark text-[#141517]'} text-xs"></i>
-              </button>
-              <div class="hardware-screw"></div>
-            </div>
+            <button 
+              type="button" 
+              class="w-8 h-8 rounded-xl bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60 flex items-center justify-center text-slate-400 hover:text-rose-500 transition"
+              onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
+              title="Bookmark opportunity"
+            >
+              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-rose-500' : 'ph-bookmark'} text-base"></i>
+            </button>
           </div>
 
-          <!-- Role & Organization -->
-          <h3 class="font-mono text-base font-extrabold text-[#141517] leading-snug line-clamp-2 group-hover:text-[#FF5C00] transition-colors uppercase tracking-tight">
-            ${escapeHtml(item.role_title || 'OPPORTUNITY')}
+          <!-- Role & Company (Crisp typography, minimal clutter) -->
+          <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
+            ${escapeHtml(item.role_title || 'Internship Opportunity')}
           </h3>
           
-          <div class="text-xs font-mono text-[#686B73] mt-1.5 flex items-center gap-2 font-bold uppercase">
-            <span class="text-[#141517]">${escapeHtml(item.company_name || 'RESEARCH LAB')}</span>
-            <span>//</span>
-            <span class="truncate">${escapeHtml(item.location || 'REMOTE')}</span>
+          <div class="text-xs text-slate-500 mt-2 flex items-center gap-2 font-medium">
+            <span class="font-bold text-slate-800">${escapeHtml(item.company_name || 'Organization')}</span>
+            <span>&bull;</span>
+            <span class="truncate">${escapeHtml(item.location || 'Remote')}</span>
           </div>
 
-          <!-- Tactile Parameter Badges -->
-          <div class="flex flex-wrap gap-1.5 mt-3.5">
-            ${skills.map(skill => `<span class="px-2 py-0.5 bg-[#F5F5F0] border border-[#D5D5CA] text-[#141517] rounded text-[10px] font-mono font-bold uppercase tracking-wider">${escapeHtml(skill)}</span>`).join('')}
+          <!-- Flat Clean Skill Pills -->
+          <div class="flex flex-wrap gap-1.5 mt-4">
+            ${skills.map(skill => `<span class="px-2.5 py-1 bg-slate-100/90 text-slate-700 rounded-lg text-[11px] font-semibold">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
-        <!-- Hardware Footer: Stipend Readout & Detail Trigger -->
-        <div class="pt-3.5 mt-4 border-t-1.5 border-[#1E2024] flex items-center justify-between font-mono">
+        <!-- Footer: Clean Stipend readout & Action Pill -->
+        <div class="pt-4 mt-5 border-t border-slate-200/60 flex items-center justify-between text-xs">
           <div>
-            <div class="text-[9px] text-[#686B73] uppercase font-bold tracking-widest">[STIPEND]</div>
-            <div class="font-extrabold text-[#141517] text-xs mt-0.5">${escapeHtml(item.stipend || 'UNSPECIFIED')}</div>
+            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Stipend</div>
+            <div class="font-extrabold text-slate-900 text-sm mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
           </div>
           <div>
-            <span class="tactile-btn px-2.5 py-1 text-[10px] flex items-center gap-1 group-hover:bg-[#FF5C00] group-hover:text-white transition">
-              <span>INSPECT</span>
-              <i class="ph ph-arrow-right text-[10px]"></i>
+            <span class="px-3.5 py-1.5 bg-blue-50 text-blue-600 font-bold rounded-xl group-hover:bg-blue-600 group-hover:text-white transition flex items-center gap-1">
+              <span>View Details</span>
+              <i class="ph ph-arrow-right text-xs"></i>
             </span>
           </div>
         </div>
@@ -331,15 +331,15 @@ function openDetailDrawer(id) {
   if (!item) return;
 
   activeDrawerJob = item;
-  document.getElementById('drawer-role-title').innerText = item.role_title || 'INTERNSHIP';
+  document.getElementById('drawer-role-title').innerText = item.role_title || 'Opportunity';
   document.getElementById('drawer-company-name').innerText = item.company_name || '';
-  document.getElementById('drawer-location').innerText = item.location || 'REMOTE';
-  document.getElementById('drawer-duration').innerText = item.duration || 'FLEXIBLE';
-  document.getElementById('drawer-stipend').innerText = item.stipend || 'UNSPECIFIED';
-  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'OPEN / ROLLING';
-  document.getElementById('drawer-source').innerText = item.source_platform || 'RADAR';
-  document.getElementById('drawer-date').innerText = item.date_scraped || 'RECENT';
-  document.getElementById('drawer-org-badge').innerText = (item.org_type || 'ORGANIZATION').toUpperCase();
+  document.getElementById('drawer-location').innerText = item.location || 'Remote';
+  document.getElementById('drawer-duration').innerText = item.duration || 'Flexible';
+  document.getElementById('drawer-stipend').innerText = item.stipend || 'Unspecified';
+  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'Rolling';
+  document.getElementById('drawer-source').innerText = item.source_platform || 'Portal';
+  document.getElementById('drawer-date').innerText = item.date_scraped || 'Recent';
+  document.getElementById('drawer-org-badge').innerText = item.org_type || 'Company';
 
   const applyLink = document.getElementById('drawer-apply-link');
   applyLink.href = item.apply_link || '#';
@@ -347,8 +347,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-[#FFFFFF] border border-[#1E2024] text-[#141517] rounded text-xs font-mono font-bold uppercase tracking-wider">${escapeHtml(s)}</span>`).join('')
-    : '<span class="text-xs font-mono text-[#686B73]">[STANDARD RESEARCH CRITERIA]</span>';
+    ? skills.map(s => `<span class="px-3 py-1 bg-slate-100 text-slate-800 rounded-lg text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
+    : '<span class="text-xs text-slate-500">General qualifications.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -369,7 +369,7 @@ function updateDrawerBookmarkIcon() {
   const btn = document.getElementById('drawer-bookmark-btn');
   if (!btn || !activeDrawerJob) return;
   const isBookmarked = bookmarks.includes(activeDrawerJob.id);
-  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#FF5C00]' : 'ph-bookmark text-[#141517]'} text-base"></i>`;
+  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-rose-500' : 'ph-bookmark text-slate-600'} text-base"></i>`;
 }
 
 // ==========================================
@@ -396,7 +396,7 @@ function updateBookmarkCounter() {
 }
 
 // ==========================================
-// 6. Scraper Status & Telemetry Console
+// 6. Scraper Status & Activity Feeds
 // ==========================================
 async function pollScraperStatus() {
   try {
@@ -408,12 +408,12 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-[#FF5C00] animate-ping border border-[#1E2024]';
-      if (text) text.innerText = '[SCANNING]';
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+      if (text) text.innerText = 'Scanning...';
       fetchLogs();
     } else {
-      if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-[#10B981] border border-[#1E2024]';
-      if (text) text.innerText = '[SYS_OK]';
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+      if (text) text.innerText = 'System Ready';
     }
   } catch (e) {}
 
@@ -426,7 +426,7 @@ async function fetchLogs() {
     const data = await res.json();
     const logsContainer = document.getElementById('logs-content');
     if (logsContainer && data.logs) {
-      logsContainer.innerHTML = data.logs.map(log => `<div class="font-mono text-xs text-[#141517] leading-relaxed">${escapeHtml(log)}</div>`).join('');
+      logsContainer.innerHTML = data.logs.map(log => `<div>${escapeHtml(log)}</div>`).join('');
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
   } catch (e) {}
@@ -439,8 +439,8 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'TELEMETRY ALERT';
-      document.getElementById('action-message').innerText = data.alert.message || 'ACTION REQUIRED IN BROWSER';
+      document.getElementById('action-title').innerText = data.alert.title || 'Notification';
+      document.getElementById('action-message').innerText = data.alert.message || 'Action required in browser window.';
       banner.classList.remove('hidden');
     } else {
       banner.classList.add('hidden');
@@ -450,25 +450,25 @@ async function pollAlerts() {
 }
 
 // ==========================================
-// 7. Event Handlers & Rocker Switches
+// 7. Event Handlers & Segmented Controls
 // ==========================================
 function bindEventHandlers() {
   document.getElementById('search-input')?.addEventListener('input', applyFiltersAndRender);
 
-  // Region Rocker Switch
-  document.querySelectorAll('#location-tabs .rocker-item').forEach(btn => {
+  // Region Segmented Rocker Switches
+  document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#location-tabs .rocker-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeLocation = btn.getAttribute('data-val');
       applyFiltersAndRender();
     });
   });
 
-  // Stipend Rocker Switch
-  document.querySelectorAll('#stipend-filters .rocker-item').forEach(btn => {
+  // Stipend Segmented Rocker Switches
+  document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#stipend-filters .rocker-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeStipend = btn.getAttribute('data-val');
       applyFiltersAndRender();
@@ -484,9 +484,9 @@ function bindEventHandlers() {
     showBookmarkedOnly = !showBookmarkedOnly;
     const btn = document.getElementById('filter-bookmarks-btn');
     if (showBookmarkedOnly) {
-      btn.classList.add('bg-[#141517]', 'text-white');
+      btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
     } else {
-      btn.classList.remove('bg-[#141517]', 'text-white');
+      btn.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200');
     }
     applyFiltersAndRender();
   });
@@ -503,17 +503,17 @@ function bindEventHandlers() {
     if (sourceSelect) sourceSelect.value = 'all';
     
     const bookmarkBtn = document.getElementById('filter-bookmarks-btn');
-    if (bookmarkBtn) bookmarkBtn.classList.remove('bg-[#141517]', 'text-white');
+    if (bookmarkBtn) bookmarkBtn.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200');
 
     const allTab = document.querySelector('#location-tabs [data-val="all"]');
     if (allTab) {
-      document.querySelectorAll('#location-tabs .rocker-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(b => b.classList.remove('active'));
       allTab.classList.add('active');
     }
 
     const allStipend = document.querySelector('#stipend-filters [data-val="all"]');
     if (allStipend) {
-      document.querySelectorAll('#stipend-filters .rocker-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(b => b.classList.remove('active'));
       allStipend.classList.add('active');
     }
 
