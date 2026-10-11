@@ -1,8 +1,7 @@
 /**
  * InReal Dashboard
- * Palette: #A6D9F3, #B7F0F5, #E8FFF7, #6FB0C8, #0F2E3A
- * Real-time GLSL Shader Liquid Chrome/Mercury Simulation (matching reference image)
- * Zero emojis, zero em dashes.
+ * Clean SideNote typography + High-performance lightweight utility
+ * Free of decorative background clutter and vibe-coded filler text.
  */
 
 let allInternships = [];
@@ -14,7 +13,6 @@ let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  initFullFluidChromeShader();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -23,188 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. 3D Web Experience: Real-time GLSL Liquid Mercury Shader
-// Exactly replicating the swirling, high-contrast chrome ripples in the reference image
-// ==========================================
-function initFullFluidChromeShader() {
-  const canvas = document.getElementById('liquid-river-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-  const renderer = new THREE.WebGLRenderer({ 
-    canvas, 
-    alpha: true, 
-    antialias: true, 
-    powerPreference: 'high-performance' 
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-  // Custom GLSL Fragment Shader for Swirling High-Contrast Chrome Liquid
-  const uniforms = {
-    u_time: { value: 0.0 },
-    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-    u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
-    u_colorFoam: { value: new THREE.Color('#E8FFF7') },
-    u_colorMint: { value: new THREE.Color('#B7F0F5') },
-    u_colorSky: { value: new THREE.Color('#A6D9F3') },
-    u_colorDeepSky: { value: new THREE.Color('#6FB0C8') },
-    u_colorMidnight: { value: new THREE.Color('#0F2E3A') }
-  };
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = vec4(position, 1.0);
-    }
-  `;
-
-  // Fractal domain-warping fluid shader with enlarged ribbons and direct cursor deformation
-  const fragmentShader = `
-    uniform float u_time;
-    uniform vec2 u_resolution;
-    uniform vec2 u_mouse;
-    uniform vec2 u_mouse_velocity;
-    uniform vec3 u_colorFoam;
-    uniform vec3 u_colorMint;
-    uniform vec3 u_colorSky;
-    uniform vec3 u_colorDeepSky;
-    uniform vec3 u_colorMidnight;
-    varying vec2 vUv;
-
-    // Simplex / harmonic wave equations
-    vec2 hash(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-    }
-
-    float noise(vec2 p) {
-      const float K1 = 0.366025404;
-      const float K2 = 0.211324865;
-      vec2 i = floor(p + (p.x + p.y) * K1);
-      vec2 a = p - i + (i.x + i.y) * K2;
-      vec2 o = (a.x > a.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-      vec2 b = a - o + K2;
-      vec2 c = a - 1.0 + 2.0 * K2;
-      vec3 h = max(0.5 - vec3(dot(a, a), dot(b, b), dot(c, c)), 0.0);
-      vec3 n = h * h * h * h * vec3(dot(a, hash(i)), dot(b, hash(i + o)), dot(c, hash(i + 1.0)));
-      return dot(n, vec3(70.0));
-    }
-
-    void main() {
-      vec2 st = gl_FragCoord.xy / u_resolution.xy;
-      vec2 aspectSt = st;
-      aspectSt.x *= u_resolution.x / u_resolution.y;
-
-      vec2 aspectMouse = u_mouse;
-      aspectMouse.x *= u_resolution.x / u_resolution.y;
-
-      // Distance from interactive pointer for localized fluid displacement
-      float distToMouse = length(aspectSt - aspectMouse);
-      float mouseInfluence = exp(-distToMouse * 3.2); // Smooth radial Gaussian falloff
-
-      // Direct interactive cursor push & swirling vortex force
-      vec2 mousePush = (aspectSt - aspectMouse) * mouseInfluence * 1.8;
-      vec2 vortex = vec2(-aspectSt.y + aspectMouse.y, aspectSt.x - aspectMouse.x) * mouseInfluence * 2.2;
-
-      // Much LARGER fluid flow scale (reduced coordinate multiplier from 2.8 to 1.35)
-      vec2 p = aspectSt * 1.35 + mousePush + vortex;
-      float t = u_time * 0.28;
-
-      // Deep domain warping (massive sweeping ribbon folds)
-      vec2 q = vec2(0.0);
-      q.x = noise(p + vec2(0.0, 0.0) + t * 0.38);
-      q.y = noise(p + vec2(5.2, 1.3) + t * 0.32);
-
-      vec2 r = vec2(0.0);
-      r.x = noise(p + 3.2 * q + vec2(1.7, 9.2) + 0.18 * t + (u_mouse - 0.5) * 0.8);
-      r.y = noise(p + 3.2 * q + vec2(8.3, 2.8) + 0.15 * t + (u_mouse - 0.5) * 0.8);
-
-      // Fluid height field with sweeping large ribbons
-      float f = noise(p + 3.6 * r + t * 0.22);
-
-      // Metallic specular contour mapping (sculpted chrome ridges)
-      float chromeContour = sin(f * 6.2 + r.x * 4.2 + r.y * 3.8);
-      float specular = pow(clamp(chromeContour, 0.0, 1.0), 3.0);
-      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 1.8);
-
-      // Deep, luminous color gradients across the arctic spectrum
-      vec3 col = mix(u_colorMidnight, u_colorDeepSky, clamp(f * f * 2.8, 0.0, 1.0));
-      col = mix(col, u_colorSky, clamp(length(q) * 1.2, 0.0, 1.0));
-      col = mix(col, u_colorMint, clamp(length(r.x) * 1.3, 0.0, 1.0));
-      
-      // Intense liquid chrome reflections (bright silver-white bands)
-      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.94);
-      col = mix(col, u_colorMidnight * 0.3, darkCrevice * 0.82);
-
-      // Add dynamic cursor glow highlights into the metallic surface
-      col += vec3(0.15, 0.25, 0.3) * mouseInfluence * 1.2;
-
-      // Fine physical metal sheen grain
-      float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.028;
-      col += grain;
-
-      gl_FragColor = vec4(col, 1.0);
-    }
-  `;
-
-  const uniforms = {
-    u_time: { value: 0.0 },
-    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-    u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
-    u_colorFoam: { value: new THREE.Color('#E8FFF7') },
-    u_colorMint: { value: new THREE.Color('#B7F0F5') },
-    u_colorSky: { value: new THREE.Color('#A6D9F3') },
-    u_colorDeepSky: { value: new THREE.Color('#6FB0C8') },
-    u_colorMidnight: { value: new THREE.Color('#0F2E3A') }
-  };
-
-  const material = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms
-  });
-
-  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-  scene.add(quad);
-
-  // Responsive mouse tracking with velocity
-  let mouseTargetX = 0.5, mouseTargetY = 0.5;
-  let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
-
-  window.addEventListener('mousemove', (e) => {
-    mouseTargetX = e.clientX / window.innerWidth;
-    mouseTargetY = 1.0 - (e.clientY / window.innerHeight);
-  }, { passive: true });
-
-  window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
-  });
-
-  const clock = new THREE.Clock();
-
-  function animate() {
-    requestAnimationFrame(animate);
-    const elapsed = clock.getElapsedTime();
-
-    // Responsive fluid mouse spring interpolation
-    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.08;
-    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.08;
-
-    uniforms.u_time.value = elapsed;
-    uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
-
-    renderer.render(scene, camera);
-  }
-  animate();
-}
-
-// ==========================================
-// 2. Data Fetching & Processing
+// 1. Data Fetching & Processing
 // ==========================================
 async function loadData() {
   try {
@@ -235,14 +52,6 @@ function populateSourceFilter(internships) {
 
 function renderOverviewStats() {
   const total = allInternships.length;
-  const paidCount = allInternships.filter(i => {
-    const val = Number(i.stipend_numeric || 0);
-    return val > 0 || (i.stipend && !i.stipend.toLowerCase().includes('unpaid'));
-  }).length;
-
-  document.getElementById('stat-total-jobs').innerText = total;
-  document.getElementById('stat-paid-jobs').innerText = paidCount;
-
   document.getElementById('count-all').innerText = total;
   document.getElementById('count-india').innerText = allInternships.filter(i => (i.location_type || '').toLowerCase() === 'india').length;
   document.getElementById('count-remote').innerText = allInternships.filter(i => (i.location_type || '').toLowerCase() === 'remote').length;
@@ -250,7 +59,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Card Grid Rendering
+// 2. Card Grid Rendering
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -303,77 +112,55 @@ function renderListings(items) {
   emptyState.classList.add('hidden');
   emptyState.classList.remove('flex');
 
-  const defaultPhotos = [
-    'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80'
-  ];
-
-  container.innerHTML = items.map((item, idx) => {
+  container.innerHTML = items.map(item => {
     const isBookmarked = bookmarks.includes(item.id);
-    const score = item.match_score || 95;
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
-    const photoUrl = item.image_url || defaultPhotos[idx % defaultPhotos.length];
 
     return `
       <article 
-        class="sketch-card flex flex-col justify-between cursor-pointer group p-5"
+        class="note-card p-4 flex flex-col justify-between cursor-pointer"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Facility thumbnail banner -->
-          <div class="w-full h-32 border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative mb-4">
-            <img 
-              src="${photoUrl}" 
-              alt="Lab thumbnail" 
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            >
-            <div class="absolute top-2 left-2 flex items-center gap-1.5">
-              <span class="px-2 py-0.5 bg-[#0F2E3A] text-[#E8FFF7] font-mono font-bold text-[10px] rounded">
-                ${score}% Match
-              </span>
-              ${item.is_new ? '<span class="px-2 py-0.5 bg-[#B7F0F5] text-[#0F2E3A] font-mono font-bold text-[10px] border border-[#0F2E3A] rounded">Verified</span>' : ''}
-            </div>
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-[#0F2E3A]/70 uppercase">
+              ${escapeHtml(item.source_platform || 'Direct')}
+            </span>
 
             <button 
               type="button" 
-              class="absolute top-2 right-2 p-1.5 bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded text-[#0F2E3A] hover:bg-white transition"
+              class="p-1 rounded text-[#0F2E3A] hover:bg-[#F4FAFC] transition"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
             >
-              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-sm font-bold"></i>
+              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-base"></i>
             </button>
           </div>
 
-          <!-- Role & Institution -->
-          <h3 class="font-serif text-xl font-bold text-[#0F2E3A] leading-snug group-hover:text-[#6FB0C8] transition-colors line-clamp-2">
-            ${escapeHtml(item.role_title || 'Research Fellowship')}
+          <!-- Role & Company -->
+          <h3 class="text-lg font-bold text-[#0F2E3A] leading-snug line-clamp-2">
+            ${escapeHtml(item.role_title || 'Internship')}
           </h3>
           
-          <div class="font-sans text-xs text-[#0F2E3A]/85 mt-2 flex items-center gap-2 font-semibold">
-            <span class="text-[#0F2E3A] font-bold">${escapeHtml(item.company_name || 'Institution')}</span>
-            <span>|</span>
-            <span class="truncate">${escapeHtml(item.location || 'Location Not Listed')}</span>
+          <div class="text-xs text-[#0F2E3A]/80 mt-1 flex items-center gap-1.5 font-medium">
+            <span class="font-bold text-[#0F2E3A]">${escapeHtml(item.company_name || 'Organization')}</span>
+            <span>&bull;</span>
+            <span class="truncate">${escapeHtml(item.location || 'Location Not Specified')}</span>
           </div>
 
-          <!-- Skills Badges -->
-          <div class="flex flex-wrap gap-1.5 mt-4">
-            ${skills.map(skill => `<span class="px-2 py-0.5 font-mono text-[10px] bg-white text-[#0F2E3A] border border-[#0F2E3A] rounded font-bold">${escapeHtml(skill)}</span>`).join('')}
+          <!-- Skills tags -->
+          <div class="flex flex-wrap gap-1 mt-3">
+            ${skills.map(skill => `<span class="px-2 py-0.5 text-xs bg-[#F4FAFC] border border-[#0F2E3A]/30 rounded font-medium">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
-        <!-- Metric Footer -->
-        <div class="pt-4 mt-5 border-t-2 border-[#0F2E3A] flex items-center justify-between">
+        <!-- Footer -->
+        <div class="pt-3 mt-4 border-t border-[#0F2E3A]/15 flex items-center justify-between text-xs font-bold">
           <div>
-            <div class="font-mono text-[9px] uppercase font-bold text-[#0F2E3A]/70">Compensation</div>
-            <div class="font-mono font-bold text-[#0F2E3A] text-xs mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
+            <span class="text-[#0F2E3A]">${escapeHtml(item.stipend || 'Unspecified')}</span>
           </div>
-          <div class="text-right">
-            <span class="px-2 py-1 bg-[#B7F0F5] border border-[#0F2E3A] rounded font-mono font-bold text-[10px] text-[#0F2E3A]">
-              ${escapeHtml(item.source_platform || 'Portal')}
-            </span>
+          <div>
+            <span class="text-xs font-semibold text-[#0F2E3A]/60">View details &rarr;</span>
           </div>
         </div>
       </article>
@@ -382,14 +169,14 @@ function renderListings(items) {
 }
 
 // ==========================================
-// 4. Slide-Over Detail Drawer
+// 3. Slide-Over Detail Drawer
 // ==========================================
 function openDetailDrawer(id) {
   const item = allInternships.find(i => i.id === id);
   if (!item) return;
 
   activeDrawerJob = item;
-  document.getElementById('drawer-role-title').innerText = item.role_title || 'Fellowship';
+  document.getElementById('drawer-role-title').innerText = item.role_title || 'Internship';
   document.getElementById('drawer-company-name').innerText = item.company_name || '';
   document.getElementById('drawer-location').innerText = item.location || 'Remote';
   document.getElementById('drawer-duration').innerText = item.duration || 'Flexible';
@@ -397,13 +184,7 @@ function openDetailDrawer(id) {
   document.getElementById('drawer-deadline').innerText = item.application_deadline || 'Rolling';
   document.getElementById('drawer-source').innerText = item.source_platform || 'Portal';
   document.getElementById('drawer-date').innerText = item.date_scraped || 'Recent';
-  document.getElementById('drawer-org-badge').innerText = item.org_type || 'Institution';
-  document.getElementById('drawer-match-badge').innerText = `${item.match_score || 95}% Match`;
-
-  const drawerImg = document.getElementById('drawer-image');
-  if (drawerImg) {
-    drawerImg.src = item.image_url || 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80';
-  }
+  document.getElementById('drawer-org-badge').innerText = item.org_type || 'Company';
 
   const applyLink = document.getElementById('drawer-apply-link');
   applyLink.href = item.apply_link || '#';
@@ -411,8 +192,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-white border border-[#0F2E3A] font-mono text-xs font-bold text-[#0F2E3A] rounded">${escapeHtml(s)}</span>`).join('')
-    : '<span class="font-serif text-xs text-[#0F2E3A]/80">Standard qualification specifications apply.</span>';
+    ? skills.map(s => `<span class="px-2.5 py-1 bg-[#F4FAFC] border border-[#0F2E3A]/30 text-xs font-medium rounded">${escapeHtml(s)}</span>`).join('')
+    : '<span class="text-xs text-[#0F2E3A]/60">Standard qualifications.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -426,18 +207,18 @@ function closeDetailDrawer() {
   const overlay = document.getElementById('detail-drawer-overlay');
   const drawer = document.getElementById('detail-drawer');
   drawer.classList.add('translate-x-full');
-  setTimeout(() => overlay.classList.add('hidden'), 250);
+  setTimeout(() => overlay.classList.add('hidden'), 200);
 }
 
 function updateDrawerBookmarkIcon() {
   const btn = document.getElementById('drawer-bookmark-btn');
   if (!btn || !activeDrawerJob) return;
   const isBookmarked = bookmarks.includes(activeDrawerJob.id);
-  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-lg"></i>`;
+  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-base"></i>`;
 }
 
 // ==========================================
-// 5. Bookmarks & Local Storage
+// 4. Bookmarks & Local Storage
 // ==========================================
 function toggleBookmark(id) {
   if (bookmarks.includes(id)) {
@@ -456,13 +237,11 @@ function toggleBookmark(id) {
 function updateBookmarkCounter() {
   const count = bookmarks.length;
   const counter = document.getElementById('bookmark-count');
-  const spotlight = document.getElementById('spotlight-saved-count');
   if (counter) counter.innerText = count;
-  if (spotlight) spotlight.innerText = `${count} Items`;
 }
 
 // ==========================================
-// 6. Scraper Status & Telemetry
+// 5. Scraper Status & Telemetry
 // ==========================================
 async function pollScraperStatus() {
   try {
@@ -474,12 +253,12 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
-      text.innerText = 'Scanning Feeds';
+      dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+      text.innerText = 'Scraping';
       fetchLogs();
     } else {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-600';
-      text.innerText = 'Index Active';
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-600';
+      text.innerText = 'Ready';
     }
   } catch (e) {}
 
@@ -505,7 +284,7 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'Verification Notice';
+      document.getElementById('action-title').innerText = data.alert.title || 'Verification';
       document.getElementById('action-message').innerText = data.alert.message || 'Please check browser';
       banner.classList.remove('hidden');
     } else {
@@ -516,23 +295,23 @@ async function pollAlerts() {
 }
 
 // ==========================================
-// 7. Event Handlers
+// 6. Event Handlers
 // ==========================================
 function bindEventHandlers() {
   document.getElementById('search-input')?.addEventListener('input', applyFiltersAndRender);
 
-  document.querySelectorAll('#location-tabs .sketch-pill').forEach(btn => {
+  document.querySelectorAll('#location-tabs .filter-tab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#location-tabs .sketch-pill').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#location-tabs .filter-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeLocation = btn.getAttribute('data-val');
       applyFiltersAndRender();
     });
   });
 
-  document.querySelectorAll('#stipend-filters .sketch-pill').forEach(btn => {
+  document.querySelectorAll('#stipend-filters .filter-tab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#stipend-filters .sketch-pill').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#stipend-filters .filter-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeStipend = btn.getAttribute('data-val');
       applyFiltersAndRender();
@@ -587,7 +366,7 @@ function bindEventHandlers() {
     if (activeDrawerJob) toggleBookmark(activeDrawerJob.id);
   });
 
-  // Telemetry drawer
+  // Logs
   const logsPanel = document.getElementById('logs-panel');
   document.getElementById('open-logs-btn')?.addEventListener('click', () => {
     logsPanel.classList.toggle('hidden');
@@ -597,7 +376,7 @@ function bindEventHandlers() {
     logsPanel.classList.add('hidden');
   });
 
-  // Scraper config modal
+  // Modal
   const modal = document.getElementById('scrape-config-modal');
   document.getElementById('trigger-scrape-btn')?.addEventListener('click', () => {
     modal.classList.remove('hidden');
@@ -636,7 +415,6 @@ function bindEventHandlers() {
     } catch (e) {}
   });
 
-  // Hotkeys
   window.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
