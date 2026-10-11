@@ -1,7 +1,6 @@
 /**
- * InReal Dashboard
- * Interactive Sketchbook Background Canvas:
- * Users can sketch directly on the background! Marks look like ink sketch pens and fade smoothly after 10 seconds.
+ * INREAL // GLITCH ART CYBER ENGINE
+ * Digital Errors, RGB Chromatic Aberrations, Pixel Corruption, and Interactive Scanline Distortion
  */
 
 let allInternships = [];
@@ -12,18 +11,8 @@ let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
-// Cheerful card pastel palette
-const cardBgPalette = [
-  '#FEF08A', // pastel yellow
-  '#BAE6FD', // pastel sky
-  '#A7F3D0', // pastel mint
-  '#DDD6FE', // pastel lavender
-  '#FED7AA', // pastel peach
-  '#FBCFE8'  // pastel pink
-];
-
 document.addEventListener('DOMContentLoaded', () => {
-  initSketchbookCanvas();
+  initGlitchArtCanvas();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -32,119 +21,147 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. Interactive Sketchbook Background Canvas
-// Draws ink sketch pen strokes that smoothly fade over 10 seconds
+// 1. 3D Web Experience: Interactive GLSL Glitch Art & RGB Displacement Shader
+// Real-time digital signal corruption, scanline tears, and cursor chromatic shift
 // ==========================================
-function initSketchbookCanvas() {
-  const canvas = document.getElementById('sketchbook-canvas');
-  if (!canvas) return;
+function initGlitchArtCanvas() {
+  const canvas = document.getElementById('glitch-mesh-canvas');
+  if (!canvas || typeof THREE === 'undefined') return;
 
-  const ctx = canvas.getContext('2d');
-  let width = (canvas.width = window.innerWidth);
-  let height = (canvas.height = window.innerHeight);
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  window.addEventListener('resize', () => {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+  const renderer = new THREE.WebGLRenderer({ 
+    canvas, 
+    alpha: true, 
+    antialias: false, // Intentional pixel-sharp digital corruption
+    powerPreference: 'high-performance' 
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+  const uniforms = {
+    u_time: { value: 0.0 },
+    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    u_mouse: { value: new THREE.Vector2(0.5, 0.5) }
+  };
+
+  const vertexShader = `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position, 1.0);
+    }
+  `;
+
+  // Glitch Art Fragment Shader with RGB Split, Block Pixel Corruption, and Scanline Noise
+  const fragmentShader = `
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    uniform vec2 u_mouse;
+    varying vec2 vUv;
+
+    // Pseudorandom noise generator
+    float random(vec2 st) {
+      return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+    }
+
+    // Block noise for digital compression artifacts
+    float blockNoise(vec2 p) {
+      vec2 ipos = floor(p);
+      return random(ipos);
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+      float time = u_time * 1.5;
+
+      // Distance to cursor
+      float distToMouse = length(uv - u_mouse);
+      float mouseImpact = exp(-distToMouse * 4.0);
+
+      // Digital scanline & horizontal glitch displacement slice
+      float sliceNoise = blockNoise(vec2(0.0, floor(uv.y * 35.0) + time * 12.0));
+      float sliceDisplacement = step(0.88, sliceNoise) * (random(vec2(time, uv.y)) - 0.5) * 0.12;
+
+      // Cursor-triggered localized glitch shockwave
+      float cursorGlitch = sin(distToMouse * 25.0 - time * 8.0) * mouseImpact * 0.08;
+      
+      vec2 glitchUv = uv;
+      glitchUv.x += sliceDisplacement + cursorGlitch;
+
+      // Multi-frequency pixel grid corruption
+      vec2 grid = floor(glitchUv * vec2(120.0, 75.0));
+      float pixelCorrupt = random(grid + floor(time * 6.0));
+
+      // Chromatic Aberration RGB Shift calculation
+      float rOffset = 0.008 + mouseImpact * 0.02;
+      float bOffset = -0.008 - mouseImpact * 0.02;
+
+      // Channel generation with synthetic digital errors
+      float rPattern = sin((glitchUv.x + rOffset) * 45.0 + time * 2.0) * cos(glitchUv.y * 30.0);
+      float gPattern = sin(glitchUv.x * 45.0 + time * 1.5) * cos(glitchUv.y * 30.0);
+      float bPattern = sin((glitchUv.x + bOffset) * 45.0 + time * 1.2) * cos(glitchUv.y * 30.0);
+
+      // Color matrix
+      float r = smoothstep(0.4, 0.9, rPattern) + step(0.96, pixelCorrupt) * 0.8;
+      float g = smoothstep(0.5, 0.95, gPattern) * 0.4;
+      float b = smoothstep(0.35, 0.85, bPattern) * 1.2 + step(0.94, pixelCorrupt) * 0.9;
+
+      // Add digital noise grain
+      float grain = random(uv * 50.0 + time) * 0.12;
+      r += grain;
+      g += grain * 0.6;
+      b += grain;
+
+      // Cyber palette tuning: Cyan (#00F0FF), Magenta (#FF0055), Matrix Dark
+      vec3 col = vec3(r * 0.95, g * 0.8, b * 1.05);
+
+      // Deep void background attenuation
+      col *= 0.35 + mouseImpact * 0.45;
+
+      gl_FragColor = vec4(col, 0.85);
+    }
+  `;
+
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms
   });
 
-  // Array of active drawing strokes
-  // Each stroke point has { x, y, prevX, prevY, timestamp, color, width }
-  const strokes = [];
-  const STROKE_LIFETIME_MS = 10000; // 10 seconds fade duration
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+  scene.add(quad);
 
-  // Vibrant sketch pen ink colors
-  const penColors = [
-    '#1E1B18', // classic ink black
-    '#2563EB', // ballpoint blue
-    '#DC2626', // red sketch pen
-    '#059669', // green marker
-    '#7C3AED'  // violet marker
-  ];
-  let currentPenColorIndex = 0;
-
-  let lastX = null;
-  let lastY = null;
-  let lastMoveTime = 0;
+  // Mouse interaction
+  let mouseTargetX = 0.5, mouseTargetY = 0.5;
+  let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
 
   window.addEventListener('mousemove', (e) => {
-    const x = e.clientX;
-    const y = e.clientY;
-    const now = Date.now();
-
-    // Check if moving
-    if (lastX !== null && lastY !== null) {
-      const dist = Math.hypot(x - lastX, y - lastY);
-      // Create sketch pen segment if moved sufficiently
-      if (dist > 2) {
-        // Vary width slightly like a real pressure-sensitive felt tip pen
-        const speed = Math.min(dist / Math.max(now - lastMoveTime, 1), 5);
-        const strokeWidth = Math.max(1.8, 4.2 - speed * 0.4);
-
-        strokes.push({
-          x,
-          y,
-          prevX: lastX,
-          prevY: lastY,
-          time: now,
-          color: penColors[currentPenColorIndex],
-          width: strokeWidth
-        });
-      }
-    }
-
-    lastX = x;
-    lastY = y;
-    lastMoveTime = now;
+    mouseTargetX = e.clientX / window.innerWidth;
+    mouseTargetY = 1.0 - (e.clientY / window.innerHeight);
   }, { passive: true });
 
-  // Optional: Click cycles the sketch pen ink color for user fun!
-  window.addEventListener('click', (e) => {
-    // Only if clicking on the open background
-    if (e.target.tagName === 'BODY' || e.target.id === 'sketchbook-canvas') {
-      currentPenColorIndex = (currentPenColorIndex + 1) % penColors.length;
-    }
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   });
 
-  // Continuous render loop: draws lines & fades them based on their exact 10s age
-  function render() {
-    requestAnimationFrame(render);
-    ctx.clearRect(0, 0, width, height);
+  const clock = new THREE.Clock();
 
-    const now = Date.now();
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+  function animate() {
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
 
-    for (let i = strokes.length - 1; i >= 0; i--) {
-      const stroke = strokes[i];
-      const age = now - stroke.time;
+    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.1;
+    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.1;
 
-      if (age >= STROKE_LIFETIME_MS) {
-        strokes.splice(i, 1);
-        continue;
-      }
+    uniforms.u_time.value = elapsed;
+    uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
 
-      // Smooth cubic fade-out over 10 seconds
-      // Stays strong for the first 3 seconds, then fades smoothly to 0 by 10s
-      const progress = age / STROKE_LIFETIME_MS;
-      let alpha = 1.0;
-      if (progress > 0.3) {
-        alpha = Math.max(0, 1.0 - ((progress - 0.3) / 0.7));
-      }
-
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = stroke.color;
-      ctx.lineWidth = stroke.width;
-
-      ctx.beginPath();
-      ctx.moveTo(stroke.prevX, stroke.prevY);
-      ctx.lineTo(stroke.x, stroke.y);
-      ctx.stroke();
-      ctx.restore();
-    }
+    renderer.render(scene, camera);
   }
-  render();
+  animate();
 }
 
 // ==========================================
@@ -168,11 +185,11 @@ function populateSourceFilter(internships) {
   const sourceSelect = document.getElementById('source-filter');
   if (!sourceSelect) return;
   const sources = new Set(internships.map(i => i.source_platform).filter(Boolean));
-  sourceSelect.innerHTML = '<option value="all">All Sources</option>';
+  sourceSelect.innerHTML = '<option value="all">ALL STREAMS</option>';
   sources.forEach(src => {
     const opt = document.createElement('option');
     opt.value = src;
-    opt.textContent = src;
+    opt.textContent = src.toUpperCase();
     sourceSelect.appendChild(opt);
   });
 }
@@ -196,7 +213,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Card Grid Rendering with Colorful Palette
+// 3. Cyberpunk Glitch Card Grid Rendering
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -249,57 +266,59 @@ function renderListings(items) {
   emptyState.classList.add('hidden');
   emptyState.classList.remove('flex');
 
-  container.innerHTML = items.map((item, idx) => {
+  container.innerHTML = items.map(item => {
     const isBookmarked = bookmarks.includes(item.id);
+    const score = item.match_score || 95;
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
-    const cardColor = cardBgPalette[idx % cardBgPalette.length];
 
     return `
       <article 
-        class="sketch-card p-5 flex flex-col justify-between cursor-pointer"
-        style="background-color: ${cardColor};"
+        class="cyber-card p-5 flex flex-col justify-between cursor-pointer group"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Header -->
-          <div class="flex items-center justify-between mb-2">
-            <span class="px-2 py-0.5 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-[11px] font-bold uppercase">
-              ${escapeHtml(item.source_platform || 'Portal')}
-            </span>
+          <!-- Header Bar -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 bg-[#00F0FF]/15 border border-[#00F0FF] text-[10px] font-bold text-[#00F0FF] font-mono tracking-wider">
+                ${score}% SYNC
+              </span>
+              ${item.is_new ? '<span class="px-2 py-0.5 bg-[#FF0055]/20 border border-[#FF0055] text-[10px] font-bold text-[#FF0055] font-mono">NEW_ENTRY</span>' : ''}
+            </div>
 
             <button 
               type="button" 
-              class="p-1.5 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-[#1E1B18] hover:scale-105 transition shadow-[1px_1px_0px_#1E1B18]"
+              class="p-1 text-slate-400 hover:text-[#FF0055] transition"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
             >
-              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#F472B6]' : 'ph-bookmark'} text-base"></i>
+              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#FF0055]' : 'ph-bookmark'} text-base"></i>
             </button>
           </div>
 
           <!-- Role & Company -->
-          <h3 class="text-xl font-bold text-[#1E1B18] leading-snug line-clamp-2 mt-1">
-            ${escapeHtml(item.role_title || 'Internship')}
+          <h3 class="font-cyber text-base font-black text-white leading-snug tracking-wide group-hover:text-[#00F0FF] transition-colors line-clamp-2">
+            ${escapeHtml(item.role_title || 'RESEARCH ENG')}
           </h3>
           
-          <div class="text-xs text-[#1E1B18]/85 mt-1.5 flex items-center gap-1.5 font-bold">
-            <span class="text-[#1E1B18] font-black">${escapeHtml(item.company_name || 'Organization')}</span>
-            <span>&bull;</span>
-            <span class="truncate">${escapeHtml(item.location || 'Location Not Specified')}</span>
+          <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5 font-mono">
+            <span class="text-[#00F0FF] font-bold">${escapeHtml(item.company_name || 'ENTITY')}</span>
+            <span>//</span>
+            <span class="truncate text-slate-300">${escapeHtml(item.location || 'UNKNOWN')}</span>
           </div>
 
           <!-- Skills tags -->
           <div class="flex flex-wrap gap-1.5 mt-4">
-            ${skills.map(skill => `<span class="px-2.5 py-0.5 text-xs bg-white border-1.5 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] font-bold">${escapeHtml(skill)}</span>`).join('')}
+            ${skills.map(skill => `<span class="px-2 py-0.5 text-[11px] bg-[#050508] border border-[#00F0FF]/30 text-slate-300 font-mono">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
         <!-- Footer -->
-        <div class="pt-3.5 mt-5 border-t-2 border-[#1E1B18]/25 flex items-center justify-between text-xs font-bold">
+        <div class="pt-3.5 mt-5 border-t border-[#00F0FF]/20 flex items-center justify-between text-xs font-mono">
           <div>
-            <span class="text-[#1E1B18] font-black">${escapeHtml(item.stipend || 'Unspecified')}</span>
+            <span class="text-[#00FF66] font-bold tracking-wider">${escapeHtml(item.stipend || 'UNLISTED')}</span>
           </div>
           <div>
-            <span class="px-2 py-1 bg-white border border-[#1E1B18] rounded text-xs font-bold">Details &rarr;</span>
+            <span class="text-[#00F0FF] text-[11px] uppercase tracking-wider group-hover:underline">INSPECT &gt;&gt;</span>
           </div>
         </div>
       </article>
@@ -315,15 +334,15 @@ function openDetailDrawer(id) {
   if (!item) return;
 
   activeDrawerJob = item;
-  document.getElementById('drawer-role-title').innerText = item.role_title || 'Internship';
+  document.getElementById('drawer-role-title').innerText = item.role_title || 'FELLOWSHIP';
   document.getElementById('drawer-company-name').innerText = item.company_name || '';
-  document.getElementById('drawer-location').innerText = item.location || 'Remote';
-  document.getElementById('drawer-duration').innerText = item.duration || 'Flexible';
-  document.getElementById('drawer-stipend').innerText = item.stipend || 'Unspecified';
-  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'Rolling';
-  document.getElementById('drawer-source').innerText = item.source_platform || 'Portal';
-  document.getElementById('drawer-date').innerText = item.date_scraped || 'Recent';
-  document.getElementById('drawer-org-badge').innerText = item.org_type || 'Company';
+  document.getElementById('drawer-location').innerText = item.location || 'REMOTE';
+  document.getElementById('drawer-duration').innerText = item.duration || 'FLEXIBLE';
+  document.getElementById('drawer-stipend').innerText = item.stipend || 'UNSPECIFIED';
+  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'OPEN';
+  document.getElementById('drawer-source').innerText = (item.source_platform || 'PORTAL').toUpperCase();
+  document.getElementById('drawer-date').innerText = item.date_scraped || 'RECENT';
+  document.getElementById('drawer-org-badge').innerText = (item.org_type || 'ORGANIZATION').toUpperCase();
 
   const applyLink = document.getElementById('drawer-apply-link');
   applyLink.href = item.apply_link || '#';
@@ -331,8 +350,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-3 py-1 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-xs font-bold">${escapeHtml(s)}</span>`).join('')
-    : '<span class="text-xs text-[#1E1B18]/70">Standard qualifications.</span>';
+    ? skills.map(s => `<span class="px-2.5 py-1 bg-[#050508] border border-[#00F0FF] text-xs font-mono text-[#00F0FF]">${escapeHtml(s)}</span>`).join('')
+    : '<span class="text-xs text-slate-500">STANDARD ARCHITECTURE PROTOCOLS.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -353,7 +372,7 @@ function updateDrawerBookmarkIcon() {
   const btn = document.getElementById('drawer-bookmark-btn');
   if (!btn || !activeDrawerJob) return;
   const isBookmarked = bookmarks.includes(activeDrawerJob.id);
-  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#F472B6]' : 'ph-bookmark'} text-base"></i>`;
+  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#FF0055]' : 'ph-bookmark'} text-base"></i>`;
 }
 
 // ==========================================
@@ -392,12 +411,14 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-[#FB923C] animate-pulse border border-[#1E1B18]';
-      text.innerText = 'Scraping Live';
+      dot.className = 'w-2 h-2 rounded-full bg-[#FF0055] shadow-[0_0_8px_#FF0055] animate-ping';
+      text.innerText = 'HARVESTING';
+      text.className = 'text-[#FF0055] text-[11px] uppercase tracking-wider font-bold';
       fetchLogs();
     } else {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-[#34D399] border border-[#1E1B18]';
-      text.innerText = 'Radar Active';
+      dot.className = 'w-2 h-2 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66]';
+      text.innerText = 'ONLINE';
+      text.className = 'text-[#00FF66] text-[11px] uppercase tracking-wider';
     }
   } catch (e) {}
 
@@ -410,7 +431,7 @@ async function fetchLogs() {
     const data = await res.json();
     const logsContainer = document.getElementById('logs-content');
     if (logsContainer && data.logs) {
-      logsContainer.innerHTML = data.logs.map(log => `<div>${escapeHtml(log)}</div>`).join('');
+      logsContainer.innerHTML = data.logs.map(log => `<div>&gt;&gt; ${escapeHtml(log)}</div>`).join('');
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
   } catch (e) {}
@@ -423,8 +444,8 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'Notice';
-      document.getElementById('action-message').innerText = data.alert.message || 'Please check browser';
+      document.getElementById('action-title').innerText = data.alert.title || 'SYSTEM INTERRUPT';
+      document.getElementById('action-message').innerText = data.alert.message || 'MANUAL BYPASS REQUIRED';
       banner.classList.remove('hidden');
     } else {
       banner.classList.add('hidden');
@@ -439,18 +460,18 @@ async function pollAlerts() {
 function bindEventHandlers() {
   document.getElementById('search-input')?.addEventListener('input', applyFiltersAndRender);
 
-  document.querySelectorAll('#location-tabs .sketch-tab').forEach(btn => {
+  document.querySelectorAll('#location-tabs .glitch-tab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#location-tabs .sketch-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#location-tabs .glitch-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeLocation = btn.getAttribute('data-val');
       applyFiltersAndRender();
     });
   });
 
-  document.querySelectorAll('#stipend-filters .sketch-tab').forEach(btn => {
+  document.querySelectorAll('#stipend-filters .glitch-tab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#stipend-filters .sketch-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#stipend-filters .glitch-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeStipend = btn.getAttribute('data-val');
       applyFiltersAndRender();
@@ -466,9 +487,9 @@ function bindEventHandlers() {
     showBookmarkedOnly = !showBookmarkedOnly;
     const btn = document.getElementById('filter-bookmarks-btn');
     if (showBookmarkedOnly) {
-      btn.classList.add('active');
+      btn.classList.add('bg-[#FF0055]', 'text-white', 'border-[#FF0055]');
     } else {
-      btn.classList.remove('active');
+      btn.classList.remove('bg-[#FF0055]', 'text-white', 'border-[#FF0055]');
     }
     applyFiltersAndRender();
   });
@@ -480,7 +501,7 @@ function bindEventHandlers() {
     activeSource = 'all';
     showBookmarkedOnly = false;
     document.getElementById('source-filter').value = 'all';
-    document.getElementById('filter-bookmarks-btn')?.classList.remove('active');
+    document.getElementById('filter-bookmarks-btn')?.classList.remove('bg-[#FF0055]', 'text-white', 'border-[#FF0055]');
 
     const allTab = document.querySelector('#location-tabs [data-val="all"]');
     if (allTab) allTab.click();

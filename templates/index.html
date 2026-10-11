@@ -3,34 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InReal | Internship Radar</title>
+  <title>INREAL // DIGITAL MALFUNCTION</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- SideNote / Comic Neue & Patrick Hand for the handwritten / sketched art look -->
-  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&family=Patrick+Hand&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sidenote: ['"Comic Neue"', '"Patrick Hand"', 'sans-serif'],
-            sketch: ['"Caveat"', 'cursive'],
+            mono: ['"Share Tech Mono"', 'monospace'],
+            glitch: ['"VT323"', 'monospace'],
+            cyber: ['"Orbitron"', 'sans-serif'],
           },
           colors: {
-            brand: {
-              ink: '#1E1B18',
-              paper: '#FAF6EE',
-              yellow: '#FDE047',
-              pink: '#F472B6',
-              mint: '#34D399',
-              sky: '#38BDF8',
-              orange: '#FB923C',
-              purple: '#A78BFA',
-            }
+            void: '#050508',
+            cyanGlitch: '#00F0FF',
+            magentaGlitch: '#FF0055',
+            neonGreen: '#00FF66',
+            amberGlitch: '#FFE600',
+            matrixDark: '#0A0E17',
           }
         }
       }
@@ -38,231 +35,283 @@
   </script>
 
   <style>
-    /* Sketchbook Grid/Texture Background */
+    /* Cyber CRT Scanline & Pixel Grid Overlay */
     body {
-      background-color: #FAF6EE;
-      color: #1E1B18;
-      font-family: 'Comic Neue', 'Patrick Hand', sans-serif;
-      /* Subtle sketchbook subtle dot/grid paper texture */
-      background-image: 
-        radial-gradient(#1E1B18 0.75px, transparent 0.75px),
-        radial-gradient(#1E1B18 0.75px, #FAF6EE 0.75px);
-      background-size: 24px 24px;
-      background-position: 0 0, 12px 12px;
+      background-color: #050508;
+      color: #E2E8F0;
+      font-family: 'Share Tech Mono', monospace;
+      overflow-x: hidden;
     }
 
-    /* Hand-sketched colorful card system with wobbly borders */
-    .sketch-card {
-      border: 2.5px solid #1E1B18;
-      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      box-shadow: 4px 5px 0px #1E1B18;
-      transition: transform 0.16s ease, box-shadow 0.16s ease;
-    }
-    .sketch-card:hover {
-      transform: translate(-3px, -3px) rotate(-0.35deg);
-      box-shadow: 7px 8px 0px #1E1B18;
-    }
-
-    .sketch-btn {
-      border: 2px solid #1E1B18;
-      border-radius: 255px 20px 225px 20px/20px 225px 20px 255px;
-      box-shadow: 3px 3px 0px #1E1B18;
-      font-size: 13px;
-      font-weight: 700;
-      color: #1E1B18;
-      transition: all 0.12s ease;
-    }
-    .sketch-btn:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 5px 5px 0px #1E1B18;
-    }
-    .sketch-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0px #1E1B18;
+    /* Scanlines effect */
+    .scanlines {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.45) 50%,
+        rgba(0, 0, 0, 0.45)
+      );
+      background-size: 100% 4px;
     }
 
-    .sketch-tab {
-      background: #FFFFFF;
-      border: 2px solid #1E1B18;
-      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      box-shadow: 2px 3px 0px #1E1B18;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 5px 14px;
-      color: #1E1B18;
+    /* Glitch Chromatic Text Splitting */
+    .glitch-text {
+      position: relative;
+      display: inline-block;
+      text-shadow: 2px 0 #FF0055, -2px 0 #00F0FF;
+    }
+    .glitch-text:hover {
+      animation: glitch-anim 0.3s infinite;
+    }
+
+    @keyframes glitch-anim {
+      0% { text-shadow: 2px 0 #FF0055, -2px 0 #00F0FF; transform: translate(0); }
+      20% { text-shadow: -3px 0 #FF0055, 3px 0 #00F0FF; transform: translate(-2px, 1px); }
+      40% { text-shadow: 3px 0 #FF0055, -3px 0 #00F0FF; transform: translate(1px, -1px); }
+      60% { text-shadow: -2px 0 #FF0055, 2px 0 #00F0FF; transform: translate(-1px, 2px); }
+      80% { text-shadow: 3px 0 #FF0055, -1px 0 #00F0FF; transform: translate(2px, -1px); }
+      100% { text-shadow: 2px 0 #FF0055, -2px 0 #00F0FF; transform: translate(0); }
+    }
+
+    /* Cyber Glitch Cards with Angled Chamfered Corners */
+    .cyber-card {
+      background: rgba(10, 14, 23, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      clip-path: polygon(
+        0 0,
+        calc(100% - 14px) 0,
+        100% 14px,
+        100% 100%,
+        14px 100%,
+        0 calc(100% - 14px)
+      );
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.08), inset 0 0 15px rgba(255, 0, 85, 0.05);
+      transition: all 0.2s ease;
+    }
+    .cyber-card:hover {
+      border-color: #00F0FF;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.25), -3px 0 #FF0055, 3px 0 #00F0FF;
+      transform: translateY(-2px);
+    }
+
+    /* Cyber Button */
+    .cyber-btn {
+      position: relative;
+      background: #00F0FF;
+      color: #050508;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      transition: all 0.15s ease;
+      box-shadow: 3px 3px 0px #FF0055;
+    }
+    .cyber-btn:hover {
+      background: #FF0055;
+      color: #FFFFFF;
+      box-shadow: -3px -3px 0px #00F0FF;
+      transform: translate(1px, 1px);
+    }
+
+    .cyber-btn-outline {
+      background: rgba(0, 240, 255, 0.05);
+      color: #00F0FF;
+      border: 1px solid #00F0FF;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: all 0.15s ease;
+    }
+    .cyber-btn-outline:hover {
+      background: #00F0FF;
+      color: #050508;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+    }
+
+    /* Filter Tabs */
+    .glitch-tab {
+      background: rgba(10, 14, 23, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: #94A3B8;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 6px 14px;
       cursor: pointer;
-      transition: all 0.12s ease;
+      transition: all 0.15s ease;
     }
-    .sketch-tab:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: 3px 4px 0px #1E1B18;
+    .glitch-tab:hover {
+      color: #00F0FF;
+      border-color: #00F0FF;
+      text-shadow: 0 0 8px #00F0FF;
     }
-    .sketch-tab.active {
-      background: #1E1B18 !important;
-      color: #FFFFFF !important;
-      box-shadow: 2px 2px 0px #1E1B18;
+    .glitch-tab.active {
+      background: #00F0FF !important;
+      color: #050508 !important;
+      border-color: #00F0FF !important;
+      font-weight: 900;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.7);
     }
 
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #FAF6EE; border-left: 2px solid #1E1B18; }
-    ::-webkit-scrollbar-thumb { background: #1E1B18; border-radius: 4px; }
+    /* Custom cyber scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #050508; }
+    ::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 0px; }
+    ::-webkit-scrollbar-thumb:hover { background: #FF0055; }
   </style>
 </head>
 
-<body class="bg-[#FAF6EE] min-h-screen text-[#1E1B18] flex flex-col relative antialiased selection:bg-[#FDE047] selection:text-[#1E1B18] overflow-x-hidden font-sidenote">
+<body class="bg-[#050508] min-h-screen text-slate-200 flex flex-col relative antialiased selection:bg-[#FF0055] selection:text-white font-mono">
 
-  <!-- Interactive Sketchbook Background Canvas (Draw with cursor, strokes fade over 10s) -->
-  <canvas id="sketchbook-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+  <!-- Interactive 3D WebGL Digital Error & RGB Shift Glitch Mesh Canvas -->
+  <canvas id="glitch-mesh-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-80"></canvas>
+  <div class="fixed inset-0 pointer-events-none z-10 scanlines opacity-50"></div>
 
-  <!-- Notification Banner -->
-  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-[#FEF08A] border-2.5 border-[#1E1B18] p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[5px_5px_0px_#1E1B18]">
+  <!-- Error Notification Alert -->
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-[#0A0E17]/95 border-2 border-[#FF0055] p-4 shadow-[0_0_20px_rgba(255,0,85,0.4)]">
     <div class="flex items-start gap-3">
-      <i class="ph ph-warning-circle text-xl text-[#1E1B18] mt-0.5"></i>
+      <i class="ph ph-warning-octagon text-xl text-[#FF0055] animate-pulse"></i>
       <div class="flex-1">
-        <h4 id="action-title" class="font-bold text-sm">Action Notice</h4>
-        <p id="action-message" class="text-xs text-[#1E1B18]/80 mt-0.5">Please check the browser window.</p>
+        <h4 id="action-title" class="font-cyber text-xs uppercase tracking-wider text-[#FF0055]">SYSTEM INTERRUPT</h4>
+        <p id="action-message" class="text-xs text-slate-300 mt-0.5">MANUAL BYPASS REQUIRED IN BROWSER.</p>
       </div>
-      <button id="action-dismiss-btn" class="sketch-btn px-3 py-1 bg-white text-xs">
-        Dismiss
+      <button id="action-dismiss-btn" class="cyber-btn px-3 py-1 text-xs">
+        BYPASS
       </button>
     </div>
   </div>
 
-  <!-- Colorful Sketched Header -->
-  <header class="sticky top-0 z-30 w-full bg-[#FAF6EE]/95 backdrop-blur-md border-b-2.5 border-[#1E1B18]">
-    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
+  <!-- Cyber Glitch Header -->
+  <header class="sticky top-0 z-30 w-full bg-[#050508]/85 backdrop-blur-md border-b border-[#00F0FF]/30">
+    <div class="max-w-7xl mx-auto px-6 h-18 py-3 flex items-center justify-between gap-4">
       
-      <!-- Brand & Sketched Badge -->
+      <!-- Brand & RGB Splitting Logo -->
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 bg-[#FDE047] border-2.5 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#1E1B18] flex items-center justify-center text-[#1E1B18]">
-          <i class="ph ph-sparkle text-2xl font-bold"></i>
+        <div class="w-10 h-10 bg-[#0A0E17] border border-[#00F0FF] flex items-center justify-center text-[#00F0FF] shadow-[0_0_10px_rgba(0,240,255,0.3)]">
+          <i class="ph ph-terminal text-2xl"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-2xl font-bold tracking-tight text-[#1E1B18]">InReal</span>
-            <span class="px-2 py-0.5 bg-[#A78BFA]/30 border border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-[11px] font-bold">v2.0</span>
+            <span class="font-cyber text-2xl font-black tracking-widest text-white glitch-text">INREAL</span>
+            <span class="px-2 py-0.5 bg-[#FF0055]/20 border border-[#FF0055] text-[10px] text-[#FF0055] font-bold">ERROR://2026</span>
           </div>
-          <span class="text-xs text-[#1E1B18]/70 font-semibold hidden sm:inline">Internship Radar</span>
+          <span class="text-[11px] text-[#00F0FF]/80 tracking-widest uppercase hidden sm:inline">CYBER TELEMETRY RADAR</span>
         </div>
       </div>
 
-      <!-- Controls & Live Indicator -->
+      <!-- Live Controls -->
       <div class="flex items-center gap-3">
         <!-- Live Status Pill -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#1E1B18] text-xs font-bold">
-          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-[#34D399] border border-[#1E1B18]"></span>
-          <span id="scraper-status-text">Radar Active</span>
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1 bg-[#0A0E17] border border-[#00FF66]/50 text-xs">
+          <span id="ping-dot" class="w-2 h-2 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66]"></span>
+          <span id="scraper-status-text" class="text-[#00FF66] text-[11px] uppercase tracking-wider">ONLINE</span>
         </div>
 
-        <button id="open-logs-btn" class="sketch-btn px-3.5 py-1.5 bg-white flex items-center gap-1.5">
-          <i class="ph ph-terminal text-sm text-[#FB923C]"></i>
-          <span class="hidden md:inline">Logs</span>
+        <button id="open-logs-btn" class="cyber-btn-outline px-3.5 py-1.5 text-xs flex items-center gap-1.5">
+          <i class="ph ph-cpu text-sm text-[#00F0FF]"></i>
+          <span class="hidden md:inline">CONSOLE</span>
         </button>
 
-        <button id="trigger-scrape-btn" class="sketch-btn px-4 py-2 bg-[#F472B6] text-[#1E1B18] hover:bg-[#F472B6]/90 flex items-center gap-1.5">
-          <i class="ph ph-arrows-clockwise text-sm"></i>
-          <span>Scrape Now</span>
+        <button id="trigger-scrape-btn" class="cyber-btn px-4 py-2 text-xs flex items-center gap-2 font-cyber">
+          <i class="ph ph-lightning text-sm"></i>
+          <span>EXECUTE</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- Main Content Layout -->
-  <main class="relative z-10 max-w-6xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
+  <main class="relative z-20 max-w-7xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
 
-    <!-- Colorful Stat Cards Overview for Judges -->
+    <!-- Glitch Telemetry Data Meters -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="sketch-card p-4 bg-[#FEF08A] flex items-center justify-between">
-        <div>
-          <div class="text-2xl font-bold" id="stat-total-jobs">0</div>
-          <div class="text-xs font-bold text-[#1E1B18]/70">Total Found</div>
-        </div>
-        <div class="w-9 h-9 rounded-full bg-white border-2 border-[#1E1B18] flex items-center justify-center">
-          <i class="ph ph-briefcase text-lg"></i>
-        </div>
-      </div>
-
-      <div class="sketch-card p-4 bg-[#BAE6FD] flex items-center justify-between">
-        <div>
-          <div class="text-2xl font-bold" id="stat-new-jobs">0</div>
-          <div class="text-xs font-bold text-[#1E1B18]/70">New Added</div>
-        </div>
-        <div class="w-9 h-9 rounded-full bg-white border-2 border-[#1E1B18] flex items-center justify-center">
-          <i class="ph ph-bell text-lg"></i>
+      <div class="cyber-card p-4 relative overflow-hidden group">
+        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#00F0FF]/5 pointer-events-none group-hover:text-[#00F0FF]/15 transition">#01</div>
+        <div class="text-xs text-[#00F0FF] uppercase tracking-wider font-bold">FELLOWSHIPS FOUND</div>
+        <div class="font-cyber text-3xl font-black text-white mt-1" id="stat-total-jobs">0</div>
+        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
+          <div class="bg-[#00F0FF] h-full w-4/5 animate-pulse"></div>
         </div>
       </div>
 
-      <div class="sketch-card p-4 bg-[#A7F3D0] flex items-center justify-between">
-        <div>
-          <div class="text-2xl font-bold" id="stat-paid-jobs">0</div>
-          <div class="text-xs font-bold text-[#1E1B18]/70">Stipend Available</div>
-        </div>
-        <div class="w-9 h-9 rounded-full bg-white border-2 border-[#1E1B18] flex items-center justify-center">
-          <i class="ph ph-currency-inr text-lg"></i>
+      <div class="cyber-card p-4 relative overflow-hidden group">
+        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#FF0055]/5 pointer-events-none group-hover:text-[#FF0055]/15 transition">#02</div>
+        <div class="text-xs text-[#FF0055] uppercase tracking-wider font-bold">NEW DETECTIONS</div>
+        <div class="font-cyber text-3xl font-black text-white mt-1" id="stat-new-jobs">0</div>
+        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
+          <div class="bg-[#FF0055] h-full w-3/5 animate-pulse"></div>
         </div>
       </div>
 
-      <div class="sketch-card p-4 bg-[#DDD6FE] flex items-center justify-between">
-        <div>
-          <div class="text-2xl font-bold">16+</div>
-          <div class="text-xs font-bold text-[#1E1B18]/70">Scraped Sources</div>
+      <div class="cyber-card p-4 relative overflow-hidden group">
+        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#00FF66]/5 pointer-events-none group-hover:text-[#00FF66]/15 transition">#03</div>
+        <div class="text-xs text-[#00FF66] uppercase tracking-wider font-bold">FUNDED STIPENDS</div>
+        <div class="font-cyber text-3xl font-black text-white mt-1" id="stat-paid-jobs">0</div>
+        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
+          <div class="bg-[#00FF66] h-full w-2/3 animate-pulse"></div>
         </div>
-        <div class="w-9 h-9 rounded-full bg-white border-2 border-[#1E1B18] flex items-center justify-center">
-          <i class="ph ph-globe text-lg"></i>
+      </div>
+
+      <div class="cyber-card p-4 relative overflow-hidden group">
+        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#FFE600]/5 pointer-events-none group-hover:text-[#FFE600]/15 transition">#04</div>
+        <div class="text-xs text-[#FFE600] uppercase tracking-wider font-bold">PORTALS HOOKED</div>
+        <div class="font-cyber text-3xl font-black text-white mt-1">16+</div>
+        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
+          <div class="bg-[#FFE600] h-full w-full animate-pulse"></div>
         </div>
       </div>
     </section>
 
-    <!-- Search & Filters Container (Sketched Card) -->
-    <section class="sketch-card p-5 bg-white flex flex-col gap-4">
+    <!-- Search & Command Filter Console -->
+    <section class="cyber-card p-5 flex flex-col gap-4">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
         <!-- Search Input -->
         <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#1E1B18] text-lg font-bold"></i>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#00F0FF] text-base"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Search role, company, or skills..." 
-            class="w-full bg-[#FAF6EE] border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] pl-10 pr-4 py-2.5 text-sm text-[#1E1B18] placeholder-[#1E1B18]/50 focus:outline-none focus:bg-white transition shadow-[2px_2px_0px_#1E1B18] font-bold"
+            placeholder="QUERY ROLE, INSTITUTION (ANTHROPIC, GOOGLE), OR STACK (PYTORCH, CUDA)..." 
+            class="w-full bg-[#050508] border border-[#00F0FF]/40 pl-10 pr-4 py-2.5 text-xs text-cyanGlitch placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:shadow-[0_0_15px_rgba(0,240,255,0.4)] transition tracking-wider uppercase"
           >
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[#00F0FF] bg-[#00F0FF]/10 px-1.5 py-0.5 border border-[#00F0FF]/30 hidden sm:inline">SYS_EXEC</span>
         </div>
 
-        <!-- Secondary Controls -->
+        <!-- Controls -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <select id="source-filter" class="bg-[#FAF6EE] border-2 border-[#1E1B18] text-xs font-bold px-3 py-2.5 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#1E1B18] focus:outline-none">
-            <option value="all">All Sources</option>
+          <select id="source-filter" class="bg-[#050508] border border-[#00F0FF]/40 text-xs text-[#00F0FF] px-3 py-2.5 focus:outline-none uppercase tracking-wider">
+            <option value="all">ALL STREAMS</option>
           </select>
 
-          <button id="filter-bookmarks-btn" class="sketch-btn px-3.5 py-2.5 bg-white text-xs flex items-center gap-1.5">
-            <i class="ph ph-bookmark text-sm text-[#F472B6]"></i>
-            <span>Saved (<span id="bookmark-count">0</span>)</span>
+          <button id="filter-bookmarks-btn" class="cyber-btn-outline px-3.5 py-2.5 text-xs flex items-center gap-1.5">
+            <i class="ph ph-bookmark-simple text-sm text-[#FF0055]"></i>
+            <span>SAVED (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="sketch-btn px-3.5 py-2.5 bg-white text-xs flex items-center gap-1">
+          <button id="reset-filters-btn" class="cyber-btn-outline px-3.5 py-2.5 text-xs flex items-center gap-1">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-            <span>Reset</span>
+            <span>RESET</span>
           </button>
         </div>
       </div>
 
-      <!-- Segmented Region & Stipend Filters -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-[#1E1B18]/15">
+      <!-- Segmented Region & Stipend Console Tabs -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#00F0FF]/20">
         <!-- Region Tabs -->
-        <div class="flex items-center gap-2" id="location-tabs">
-          <button class="sketch-tab active" data-val="all">All (<span id="count-all">0</span>)</button>
-          <button class="sketch-tab" data-val="India">India (<span id="count-india">0</span>)</button>
-          <button class="sketch-tab" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
-          <button class="sketch-tab" data-val="International">Global (<span id="count-global">0</span>)</button>
+        <div class="flex items-center gap-1.5" id="location-tabs">
+          <button class="glitch-tab active" data-val="all">GLOBAL (<span id="count-all">0</span>)</button>
+          <button class="glitch-tab" data-val="India">INDIA (<span id="count-india">0</span>)</button>
+          <button class="glitch-tab" data-val="Remote">REMOTE (<span id="count-remote">0</span>)</button>
+          <button class="glitch-tab" data-val="International">INTL (<span id="count-global">0</span>)</button>
         </div>
 
         <!-- Stipend Chips -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
-          <button class="sketch-tab active" data-val="all">Any Stipend</button>
-          <button class="sketch-tab" data-val="paid">Paid Only</button>
-          <button class="sketch-tab" data-val="20k">> ₹20,000</button>
-          <button class="sketch-tab" data-val="50k">> ₹50,000</button>
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
+          <button class="glitch-tab active" data-val="all">ALL STIPENDS</button>
+          <button class="glitch-tab" data-val="paid">PAID ONLY</button>
+          <button class="glitch-tab" data-val="20k">> 20K</button>
+          <button class="glitch-tab" data-val="50k">> 50K</button>
         </div>
       </div>
     </section>
@@ -274,64 +323,64 @@
       </div>
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden sketch-card p-10 bg-white text-center flex-col items-center justify-center">
-        <i class="ph ph-magnifying-glass text-3xl mb-2 text-[#1E1B18]"></i>
-        <h3 class="text-lg font-bold text-[#1E1B18]">No opportunities found</h3>
-        <p class="text-xs text-[#1E1B18]/70 mt-1">Try broadening your search or resetting filters.</p>
-        <button id="empty-reset-btn" class="mt-4 sketch-btn px-4 py-1.5 bg-[#FDE047] text-xs">Reset filters</button>
+      <div id="empty-state" class="hidden cyber-card p-10 text-center flex-col items-center justify-center">
+        <i class="ph ph-prohibit text-4xl mb-2 text-[#FF0055]"></i>
+        <h3 class="font-cyber text-lg font-bold text-white tracking-widest">DATA PACKET EMPTY</h3>
+        <p class="text-xs text-slate-400 mt-1 uppercase">NO MEMORY BLOCKS MATCHED SPECIFIED FILTER VECTOR.</p>
+        <button id="empty-reset-btn" class="mt-4 cyber-btn px-4 py-2 text-xs">RESET FILTERS</button>
       </div>
     </section>
   </main>
 
-  <!-- Slide-Over Inspection Drawer -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#1E1B18]/40 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#FAF6EE] border-l-3 border-[#1E1B18] p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
+  <!-- Slide-Over Inspection Terminal -->
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#050508]/80 backdrop-blur-md z-50 hidden transition-opacity duration-200">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#0A0E17] border-l-2 border-[#00F0FF] p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-4 border-b-2 border-[#1E1B18]/20">
-        <span id="drawer-org-badge" class="px-3 py-1 border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-xs font-bold bg-[#FDE047]">Company</span>
-        <button id="close-drawer-btn" class="p-1 rounded hover:bg-white transition border-2 border-[#1E1B18]">
+      <div class="flex items-center justify-between pb-4 border-b border-[#00F0FF]/30">
+        <span id="drawer-org-badge" class="px-3 py-1 border border-[#00F0FF] text-[10px] font-bold text-[#00F0FF] uppercase tracking-widest bg-[#00F0FF]/10">COMPANY</span>
+        <button id="close-drawer-btn" class="p-1 hover:bg-[#FF0055] hover:text-white transition border border-[#00F0FF]/40 text-[#00F0FF]">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <div class="py-5 flex-1 flex flex-col gap-5">
         <div>
-          <h2 id="drawer-role-title" class="text-2xl font-bold leading-tight text-[#1E1B18]">Role Title</h2>
-          <div id="drawer-company-name" class="text-base font-bold text-[#1E1B18]/80 mt-1">Company</div>
-          <div class="flex items-center gap-3 text-xs text-[#1E1B18]/70 mt-2 font-bold">
-            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">Location</span></span>
-            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">Duration</span></span>
+          <h2 id="drawer-role-title" class="font-cyber text-2xl font-black text-white leading-tight tracking-wide glitch-text">ROLE TITLE</h2>
+          <div id="drawer-company-name" class="text-sm font-bold text-[#00F0FF] mt-1.5 uppercase tracking-wider">ORGANIZATION</div>
+          <div class="flex items-center gap-4 text-xs text-slate-400 mt-3 font-mono">
+            <span class="flex items-center gap-1"><i class="ph ph-map-pin text-[#FF0055]"></i> <span id="drawer-location">LOCATION</span></span>
+            <span class="flex items-center gap-1"><i class="ph ph-clock text-[#00FF66]"></i> <span id="drawer-duration">DURATION</span></span>
           </div>
         </div>
 
-        <div class="p-4 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#1E1B18] flex items-center justify-between">
+        <div class="p-4 bg-[#050508] border border-[#00F0FF]/40 flex items-center justify-between">
           <div>
-            <div class="text-[11px] text-[#1E1B18]/70 uppercase font-bold">Stipend</div>
-            <div id="drawer-stipend" class="text-lg font-bold mt-0.5 text-[#1E1B18]">-</div>
+            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">COMPENSATION SPEC</div>
+            <div id="drawer-stipend" class="font-cyber text-lg font-bold text-[#00FF66] mt-0.5">-</div>
           </div>
           <div class="text-right">
-            <div class="text-[11px] text-[#1E1B18]/70 uppercase font-bold">Deadline</div>
-            <div id="drawer-deadline" class="text-xs font-bold mt-0.5 text-[#1E1B18]">Rolling</div>
+            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">DEADLINE</div>
+            <div id="drawer-deadline" class="text-xs font-bold text-white mt-0.5">ROLLING</div>
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs uppercase font-bold text-[#1E1B18]/70 mb-2">Required Skills</h4>
+          <h4 class="text-xs uppercase font-bold text-[#00F0FF] mb-2 tracking-widest">REQUIRED PROTOCOLS / SKILLS</h4>
           <div id="drawer-skills-list" class="flex flex-wrap gap-1.5"></div>
         </div>
 
-        <div class="text-xs text-[#1E1B18]/70 border-t-2 border-[#1E1B18]/20 pt-4 space-y-1 font-bold">
-          <div>Source: <span id="drawer-source" class="text-[#1E1B18]">Portal</span></div>
-          <div>Scraped: <span id="drawer-date" class="text-[#1E1B18]">-</span></div>
+        <div class="text-xs text-slate-400 border-t border-[#00F0FF]/20 pt-4 space-y-1 font-mono">
+          <div>SOURCE STREAM: <span id="drawer-source" class="text-[#00F0FF] font-bold">PORTAL</span></div>
+          <div>TIMESTAMP RECORDED: <span id="drawer-date" class="text-white font-bold">-</span></div>
         </div>
       </div>
 
-      <div class="pt-4 border-t-2 border-[#1E1B18]/20 flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-2.5 sketch-btn bg-white">
+      <div class="pt-4 border-t border-[#00F0FF]/30 flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 cyber-btn-outline">
           <i class="ph ph-bookmark text-base"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 sketch-btn bg-[#34D399] hover:bg-[#34D399]/90 text-center text-xs font-bold flex items-center justify-center gap-1.5">
-          <span>Apply on Official Site</span>
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 cyber-btn text-center text-xs font-black flex items-center justify-center gap-2">
+          <span>CONNECT SOURCE PORTAL</span>
           <i class="ph ph-arrow-up-right text-xs"></i>
         </a>
       </div>
@@ -339,50 +388,50 @@
   </div>
 
   <!-- Telemetry Slide Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#FAF6EE] border-t-2.5 border-l-2.5 border-[#1E1B18] rounded-tl-xl shadow-2xl z-40 hidden transition-all duration-200">
-    <div class="p-3 bg-[#FEF08A] border-b-2 border-[#1E1B18] flex items-center justify-between">
-      <span class="text-xs font-bold">Scraper Activity</span>
-      <button id="close-logs-btn" class="p-1 hover:bg-white rounded border border-[#1E1B18]">
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#0A0E17] border-t-2 border-l-2 border-[#00F0FF] shadow-2xl z-40 hidden transition-all duration-200">
+    <div class="p-3 bg-[#050508] border-b border-[#00F0FF]/30 flex items-center justify-between">
+      <span class="text-xs font-cyber tracking-widest text-[#00F0FF]">LIVE TELEMETRY STREAM</span>
+      <button id="close-logs-btn" class="p-1 hover:bg-[#FF0055] text-white">
         <i class="ph ph-x"></i>
       </button>
     </div>
-    <div id="logs-content" class="p-3 text-xs text-[#1E1B18] max-h-60 overflow-y-auto font-mono bg-white space-y-1"></div>
+    <div id="logs-content" class="p-3 text-xs text-[#00FF66] max-h-60 overflow-y-auto font-mono bg-[#050508] space-y-1"></div>
   </div>
 
   <!-- Scraper Configuration Modal -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-[#1E1B18]/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#FAF6EE] border-2.5 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[6px_6px_0px_#1E1B18] max-w-md w-full p-5">
-      <div class="flex items-center justify-between pb-3 border-b-2 border-[#1E1B18]/20">
-        <h3 class="text-base font-bold text-[#1E1B18]">Scraper Settings</h3>
-        <button id="close-config-btn" class="p-1 rounded hover:bg-white border-2 border-[#1E1B18]">
+  <div id="scrape-config-modal" class="fixed inset-0 bg-[#050508]/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="cyber-card max-w-md w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-[#00F0FF]/30">
+        <h3 class="font-cyber text-sm font-bold text-white tracking-widest">CONFIGURE HARVEST ENGINES</h3>
+        <button id="close-config-btn" class="p-1 hover:bg-[#FF0055] text-white">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
 
       <form id="scrape-config-form" class="mt-4 space-y-4">
         <div>
-          <label class="text-xs font-bold block mb-1.5">Regions</label>
-          <div class="grid grid-cols-3 gap-2 text-xs font-bold">
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="usa" value="usa" checked> USA</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
+          <label class="text-xs font-bold text-[#00F0FF] block mb-1.5 uppercase tracking-wider">TARGET GEOGRAPHIES</label>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="india" checked> INDIA</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="usa" checked> USA</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="europe" value="europe" checked> EUROPE</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="remote" value="remote" checked> REMOTE</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="worldwide" value="worldwide" checked> GLOBAL</label>
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold block mb-1.5">Sources</label>
-          <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
+          <label class="text-xs font-bold text-[#00F0FF] block mb-1.5 uppercase tracking-wider">INJECTION TARGETS</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="sources" value="linkedin" checked> LINKEDIN</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="internshala" value="internshala" checked> INTERNSHALA</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="unstop" value="unstop" checked> UNSTOP</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="bigtech" value="bigtech" checked> BIG TECH</label>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2.5 sketch-btn bg-[#FDE047] text-[#1E1B18] hover:bg-[#FDE047]/90 text-xs font-bold transition mt-2">
-          Start Scraper
+        <button type="submit" class="w-full py-2.5 cyber-btn text-xs font-bold transition mt-2">
+          EXECUTE SCRAPING DAEMON
         </button>
       </form>
     </div>
