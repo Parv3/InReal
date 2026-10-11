@@ -184,6 +184,7 @@ def scrape_internshala():
     all_internships = []
     seen = set()
 
+    from scraper_utils import block_unneeded_resources
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, args=get_playwright_stealth_args())
         context = browser.new_context(
@@ -192,6 +193,7 @@ def scrape_internshala():
             viewport={"width": 1920, "height": 1080},
         )
         page = context.new_page()
+        block_unneeded_resources(page)
         Stealth().apply_stealth_sync(page)
 
         for base_url in URLS:

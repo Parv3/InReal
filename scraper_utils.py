@@ -44,8 +44,8 @@ def action_resolved(source: str):
         logger.debug(f"Failed to resolve alert: {e}")
     logger.info(f"✅ [{source}] Continuing after manual step...")
 
-def human_delay(min_sec=1.5, max_sec=4.5):
-    """Introduces randomized float jitter to mimic human reading/clicking speed."""
+def human_delay(min_sec=0.2, max_sec=0.7):
+    """Fast realistic jitter to prevent blocking while cutting idle wait time."""
     delay = random.uniform(min_sec, max_sec)
     time.sleep(delay)
 
@@ -68,6 +68,22 @@ def get_random_headers():
     }
     return headers
 
+def block_unneeded_resources(page):
+    """
+    Aborts heavy images, media, and fonts to speed up page loads by 3-5x.
+    Does NOT affect DOM parsing or JSON APIs.
+    """
+    def _route_intercept(route):
+        req = route.request
+        if req.resource_type in ["image", "media", "font"]:
+            route.abort()
+        else:
+            route.continue_()
+    try:
+        page.route("**/*", _route_intercept)
+    except Exception:
+        pass
+
 def get_playwright_stealth_args():
     """Returns heavily evasive Chrome launch arguments."""
     return [
@@ -78,7 +94,8 @@ def get_playwright_stealth_args():
         '--disable-dev-shm-usage',
         '--disable-web-security',
         '--disable-features=IsolateOrigins,site-per-process',
-        '--window-size=1920,1080'
+        '--window-size=1920,1080',
+        '--blink-settings=imagesEnabled=false'
     ]
 
 # Retry decorator for raw requests

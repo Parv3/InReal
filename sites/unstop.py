@@ -183,6 +183,7 @@ def scrape_unstop():
     all_internships = []
     seen = set()
 
+    from scraper_utils import block_unneeded_resources
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, args=get_playwright_stealth_args())
         context = browser.new_context(
@@ -191,6 +192,7 @@ def scrape_unstop():
             viewport={"width": 1440, "height": 900},
         )
         page = context.new_page()
+        block_unneeded_resources(page)
         Stealth().apply_stealth_sync(page)
 
         # Open the real page first so the site sets its cookies, like a normal visit

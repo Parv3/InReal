@@ -161,6 +161,7 @@ def scrape_linkedin(config=None):
         logger.warning("LinkedIn: No regions specified, using defaults")
         req_regions = [r.lower() for r in default_regions]
 
+    from scraper_utils import block_unneeded_resources
     all_internships = []
     seen = set()
 
@@ -179,63 +180,67 @@ def scrape_linkedin(config=None):
             locale="en-US",
         )
         page = context.new_page()
+        block_unneeded_resources(page)
         Stealth().apply_stealth_sync(page)
 
+        # Collect matching queries and cap to top 8 high-priority configs
+        matched_configs = []
         for kw, loc, label in SEARCH_CONFIGS:
+            kw_lower = kw.lower()
+            loc_lower = loc.lower()
+            
+            # Check region map
+            is_india = "india" in loc_lower
+            is_remote = "remote" in loc_lower or "anywhere" in loc_lower
+            is_worldwide = "worldwide" in loc_lower
+            is_europe = any(k in loc_lower for k in ["europe", "kingdom", "germany", "france", "netherlands", "switzerland", "sweden", "finland"])
+            is_usa = any(k in loc_lower for k in ["united states", "bay area", "seattle", "boston", "york"])
+            
+            region_match = False
+            if "india" in req_regions and is_india: region_match = True
+            if "usa" in req_regions and is_usa: region_match = True
+            if "europe" in req_regions and is_europe: region_match = True
+            if "remote" in req_regions and is_remote: region_match = True
+            if "worldwide" in req_regions and (is_worldwide or (not is_india and not is_usa and not is_europe and not is_remote)): region_match = True
+            
+            if not region_match:
+                continue
+                
+            topic_match = False
+            if "ai" in req_topics and ("artificial intelligence" in kw_lower or "ai " in kw_lower or " ai" in kw_lower or kw_lower.startswith("ai") or "robotics" in kw_lower): topic_match = True
+            if "ml" in req_topics and ("machine learning" in kw_lower or "reinforcement" in kw_lower or "rl " in kw_lower): topic_match = True
+            if "dl" in req_topics and "deep learning" in kw_lower: topic_match = True
+            if "ds" in req_topics and "data science" in kw_lower: topic_match = True
+            if "cv" in req_topics and "computer vision" in kw_lower: topic_match = True
+            if "nlp" in req_topics and "natural language" in kw_lower: topic_match = True
+            if "research" in req_topics and "research" in kw_lower: topic_match = True
+            if "llm/genai" in req_topics and ("generative" in kw_lower or "large language" in kw_lower): topic_match = True
+            
+            if req_topics and not topic_match:
+                continue
+                
+            matched_configs.append((kw, loc, label))
+
+        active_configs = matched_configs[:8]
+        logger.info(f"LinkedIn: Running {len(active_configs)} prioritized queries for fast execution.")
+
+        for kw, loc, label in active_configs:
             try:
-                # Filter by config parameters
-                kw_lower = kw.lower()
-                loc_lower = loc.lower()
-                
-                # Check region map
-                is_india = "india" in loc_lower
-                is_remote = "remote" in loc_lower or "anywhere" in loc_lower
-                is_worldwide = "worldwide" in loc_lower
-                is_europe = "europe" in loc_lower or "kingdom" in loc_lower or "germany" in loc_lower or "france" in loc_lower or "netherlands" in loc_lower or "switzerland" in loc_lower or "sweden" in loc_lower or "denmark" in loc_lower or "finland" in loc_lower or "spain" in loc_lower or "italy" in loc_lower or "belgium" in loc_lower or "austria" in loc_lower
-                is_usa = "united states" in loc_lower or "bay area" in loc_lower or "seattle" in loc_lower or "boston" in loc_lower or "york" in loc_lower
-                
-                # Default map to worldwide if none of above
-                region_match = False
-                if "india" in req_regions and is_india: region_match = True
-                if "usa" in req_regions and is_usa: region_match = True
-                if "europe" in req_regions and is_europe: region_match = True
-                if "remote" in req_regions and is_remote: region_match = True
-                if "worldwide" in req_regions and (is_worldwide or (not is_india and not is_usa and not is_europe and not is_remote)): region_match = True
-                
-                if not region_match:
-                    continue
-                    
-                # Topic match
-                topic_match = False
-                if "ai" in req_topics and ("artificial intelligence" in kw_lower or "ai " in kw_lower or " ai" in kw_lower or kw_lower.startswith("ai") or "robotics" in kw_lower): topic_match = True
-                if "ml" in req_topics and ("machine learning" in kw_lower or "reinforcement" in kw_lower or "rl " in kw_lower): topic_match = True
-                if "dl" in req_topics and "deep learning" in kw_lower: topic_match = True
-                if "ds" in req_topics and "data science" in kw_lower: topic_match = True
-                if "cv" in req_topics and "computer vision" in kw_lower: topic_match = True
-                if "nlp" in req_topics and "natural language" in kw_lower: topic_match = True
-                if "research" in req_topics and "research" in kw_lower: topic_match = True
-                if "llm/genai" in req_topics and ("generative" in kw_lower or "large language" in kw_lower): topic_match = True
-                
-                # Allow fallback if no specific topic arrays given
-                if req_topics and not topic_match:
-                    # If user chose specific topics and this config query matches none of them, skip.
-                    continue
-                    
                 import urllib.parse
                 url = BASE_URL.format(
                     kw=urllib.parse.quote_plus(kw),
                     loc=urllib.parse.quote_plus(loc),
                 )
                 logger.info(f"LinkedIn: Scraping [{label}] — {url}")
-                page.goto(url, timeout=45000)
+                page.goto(url, timeout=30000, wait_until="domcontentloaded")
 
                 # Automatically close popups without waiting for the user
                 _close_popups(page)
 
-                # Scroll to load more job cards
-                for _ in range(5):
-                    page.mouse.wheel(0, random.randint(700, 1400))
-                    human_delay(1.0, 2.0)
+                # Fast scroll to trigger card load
+                for _ in range(2):
+                    page.mouse.wheel(0, 1000)
+                    human_delay(0.2, 0.5)
 
                 html = page.content()
                 soup = BeautifulSoup(html, "lxml")
@@ -243,7 +248,6 @@ def scrape_linkedin(config=None):
                 # LinkedIn guest page uses these card selectors
                 cards = soup.find_all("div", class_=lambda c: c and "base-card" in c)
                 if not cards:
-                    # Fallback: look for job cards with data attributes
                     cards = soup.find_all("li", class_=lambda c: c and "jobs-search__results-list" in (c or ""))
                 logger.info(f"LinkedIn [{label}]: Found {len(cards)} cards")
 

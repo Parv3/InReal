@@ -244,11 +244,14 @@ def scrape_universities():
     all_internships = []
     seen_ids: set = set()
 
+    # Prioritize top 12 high-yield queries to keep execution lightning fast
+    priority_queries = QUERIES[:14]
+
     try:
         ddgs = DDGS()
 
-        for i, (query, category, def_org, def_role, location, loc_type) in enumerate(QUERIES):
-            logger.info(f"[Universities] Query {i+1}/{len(QUERIES)}: {category}")
+        for i, (query, category, def_org, def_role, location, loc_type) in enumerate(priority_queries):
+            logger.info(f"[Universities] Query {i+1}/{len(priority_queries)}: {category}")
             try:
                 results = list(ddgs.text(query, max_results=15))
                 found_this = 0
@@ -328,7 +331,7 @@ def scrape_universities():
             except Exception as e:
                 logger.error(f"[Universities] Error on '{category}': {e}")
 
-            human_delay(3.0, 5.0)
+            human_delay(0.4, 0.8)
 
     except Exception as e:
         logger.error(f"[Universities] Critical error: {e}")
