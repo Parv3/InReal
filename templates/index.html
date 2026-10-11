@@ -224,10 +224,10 @@
 
       <!-- Header Action Buttons (Browse Openings & Submit an Opportunity) -->
       <div class="flex items-center gap-3">
-        <!-- Live System Status Dot -->
-        <div id="status-indicator-pill" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600">
+        <!-- Live System Status Indicator (Visible on all viewports) -->
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 shadow-xs">
           <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span id="scraper-status-text" class="text-[11px]">System Ready</span>
+          <span id="scraper-status-text" class="text-[11px] font-bold">System Ready</span>
         </div>
 
         <!-- Secondary Outlined Button -->
@@ -590,10 +590,10 @@
           <label class="font-bold text-slate-700 block mb-2">Target Geographic Regions</label>
           <div class="grid grid-cols-3 gap-2">
             <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="usa" value="usa" checked> USA</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="worldwide" checked> Global</label>
           </div>
         </div>
 
@@ -601,13 +601,13 @@
           <label class="font-bold text-slate-700 block mb-2">Target Feeds & Platforms</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="naukri" checked> Naukri/Shine</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="remotive" checked> Remotive/WWR</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="government" checked> Labs/Govt</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="universities" checked> University RSS</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="naukri" checked> Naukri/Shine</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="remotive" checked> Remotive/WWR</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="bigtech" checked> Big Tech</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="government" checked> Labs/Govt</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="universities" checked> University RSS</label>
           </div>
         </div>
 

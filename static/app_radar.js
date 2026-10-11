@@ -433,17 +433,34 @@ async function pollScraperStatus() {
 
     const dot = document.getElementById('ping-dot');
     const text = document.getElementById('scraper-status-text');
+    const scrapeBtn = document.getElementById('trigger-scrape-btn');
 
     if (isRunning) {
-      if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500 animate-pulse';
-      if (text) text.innerText = 'Scanning...';
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500 animate-ping';
+      if (text) {
+        text.innerText = 'Scanning Feeds...';
+        text.className = 'text-[11px] font-bold text-orange-600 animate-pulse';
+      }
+      if (scrapeBtn) {
+        scrapeBtn.classList.add('opacity-80', 'pointer-events-none');
+        scrapeBtn.querySelector('span').innerText = 'Scanning...';
+      }
+      // Live reload data as opportunities are discovered
+      loadData();
     } else {
       if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-      if (text) text.innerText = 'System Ready';
+      if (text) {
+        text.innerText = 'System Ready';
+        text.className = 'text-[11px] font-bold text-slate-700';
+      }
+      if (scrapeBtn) {
+        scrapeBtn.classList.remove('opacity-80', 'pointer-events-none');
+        scrapeBtn.querySelector('span').innerText = 'Submit an Opportunity';
+      }
     }
   } catch (e) {}
 
-  setTimeout(pollScraperStatus, 3500);
+  setTimeout(pollScraperStatus, 2000);
 }
 
 async function pollAlerts() {
@@ -604,20 +621,37 @@ function bindEventHandlers() {
     e.preventDefault();
     modal.classList.add('hidden');
 
+    const formBtn = document.querySelector('#scrape-config-form button[type="submit"]');
+    if (formBtn) formBtn.innerText = 'Initializing Sweep...';
+
     const checkedValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
     const config = {
       regions: checkedValues('regions'),
       sources: checkedValues('sources')
     };
 
+    // Instant visual feedback on the header indicator
+    const dot = document.getElementById('ping-dot');
+    const text = document.getElementById('scraper-status-text');
+    if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500 animate-ping';
+    if (text) {
+      text.innerText = 'Scanning Feeds...';
+      text.className = 'text-[11px] font-bold text-orange-600 animate-pulse';
+    }
+
     try {
-      await fetch('/api/scrape', {
+      const res = await fetch('/api/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)
       });
+      const data = await res.json();
+      console.log('Scraper sweep response:', data);
+      setTimeout(pollScraperStatus, 500);
     } catch (err) {
-      console.error(err);
+      console.error('Scraper launch failed:', err);
+    } finally {
+      if (formBtn) formBtn.innerText = 'Launch Opportunity Sweep';
     }
   });
 
