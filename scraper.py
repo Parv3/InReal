@@ -200,21 +200,46 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
         logger.warning("No scrapers matched the provided configuration filters!")
         return 0
 
-    for source_name, scraper_func in scrapers_to_run.items():
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    def _scrape_worker(source_name, scraper_func):
         try:
             logger.info(f"🚀 Starting to check {source_name} for new opportunities...")
             if source_name in ["linkedin", "search"]:
                 listings = scraper_func(config=config)
             else:
                 listings = scraper_func()
+            
             if not dry_run:
                 added = process_and_save(source_name, listings)
-                total_added += added
+                return source_name, added, None
             else:
                 report_dry_run(source_name, listings)
+                return source_name, 0, None
         except Exception as e:
             logger.exception(f"Failed {source_name}: {e}")
-            failed_sources.append(source_name)
+            return source_name, 0, e
+
+    # Concurrently execute scrapers across a thread pool
+    max_workers = min(len(scrapers_to_run), 6)
+    logger.info(f"⚡ Running {len(scrapers_to_run)} scrapers concurrently using {max_workers} worker threads...")
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_source = {
+            executor.submit(_scrape_worker, src, fn): src
+            for src, fn in scrapers_to_run.items()
+        }
+        for future in as_completed(future_to_source):
+            src_name = future_to_source[future]
+            try:
+                source_name, added, err = future.result()
+                if err is not None:
+                    failed_sources.append(source_name)
+                else:
+                    total_added += added
+            except Exception as e:
+                logger.exception(f"Worker exception for {src_name}: {e}")
+                failed_sources.append(src_name)
             
     if not dry_run:
         update_run_history(total_added, failed_sources)

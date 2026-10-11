@@ -1,8 +1,12 @@
 import json
 import csv
 import pandas as pd
+import threading
 from datetime import datetime
 from pathlib import Path
+
+# Thread lock to synchronize file writes across worker threads
+_FILE_LOCK = threading.Lock()
 
 # Paths relative to this file
 DATA_DIR = Path(__file__).parent
@@ -47,75 +51,76 @@ def append_to_csv(internships: list) -> int:
     if not internships:
         return 0
         
-    log_data = load_log()
-    seen_ids = set(log_data.setdefault("seen_ids", []))
-    
-    new_records = []
-    
-    for item in internships:
-        if item["id"] not in seen_ids:
-            item["is_new"] = True
-            new_records.append(item)
-            seen_ids.add(item["id"])
+    with _FILE_LOCK:
+        log_data = load_log()
+        seen_ids = set(log_data.setdefault("seen_ids", []))
         
-    if not new_records:
-        return 0
+        new_records = []
+        for item in internships:
+            if item["id"] not in seen_ids:
+                item["is_new"] = True
+                new_records.append(item)
+                seen_ids.add(item["id"])
+            
+        if not new_records:
+            return 0
+            
+        log_data["seen_ids"] = list(seen_ids)
+        log_data["total_scraped"] = len(seen_ids)
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        log_data["last_run"] = today_str
         
-    log_data["seen_ids"] = list(seen_ids)
-    log_data["total_scraped"] = len(seen_ids)
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    log_data["last_run"] = today_str
-    
-    file_exists = CSV_FILE.exists()
-    if file_exists:
-        # Older CSVs were written before new columns were added; rewrite the header once
-        with open(CSV_FILE, "r", encoding="utf-8") as f:
-            header = f.readline().strip().split(",")
-        if header != CSV_HEADERS:
-            old = pd.read_csv(CSV_FILE)
-            old.reindex(columns=CSV_HEADERS).to_csv(CSV_FILE, index=False)
-    
-    with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
-        if not file_exists:
-            writer.writeheader()
-        for rec in new_records:
-            filtered_rec = {k: rec.get(k, "") for k in CSV_HEADERS}
-            writer.writerow(filtered_rec)
-            
-    # Read and sort by date_scraped descending
-    try:
-        df = pd.read_csv(CSV_FILE)
-        if "date_scraped" in df.columns:
-            df["date_scraped"] = pd.to_datetime(df["date_scraped"], errors='coerce')
-            df = df.sort_values(by="date_scraped", ascending=False)
-            df["date_scraped"] = df["date_scraped"].dt.strftime("%Y-%m-%d")
-            df.to_csv(CSV_FILE, index=False)
-    except Exception as e:
-        print(f"Warning: Could not sort CSV: {e}")
-            
-    save_log(log_data)
-    return len(new_records)
+        file_exists = CSV_FILE.exists()
+        if file_exists:
+            # Older CSVs were written before new columns were added; rewrite the header once
+            with open(CSV_FILE, "r", encoding="utf-8") as f:
+                header = f.readline().strip().split(",")
+            if header != CSV_HEADERS:
+                old = pd.read_csv(CSV_FILE)
+                old.reindex(columns=CSV_HEADERS).to_csv(CSV_FILE, index=False)
+        
+        with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
+            if not file_exists:
+                writer.writeheader()
+            for rec in new_records:
+                filtered_rec = {k: rec.get(k, "") for k in CSV_HEADERS}
+                writer.writerow(filtered_rec)
+                
+        # Read and sort by date_scraped descending
+        try:
+            df = pd.read_csv(CSV_FILE)
+            if "date_scraped" in df.columns:
+                df["date_scraped"] = pd.to_datetime(df["date_scraped"], errors='coerce')
+                df = df.sort_values(by="date_scraped", ascending=False)
+                df["date_scraped"] = df["date_scraped"].dt.strftime("%Y-%m-%d")
+                df.to_csv(CSV_FILE, index=False)
+        except Exception as e:
+            print(f"Warning: Could not sort CSV: {e}")
+                
+        save_log(log_data)
+        return len(new_records)
     
 def update_run_history(new_listings_count: int, sources_failed: list):
-    log_data = load_log()
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    
-    # Check if we already have an entry for today
-    history = log_data.get("run_history", [])
-    today_entry = next((item for item in history if item["date"] == today_str), None)
-    
-    if today_entry:
-        today_entry["new_listings"] += new_listings_count
-        # Merge sources_failed without duplicates
-        today_entry["sources_failed"] = list(set(today_entry.get("sources_failed", []) + sources_failed))
-    else:
-        history.append({
-            "date": today_str,
-            "new_listings": new_listings_count,
-            "sources_failed": sources_failed
-        })
+    with _FILE_LOCK:
+        log_data = load_log()
+        today_str = datetime.now().strftime("%Y-%m-%d")
         
-    log_data["run_history"] = history
-    log_data["last_run"] = today_str
-    save_log(log_data)
+        # Check if we already have an entry for today
+        history = log_data.get("run_history", [])
+        today_entry = next((item for item in history if item["date"] == today_str), None)
+        
+        if today_entry:
+            today_entry["new_listings"] += new_listings_count
+            # Merge sources_failed without duplicates
+            today_entry["sources_failed"] = list(set(today_entry.get("sources_failed", []) + sources_failed))
+        else:
+            history.append({
+                "date": today_str,
+                "new_listings": new_listings_count,
+                "sources_failed": sources_failed
+            })
+            
+        log_data["run_history"] = history
+        log_data["last_run"] = today_str
+        save_log(log_data)
