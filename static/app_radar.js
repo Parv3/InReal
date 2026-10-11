@@ -453,7 +453,7 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'Notification';
+      document.getElementById('action-title').innerText = data.alert.title || `Action Required: ${data.alert.source || 'Scraper'}`;
       document.getElementById('action-message').innerText = data.alert.message || 'Action required in browser window.';
       banner.classList.remove('hidden');
     } else {
