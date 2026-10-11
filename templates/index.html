@@ -22,12 +22,12 @@
           },
           colors: {
             brand: {
+              yellow: '#FBBF24',
+              orange: '#F97316',
               blue: '#2563EB',
-              indigo: '#4F46E5',
-              violet: '#7C3AED',
+              teal: '#0D9488',
               emerald: '#059669',
-              amber: '#D97706',
-              rose: '#E11D48',
+              slate: '#0F172A',
             }
           }
         }
@@ -36,46 +36,46 @@
   </script>
 
   <style>
-    /* Translucent Glassmorphism & Flat iOS-Grade Design */
+    /* Warm Vibrant Yellow & Translucent Frosted Glass Palette */
     :root {
-      --bg-gradient: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
-                         radial-gradient(circle at 85% 20%, rgba(236, 72, 153, 0.07) 0%, transparent 40%),
-                         radial-gradient(circle at 50% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-                         #F8FAFC;
+      --bg-amber-warmth: radial-gradient(circle at 10% 10%, rgba(251, 191, 36, 0.18) 0%, transparent 45%),
+                         radial-gradient(circle at 90% 15%, rgba(249, 115, 22, 0.14) 0%, transparent 40%),
+                         radial-gradient(circle at 50% 85%, rgba(13, 148, 136, 0.12) 0%, transparent 50%),
+                         #FFFDF5;
     }
 
     body {
-      background: var(--bg-gradient);
+      background: var(--bg-amber-warmth);
       background-attachment: fixed;
       font-family: 'Plus Jakarta Sans', sans-serif;
       color: #0F172A;
     }
 
-    /* Glassmorphic Surfaces with Pristine iOS Frosted Blur */
+    /* Glassmorphism Frosted Panels with Crisp Outlines */
     .glass-panel {
-      background: rgba(255, 255, 255, 0.72);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 12px 36px -10px rgba(245, 158, 11, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+      border-radius: 24px;
     }
 
     .glass-card {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(16px) saturate(170%);
-      -webkit-backdrop-filter: blur(16px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(16px) saturate(175%);
+      -webkit-backdrop-filter: blur(16px) saturate(175%);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
       box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
-      border-radius: 18px;
+      border-radius: 20px;
       transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .glass-card:hover {
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, 0.92);
-      border-color: rgba(99, 102, 241, 0.3);
-      box-shadow: 0 18px 36px -12px rgba(37, 99, 235, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.96);
+      border-color: rgba(249, 115, 22, 0.35);
+      box-shadow: 0 20px 40px -12px rgba(249, 115, 22, 0.15), 0 6px 12px -2px rgba(15, 23, 42, 0.04);
     }
 
     /* Flat Illustration Clean Color Blocks */
@@ -83,29 +83,42 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
-      border-radius: 10px;
+      padding: 4px 11px;
+      border-radius: 12px;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: -0.01em;
     }
 
+    /* Flat Avatar Graphic Circles */
+    .flat-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #0F172A;
+      box-shadow: 2px 2px 0px #0F172A;
+      transition: transform 0.15s ease;
+    }
+    .flat-avatar:hover {
+      transform: translateY(-2px) scale(1.05);
+    }
+
     /* Translucent Interactive Buttons */
     .glass-btn {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      border-radius: 14px;
       font-size: 12px;
       font-weight: 700;
       box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.04);
       transition: all 0.18s ease;
     }
     .glass-btn:hover {
-      background: rgba(255, 255, 255, 0.98);
+      background: rgba(255, 255, 255, 1);
       transform: translateY(-1px);
-      box-shadow: 0 6px 14px -3px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 6px 16px -3px rgba(15, 23, 42, 0.08);
     }
     .glass-btn:active {
       transform: translateY(0);
@@ -113,27 +126,27 @@
     }
 
     .glass-btn-primary {
-      background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
       color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 6px 18px -4px rgba(37, 99, 235, 0.35);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 6px 20px -4px rgba(249, 115, 22, 0.4);
     }
     .glass-btn-primary:hover {
-      background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%);
-      box-shadow: 0 8px 22px -4px rgba(37, 99, 235, 0.45);
+      background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
+      box-shadow: 0 8px 24px -4px rgba(249, 115, 22, 0.5);
       color: #FFFFFF;
     }
 
-    /* Segmented Control Pill Group (Apple iOS style) */
+    /* Apple iOS Segmented Control Rockers */
     .pill-segmented-group {
-      background: rgba(226, 232, 240, 0.6);
+      background: rgba(241, 245, 249, 0.7);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       padding: 3px;
       border-radius: 14px;
       display: inline-flex;
       gap: 3px;
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.8);
     }
 
     .pill-segmented-item {
@@ -163,16 +176,16 @@
   </style>
 </head>
 
-<body class="min-h-screen text-[#0F172A] flex flex-col relative antialiased selection:bg-blue-600 selection:text-white">
+<body class="min-h-screen text-[#0F172A] flex flex-col relative antialiased selection:bg-orange-500 selection:text-white">
 
   <!-- Interactive 3D Flat Geometric Mesh Background Canvas -->
-  <canvas id="topo-radar-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
+  <canvas id="topo-radar-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-55"></canvas>
 
   <!-- Translucent Notification Banner -->
-  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full glass-panel p-4 shadow-xl border-l-4 border-l-blue-600">
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full glass-panel p-4 shadow-xl border-l-4 border-l-orange-500">
     <div class="flex items-start gap-3">
-      <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
-        <i class="ph ph-info font-bold"></i>
+      <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm shrink-0">
+        <i class="ph ph-bell-ringing font-bold"></i>
       </div>
       <div class="flex-1">
         <h4 id="action-title" class="font-bold text-xs uppercase tracking-wide text-slate-800">Notification</h4>
@@ -185,20 +198,20 @@
   </div>
 
   <!-- Translucent Frosted Glass Header -->
-  <header class="sticky top-0 z-30 w-full bg-white/70 backdrop-blur-xl border-b border-white/80 shadow-xs">
+  <header class="sticky top-0 z-30 w-full bg-white/75 backdrop-blur-xl border-b border-white/80 shadow-xs">
     <div class="max-w-7xl mx-auto px-6 h-18 py-3.5 flex items-center justify-between gap-4">
       
       <!-- Brand & Flat Geometric Logo -->
       <div class="flex items-center gap-3.5">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-md shadow-blue-500/20 flex items-center justify-center text-white">
-          <i class="ph ph-compass-tool text-xl font-bold"></i>
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-500/20 flex items-center justify-center text-white border-2 border-slate-900">
+          <i class="ph ph-users-three text-xl font-bold"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xl font-extrabold tracking-tight text-slate-900">InReal</span>
-            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-100/80 rounded-full text-[11px] font-bold">Radar 2.0</span>
+            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded-full text-[11px] font-bold">Talent Radar</span>
           </div>
-          <div class="text-[12px] text-slate-500 font-medium">Autonomous Robotics & AI Opportunity Engine</div>
+          <div class="text-[12px] text-slate-500 font-medium">Human-Centric AI & Robotics Opportunities</div>
         </div>
       </div>
 
@@ -206,7 +219,7 @@
       <div class="flex items-center gap-2.5">
         <!-- Status Pill Indicator -->
         <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 glass-btn text-xs font-semibold text-slate-700">
-          <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400"></span>
+          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400"></span>
           <span id="scraper-status-text" class="text-[11px]">System Ready</span>
         </div>
 
@@ -226,13 +239,69 @@
   <!-- Main Content Layout -->
   <main class="relative z-10 max-w-7xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
 
+    <!-- Hero Section: Flat Illustration of People & Community Mission -->
+    <section class="glass-panel p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden bg-gradient-to-r from-amber-50/90 via-white/80 to-orange-50/90 border-2 border-white">
+      
+      <!-- Left: Headline & Community Story -->
+      <div class="flex-1 z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-200/80 border border-amber-300 text-slate-900 text-xs font-bold mb-3.5 shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
+          Curated for Engineers, Researchers & Builders
+        </div>
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
+          Where Next-Gen Builders Find Their Breakthrough.
+        </h1>
+        <p class="text-sm md:text-base text-slate-600 mt-2.5 max-w-xl font-medium leading-relaxed">
+          Aggregating top internships across Google DeepMind, OpenAI, Figure AI, Tesla Autopilot, and leading robotics laboratories with clean transparency and zero fluff.
+        </p>
+
+        <!-- People Flat Avatars & Social Proof Block -->
+        <div class="flex flex-wrap items-center gap-4 mt-6">
+          <div class="flex -space-x-2.5 overflow-hidden p-1">
+            <!-- Flat Vector People Avatars -->
+            <div class="w-10 h-10 rounded-full bg-[#EF4444] flat-avatar text-white font-bold text-xs" title="Researcher">
+              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-[#06B6D4] flat-avatar text-white font-bold text-xs" title="Robotics Engineer">
+              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-[#F59E0B] flat-avatar text-white font-bold text-xs" title="AI Fellow">
+              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-[#10B981] flat-avatar text-white font-bold text-xs" title="Hardware Lead">
+              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-900">4,800+ Students & Engineers</div>
+            <div class="text-[11px] text-slate-500 font-medium">Tracking verified lab openings weekly</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: User-Provided Flat Illustration Image Card -->
+      <div class="shrink-0 z-10 w-full md:w-80 lg:w-96">
+        <div class="relative rounded-3xl overflow-hidden border-3 border-slate-900 shadow-[6px_6px_0px_#0F172A] bg-amber-400">
+          <img 
+            src="{{ url_for('static', filename='hero_team.png') }}" 
+            alt="Flat Illustration Team of Students & Engineers" 
+            class="w-full h-auto object-cover object-center transform hover:scale-102 transition duration-300"
+          >
+          <div class="absolute bottom-2.5 left-2.5 right-2.5 p-2 bg-white/90 backdrop-blur-md rounded-xl border border-slate-900/40 flex items-center justify-between text-xs font-bold text-slate-900">
+            <span class="flex items-center gap-1.5"><i class="ph ph-heart-fill text-rose-500"></i> Open Community</span>
+            <span class="text-orange-600 font-extrabold">100% Free</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Translucent Overview Metric Cards with Flat Color Blocks -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Positions</span>
-          <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-            <i class="ph ph-database text-base"></i>
+          <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+            <i class="ph ph-database text-lg"></i>
           </div>
         </div>
         <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="stat-total-jobs">0</div>
@@ -242,19 +311,19 @@
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">New This Cycle</span>
-          <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-            <i class="ph ph-sparkle text-base"></i>
+          <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
+            <i class="ph ph-sparkle text-lg"></i>
           </div>
         </div>
-        <div class="text-3xl font-extrabold text-amber-600 tracking-tight" id="stat-new-jobs">0</div>
+        <div class="text-3xl font-extrabold text-orange-600 tracking-tight" id="stat-new-jobs">0</div>
         <div class="text-xs text-slate-500 mt-1 font-medium">Fresh telemetry sweeps</div>
       </div>
 
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funded Roles</span>
-          <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <i class="ph ph-currency-circle-dollar text-base"></i>
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <i class="ph ph-currency-circle-dollar text-lg"></i>
           </div>
         </div>
         <div class="text-3xl font-extrabold text-emerald-600 tracking-tight" id="stat-paid-jobs">0</div>
@@ -264,8 +333,8 @@
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tracked Sources</span>
-          <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-            <i class="ph ph-rss text-base"></i>
+          <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+            <i class="ph ph-rss text-lg"></i>
           </div>
         </div>
         <div class="text-3xl font-extrabold text-slate-900 tracking-tight">16+</div>
@@ -284,7 +353,7 @@
             type="text" 
             id="search-input" 
             placeholder="Search by role, company (Google, DeepMind, Figure), or tech stack (PyTorch, ROS, CUDA)..." 
-            class="w-full bg-white/70 border border-slate-200/80 rounded-xl pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition font-medium"
+            class="w-full bg-white/70 border border-slate-200/80 rounded-xl pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition font-medium"
           >
           <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100/90 px-2 py-0.5 rounded-md font-semibold hidden sm:inline">⌘K</span>
         </div>
@@ -339,10 +408,10 @@
         <!-- Injected via JavaScript -->
       </div>
 
-      <!-- Empty State -->
+      <!-- Empty State with Flat Illustration Avatar -->
       <div id="empty-state" class="hidden glass-panel p-12 text-center flex-col items-center justify-center">
-        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-          <i class="ph ph-magnifying-glass text-2xl"></i>
+        <div class="w-16 h-16 rounded-full bg-amber-400 border-2 border-slate-900 flex items-center justify-center mb-3 shadow-[3px_3px_0px_#0F172A]">
+          <i class="ph ph-binoculars text-2xl text-slate-900"></i>
         </div>
         <h3 class="text-base font-bold text-slate-900">No Matching Opportunities</h3>
         <p class="text-xs text-slate-500 mt-1 max-w-sm font-medium">Try broadening your search keywords or resetting region and stipend filters.</p>
@@ -352,12 +421,12 @@
   </main>
 
   <!-- Translucent Slide-Over Detail Drawer -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-slate-900/25 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white/90 backdrop-blur-2xl border-l border-white p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white/92 backdrop-blur-2xl border-l border-white p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
       
       <div class="flex items-center justify-between pb-4 border-b border-slate-200/80">
         <div class="flex items-center gap-2">
-          <span id="drawer-match-badge" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold">98% Match</span>
+          <span id="drawer-match-badge" class="px-2.5 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold">98% Match</span>
           <span id="drawer-org-badge" class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Company</span>
         </div>
         <button id="close-drawer-btn" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
@@ -368,7 +437,7 @@
       <div class="py-5 flex-1 flex flex-col gap-5">
         <div>
           <h2 id="drawer-role-title" class="text-xl font-bold leading-snug text-slate-900 tracking-tight">Role Title</h2>
-          <div id="drawer-company-name" class="text-sm font-bold text-blue-600 mt-1">Company Name</div>
+          <div id="drawer-company-name" class="text-sm font-bold text-orange-600 mt-1">Company Name</div>
           <div class="flex items-center gap-4 text-xs text-slate-500 mt-3 font-medium">
             <span class="flex items-center gap-1.5"><i class="ph ph-map-pin text-slate-400"></i> <span id="drawer-location">Location</span></span>
             <span class="flex items-center gap-1.5"><i class="ph ph-clock text-slate-400"></i> <span id="drawer-duration">Duration</span></span>
@@ -413,7 +482,7 @@
   <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-white/95 backdrop-blur-2xl border-t border-l border-white/90 rounded-tl-2xl shadow-2xl z-40 hidden transition-all duration-200">
     <div class="p-3.5 bg-slate-50/80 border-b border-slate-200/70 rounded-tl-2xl flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
         <span class="text-xs font-bold text-slate-800">Scraper Activity Feed</span>
       </div>
       <button id="close-logs-btn" class="w-6 h-6 rounded-lg hover:bg-slate-200/80 flex items-center justify-center text-slate-500">

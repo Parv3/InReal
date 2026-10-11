@@ -1,7 +1,7 @@
 /**
  * InReal Dashboard
- * Aesthetic: Glassmorphism & Translucent Style paired with Flat Illustration
- * (Bold Geometry, Clean Color Blocks, Minimal Shading, iOS-grade Frosted Glass Clarity)
+ * Aesthetic: Translucent Frosted Glassmorphism & Flat Illustration (People & Color Blocks)
+ * Bold Geometry, Clean Color Blocks, Minimal Shading, iOS-grade Frosted Glass Clarity
  */
 
 let allInternships = [];
@@ -12,14 +12,14 @@ let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
-// Flat clean color blocks for category tags & badges
+// Flat clean color blocks matching the warm illustration palette
 const flatColorThemes = [
-  { bg: 'bg-blue-50', text: 'text-blue-600', dot: 'bg-blue-500', border: 'border-blue-100' },
-  { bg: 'bg-indigo-50', text: 'text-indigo-600', dot: 'bg-indigo-500', border: 'border-indigo-100' },
-  { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-500', border: 'border-emerald-100' },
-  { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', border: 'border-amber-100' },
-  { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-500', border: 'border-rose-100' },
-  { bg: 'bg-purple-50', text: 'text-purple-600', dot: 'bg-purple-500', border: 'border-purple-100' }
+  { bg: 'bg-amber-100', text: 'text-amber-800', dot: 'bg-amber-500', border: 'border-amber-200', btnHover: 'group-hover:bg-amber-500 group-hover:text-white', avatarBg: 'bg-[#F59E0B]' },
+  { bg: 'bg-orange-100', text: 'text-orange-800', dot: 'bg-orange-500', border: 'border-orange-200', btnHover: 'group-hover:bg-orange-500 group-hover:text-white', avatarBg: 'bg-[#EF4444]' },
+  { bg: 'bg-teal-100', text: 'text-teal-800', dot: 'bg-teal-600', border: 'border-teal-200', btnHover: 'group-hover:bg-teal-600 group-hover:text-white', avatarBg: 'bg-[#0D9488]' },
+  { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-600', border: 'border-blue-200', btnHover: 'group-hover:bg-blue-600 group-hover:text-white', avatarBg: 'bg-[#2563EB]' },
+  { bg: 'bg-rose-100', text: 'text-rose-800', dot: 'bg-rose-600', border: 'border-rose-200', btnHover: 'group-hover:bg-rose-500 group-hover:text-white', avatarBg: 'bg-[#E11D48]' },
+  { bg: 'bg-purple-100', text: 'text-purple-800', dot: 'bg-purple-600', border: 'border-purple-200', btnHover: 'group-hover:bg-purple-600 group-hover:text-white', avatarBg: 'bg-[#7C3AED]' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,21 +47,20 @@ function initGlassTranslucentBackground() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Floating geometric primitives in flat soft pastel colors
+  // Floating geometric primitives in warm flat colors
   const group = new THREE.Group();
   scene.add(group);
 
   const materials = [
-    new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.12 }),
-    new THREE.MeshBasicMaterial({ color: 0x8B5CF6, transparent: true, opacity: 0.10 }),
+    new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: 0.14 }),
+    new THREE.MeshBasicMaterial({ color: 0xEF4444, transparent: true, opacity: 0.12 }),
+    new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: 0.12 }),
     new THREE.MeshBasicMaterial({ color: 0x10B981, transparent: true, opacity: 0.10 }),
-    new THREE.MeshBasicMaterial({ color: 0xEC4899, transparent: true, opacity: 0.08 }),
   ];
 
   const meshes = [];
 
-  // Soft geometric shapes: Icosahedrons, Torus, Octahedrons
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < 20; i++) {
     const geo = (i % 3 === 0) 
       ? new THREE.IcosahedronGeometry(Math.random() * 2.5 + 1.5, 0)
       : (i % 3 === 1) 
@@ -72,8 +71,8 @@ function initGlassTranslucentBackground() {
     const mesh = new THREE.Mesh(geo, mat);
 
     mesh.position.set(
-      (Math.random() - 0.5) * 55,
-      (Math.random() - 0.5) * 40,
+      (Math.random() - 0.5) * 60,
+      (Math.random() - 0.5) * 45,
       (Math.random() - 0.5) * 15
     );
 
@@ -90,12 +89,12 @@ function initGlassTranslucentBackground() {
   }
 
   // Soft connected wireframe plane at the back
-  const planeGeo = new THREE.PlaneGeometry(80, 50, 24, 18);
+  const planeGeo = new THREE.PlaneGeometry(85, 55, 24, 18);
   const planeMat = new THREE.MeshBasicMaterial({
-    color: 0x6366F1,
+    color: 0xF59E0B,
     wireframe: true,
     transparent: true,
-    opacity: 0.06
+    opacity: 0.07
   });
   const backgroundPlane = new THREE.Mesh(planeGeo, planeMat);
   backgroundPlane.position.z = -10;
@@ -199,7 +198,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Card Grid Rendering with Translucent Glass & Flat Color Blocks
+// 3. Card Grid Rendering with Flat Illustration People Avatars & Color Blocks
 // ==========================================
 function applyFiltersAndRender() {
   const searchInput = document.getElementById('search-input');
@@ -261,6 +260,7 @@ function renderListings(items) {
     const isBookmarked = bookmarks.includes(item.id);
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
     const theme = flatColorThemes[idx % flatColorThemes.length];
+    const initial = (item.company_name || 'Lab').charAt(0).toUpperCase();
 
     return `
       <article 
@@ -268,19 +268,23 @@ function renderListings(items) {
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Header: Source Flat Color Block & Bookmark -->
+          <!-- Header: People / Org Flat Avatar + Source Pill + Bookmark -->
           <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full ${theme.avatarBg} text-white font-extrabold text-xs flat-avatar" title="${escapeHtml(item.company_name || 'Organization')}">
+                ${initial}
+              </div>
+
               <span class="flat-badge ${theme.bg} ${theme.text} border ${theme.border}">
                 <span class="w-1.5 h-1.5 rounded-full ${theme.dot}"></span>
                 ${escapeHtml(item.source_platform || 'Portal')}
               </span>
-              ${item.is_new ? '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md text-[11px] font-bold">New</span>' : ''}
+              ${item.is_new ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-md text-[11px] font-bold">New</span>' : ''}
             </div>
 
             <button 
               type="button" 
-              class="w-8 h-8 rounded-xl bg-slate-50/80 hover:bg-slate-100 border border-slate-200/60 flex items-center justify-center text-slate-400 hover:text-rose-500 transition"
+              class="w-8 h-8 rounded-xl bg-white/90 hover:bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-xs"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
               title="Bookmark opportunity"
             >
@@ -288,8 +292,8 @@ function renderListings(items) {
             </button>
           </div>
 
-          <!-- Role & Company (Crisp typography, minimal clutter) -->
-          <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
+          <!-- Role & Company -->
+          <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-orange-600 transition-colors">
             ${escapeHtml(item.role_title || 'Internship Opportunity')}
           </h3>
           
@@ -301,18 +305,18 @@ function renderListings(items) {
 
           <!-- Flat Clean Skill Pills -->
           <div class="flex flex-wrap gap-1.5 mt-4">
-            ${skills.map(skill => `<span class="px-2.5 py-1 bg-slate-100/90 text-slate-700 rounded-lg text-[11px] font-semibold">${escapeHtml(skill)}</span>`).join('')}
+            ${skills.map(skill => `<span class="px-2.5 py-1 bg-amber-50/80 border border-amber-200/70 text-slate-700 rounded-lg text-[11px] font-semibold">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
         <!-- Footer: Clean Stipend readout & Action Pill -->
-        <div class="pt-4 mt-5 border-t border-slate-200/60 flex items-center justify-between text-xs">
+        <div class="pt-4 mt-5 border-t border-slate-200/70 flex items-center justify-between text-xs">
           <div>
             <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Stipend</div>
             <div class="font-extrabold text-slate-900 text-sm mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
           </div>
           <div>
-            <span class="px-3.5 py-1.5 bg-blue-50 text-blue-600 font-bold rounded-xl group-hover:bg-blue-600 group-hover:text-white transition flex items-center gap-1">
+            <span class="px-3.5 py-1.5 ${theme.bg} ${theme.text} ${theme.btnHover} font-bold rounded-xl transition flex items-center gap-1 border ${theme.border}">
               <span>View Details</span>
               <i class="ph ph-arrow-right text-xs"></i>
             </span>
@@ -347,7 +351,7 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-3 py-1 bg-slate-100 text-slate-800 rounded-lg text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
+    ? skills.map(s => `<span class="px-3 py-1 bg-amber-50 border border-amber-200 text-slate-800 rounded-lg text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
     : '<span class="text-xs text-slate-500">General qualifications.</span>';
 
   updateDrawerBookmarkIcon();
@@ -408,7 +412,7 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500 animate-pulse';
       if (text) text.innerText = 'Scanning...';
       fetchLogs();
     } else {
