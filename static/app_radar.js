@@ -1,7 +1,7 @@
 /**
  * InReal Dashboard
  * Palette: #A6D9F3, #B7F0F5, #E8FFF7, #6FB0C8, #0F2E3A
- * Interactive 3D Flowing Liquid Mercury River Simulation
+ * Real-time GLSL Shader Liquid Chrome/Mercury Simulation (matching reference image)
  * Zero emojis, zero em dashes.
  */
 
@@ -14,7 +14,7 @@ let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  initLiquidMercuryRiver();
+  initFullFluidChromeShader();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -23,15 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. 3D Web Experience: Full-On Interactive Liquid Chrome Mercury River
+// 1. 3D Web Experience: Real-time GLSL Liquid Mercury Shader
+// Exactly replicating the swirling, high-contrast chrome ripples in the reference image
 // ==========================================
-function initLiquidMercuryRiver() {
+function initFullFluidChromeShader() {
   const canvas = document.getElementById('liquid-river-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 22, 55);
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
   const renderer = new THREE.WebGLRenderer({ 
     canvas, 
@@ -42,123 +42,133 @@ function initLiquidMercuryRiver() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
-  // Dense liquid river wave grid spanning the entire viewport
-  const geometry = new THREE.PlaneGeometry(180, 140, 72, 72);
-  geometry.rotateX(-Math.PI / 2.3);
+  // Custom GLSL Fragment Shader for Swirling High-Contrast Chrome Liquid
+  const uniforms = {
+    u_time: { value: 0.0 },
+    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
+    u_colorFoam: { value: new THREE.Color('#E8FFF7') },
+    u_colorMint: { value: new THREE.Color('#B7F0F5') },
+    u_colorSky: { value: new THREE.Color('#A6D9F3') },
+    u_colorDeepSky: { value: new THREE.Color('#6FB0C8') },
+    u_colorMidnight: { value: new THREE.Color('#0F2E3A') }
+  };
 
-  // Liquid mercury material: pure high-specular chrome reflections with ice-tinted highlights
-  const riverMaterial = new THREE.MeshStandardMaterial({
-    color: 0xE8FFF7,           // Tinted arctic foam silver
-    metalness: 0.98,           // Pure liquid mercury mirror
-    roughness: 0.09,           // Ultra-low friction mirror reflection
-    wireframe: false,
-    transparent: true,
-    opacity: 0.38,
+  const vertexShader = `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position, 1.0);
+    }
+  `;
+
+  // Fractal domain-warping fluid shader with metallic specular Fresnel bands
+  const fragmentShader = `
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    uniform vec2 u_mouse;
+    uniform vec3 u_colorFoam;
+    uniform vec3 u_colorMint;
+    uniform vec3 u_colorSky;
+    uniform vec3 u_colorDeepSky;
+    uniform vec3 u_colorMidnight;
+    varying vec2 vUv;
+
+    // Simplex / harmonic wave equations
+    vec2 hash(vec2 p) {
+      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+    }
+
+    float noise(vec2 p) {
+      const float K1 = 0.366025404;
+      const float K2 = 0.211324865;
+      vec2 i = floor(p + (p.x + p.y) * K1);
+      vec2 a = p - i + (i.x + i.y) * K2;
+      vec2 o = (a.x > a.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec2 b = a - o + K2;
+      vec2 c = a - 1.0 + 2.0 * K2;
+      vec3 h = max(0.5 - vec3(dot(a, a), dot(b, b), dot(c, c)), 0.0);
+      vec3 n = h * h * h * h * vec3(dot(a, hash(i)), dot(b, hash(i + o)), dot(c, hash(i + 1.0)));
+      return dot(n, vec3(70.0));
+    }
+
+    void main() {
+      vec2 st = gl_FragCoord.xy / u_resolution.xy;
+      st.x *= u_resolution.x / u_resolution.y;
+
+      vec2 mouseOffset = (u_mouse - 0.5) * 0.45;
+      vec2 p = st * 2.8 + mouseOffset;
+      float t = u_time * 0.22;
+
+      // Domain warping (fluid distortion layers)
+      vec2 q = vec2(0.0);
+      q.x = noise(p + vec2(0.0, 0.0) + t * 0.35);
+      q.y = noise(p + vec2(5.2, 1.3) + t * 0.3);
+
+      vec2 r = vec2(0.0);
+      r.x = noise(p + 4.0 * q + vec2(1.7, 9.2) + 0.15 * t);
+      r.y = noise(p + 4.0 * q + vec2(8.3, 2.8) + 0.126 * t);
+
+      float f = noise(p + 4.2 * r + t * 0.2);
+
+      // Metallic specular highlight contour mapping
+      float chromeContour = sin(f * 9.0 + r.x * 6.0 + r.y * 5.0);
+      float specular = pow(clamp(chromeContour, 0.0, 1.0), 3.5);
+      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 2.2);
+
+      // Blend palette: Midnight crevices -> Deep Sky -> Mint -> Bright Chrome Foam
+      vec3 col = mix(u_colorMidnight, u_colorDeepSky, clamp(f * f * 3.5, 0.0, 1.0));
+      col = mix(col, u_colorSky, clamp(length(q), 0.0, 1.0));
+      col = mix(col, u_colorMint, clamp(length(r.x), 0.0, 1.0));
+      
+      // Intense liquid chrome reflections (matching white-hot specular bands in image)
+      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.92);
+      col = mix(col, u_colorMidnight * 0.5, darkCrevice * 0.75);
+
+      // Fine metallic grain
+      float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.035;
+      col += grain;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms
   });
 
-  const riverMesh = new THREE.Mesh(geometry, riverMaterial);
-  scene.add(riverMesh);
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+  scene.add(quad);
 
-  // Second layer: Floating liquid mercury eddies & swirls (flowing river beads)
-  const dropletCount = 24;
-  const dropletGeometry = new THREE.SphereGeometry(1.6, 20, 20);
-  const dropletMaterial = new THREE.MeshStandardMaterial({
-    color: 0xB7F0F5,
-    metalness: 0.99,
-    roughness: 0.05,
-    transparent: true,
-    opacity: 0.55,
-  });
+  // Mouse interaction
+  let mouseTargetX = 0.5, mouseTargetY = 0.5;
+  let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
 
-  const droplets = [];
-  for (let i = 0; i < dropletCount; i++) {
-    const bead = new THREE.Mesh(dropletGeometry, dropletMaterial);
-    bead.position.set(
-      (Math.random() - 0.5) * 140,
-      Math.random() * 8 + 3,
-      (Math.random() - 0.5) * 90
-    );
-    const scale = 0.6 + Math.random() * 1.8;
-    bead.scale.set(scale, scale * 0.6, scale); // Beveled surface droplet
-    scene.add(bead);
-    droplets.push({
-      mesh: bead,
-      flowSpeedZ: 0.08 + Math.random() * 0.12,
-      lateralSpeedX: (Math.random() - 0.5) * 0.05,
-      baseY: bead.position.y
-    });
-  }
-
-  // Dramatic studio lights tuned to the arctic color palette
-  const ambientLight = new THREE.AmbientLight(0xE8FFF7, 1.8);
-  scene.add(ambientLight);
-
-  // Key light: Ice sky chrome specular reflection (#A6D9F3)
-  const keyLight = new THREE.DirectionalLight(0xFFFFFF, 3.8);
-  keyLight.position.set(50, 70, 40);
-  scene.add(keyLight);
-
-  // Rim reflection: Deep arctic midnight (#0F2E3A / #6FB0C8)
-  const rimLight = new THREE.DirectionalLight(0x6FB0C8, 4.5);
-  rimLight.position.set(-60, 15, -30);
-  scene.add(rimLight);
-
-  // Interactive mouse ripples & parallax
-  let mouseX = 0, mouseY = 0;
-  let targetMouseX = 0, targetMouseY = 0;
   window.addEventListener('mousemove', (e) => {
-    targetMouseX = (e.clientX - window.innerWidth / 2) * 0.0008;
-    targetMouseY = (e.clientY - window.innerHeight / 2) * 0.0008;
+    mouseTargetX = e.clientX / window.innerWidth;
+    mouseTargetY = 1.0 - (e.clientY / window.innerHeight);
   }, { passive: true });
 
   window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   });
 
-  const pos = geometry.attributes.position;
-  const initialPositions = pos.clone();
   const clock = new THREE.Clock();
 
   function animate() {
     requestAnimationFrame(animate);
-    const time = clock.getElapsedTime() * 1.1;
+    const elapsed = clock.getElapsedTime();
 
-    // Smooth mouse lerping
-    mouseX += (targetMouseX - mouseX) * 0.05;
-    mouseY += (targetMouseY - mouseY) * 0.05;
+    // Smooth mouse lerp
+    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.05;
+    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.05;
 
-    // Physical flowing liquid mercury wave dynamics
-    for (let i = 0; i < pos.count; i++) {
-      const u = initialPositions.getX(i);
-      const v = initialPositions.getY(i);
-      
-      // River downstream flow vector combined with harmonic transverse ripples
-      const riverFlow = (v * 0.06 - time * 1.5);
-      const wave = Math.sin(u * 0.08 + riverFlow) * 4.8 +
-                   Math.cos(v * 0.07 + time * 0.9) * 3.6 +
-                   Math.sin((u + v) * 0.05 + time) * 2.2;
-      pos.setZ(i, wave);
-    }
-    pos.needsUpdate = true;
-
-    // Flowing mercury beads moving along the liquid river currents
-    droplets.forEach(d => {
-      d.mesh.position.z += d.flowSpeedZ;
-      d.mesh.position.x += d.lateralSpeedX;
-      d.mesh.position.y = d.baseY + Math.sin(time * 3 + d.mesh.position.x * 0.2) * 1.8;
-
-      if (d.mesh.position.z > 50) {
-        d.mesh.position.z = -60;
-        d.mesh.position.x = (Math.random() - 0.5) * 120;
-      }
-    });
-
-    // Tilt camera with pointer for visceral spatial depth
-    camera.position.x = mouseX * 30;
-    camera.position.y = 22 - mouseY * 25;
-    camera.lookAt(0, 0, 0);
+    uniforms.u_time.value = elapsed;
+    uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
 
     renderer.render(scene, camera);
   }
@@ -212,7 +222,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Sketched Card Grid Rendering with Arctic Theme
+// 3. Card Grid Rendering
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -286,7 +296,7 @@ function renderListings(items) {
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Lab thumbnail banner -->
+          <!-- Facility thumbnail banner -->
           <div class="w-full h-32 border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative mb-4">
             <img 
               src="${photoUrl}" 
