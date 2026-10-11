@@ -16,7 +16,7 @@ python scraper.py --source <name> --dry-run
 |---|---|---|---|---|---|
 | 1 | Internshala | `internshala` | `sites/internshala.py` | Playwright + HTML | ✅ |
 | 2 | Unstop | `unstop` | `sites/unstop.py` | Playwright + site's JSON API (HTML fallback) | ✅ |
-| 3 | Naukri | `naukri` | `sites/naukri.py` | Playwright + HTML | 🔴 |
+| 3 | Naukri | `naukri` | `sites/naukri.py` | Playwright + HTML + schema.org JSON on detail pages | 🟡 |
 | 4 | LinkedIn (guest search) | `linkedin` | `sites/linkedin.py` | Playwright + HTML | 🔴 |
 | 5 | Shine | `shine` | `sites/misc_india.py` | Playwright + HTML | 🔴 |
 | 6 | Foundit | `foundit` | `sites/misc_india.py` | Playwright + HTML | 🔴 |
@@ -90,21 +90,32 @@ On 12 Oct it returned 590 open internships, each with the full description, skil
 
 Risk: this is an internal API, not a promised one. If it changes, the scraper logs a warning and falls back to the ~20 cards on the page.
 
-## 3. Naukri 🔴
+## 3. Naukri 🟡
 
-URL: `https://www.naukri.com/ai-ml-internship-jobs-in-india`
+URL: `https://www.naukri.com/ai-ml-internship-jobs-in-india?qcstipend=0To10&qcstipend=10To20&qcstipend=20To30&qcstipend=30To40&qcstipend=40To50` (paid internships only)
+Checked on the live site: 12 Oct 2026. The page is built in the browser (the raw HTML has no cards), so Playwright is needed.
 
 | Field | Old selector | New selector | Status |
 |---|---|---|---|
-| Wait for / card | `.srp-jobtuple-wrapper` | | 🔴 |
-| Title + link | `a.title` | | 🔴 |
-| Company | `a.comp-name` | | 🔴 |
-| Location | `span.locWdth` | | 🔴 |
-| Experience | `span.expwdth` (skips 5+ yrs) | | 🔴 |
-| Stipend | `span` next to `span.ni-job-tuple-icon-srp-rupee` | | 🔴 |
-| Skills | `ul.tags-gt li` | | 🔴 |
+| Card | `.srp-jobtuple-wrapper` | same (`data-job-id` attribute = stable id) | still works |
+| Title + link | `a.title` | same | still works |
+| Company | `a.comp-name` | same (+ rating `a.rating .main-2`) | still works |
+| Location | `span.locWdth` | same | still works |
+| Stipend | `span` **next to** `span.ni-job-tuple-icon-srp-rupee` | `span` **inside** it: `.ni-job-tuple-icon-srp-rupee span` | ❌ old one always empty, fixed |
+| Duration | (not read) | `.ni-job-tuple-icon-srp-duration span` | new |
+| Experience | `span.expwdth` | not on internship cards any more (kept for job cards) | ❌ gone |
+| Skills | `ul.tags-gt li` | not on internship cards; read from the detail page instead | ❌ gone |
+| Start | (not read) | `.job-post-day` ("Starts within 1 month") | new |
+| Pages | page 1 only (20 of 594) | click `#lastCompMark a:has-text('Next')` | ❌ fixed |
+| Detail page | (not read) | `script[type="application/ld+json"]` JobPosting: description, skills, datePosted, validThrough | new |
+| Openings / applicants | (not read) | `[class*=styles_jhc__stat]` | new |
 
-Check: Naukri often blocks headless browsers. Code issue: `stipend_numeric` is always `0.0`, so the ₹5,000 rule never runs on Naukri.
+What we found:
+- 531 of the 594 "AI ML internship" results are marked **Unpaid**. Some of these are probably not really unpaid: Tower Research Capital's AI/ML intern post says "Unpaid" but is a copied post. We can't check the real pay, so we ask Naukri for paid ones only: 59 results, 3 pages.
+- Many posts say *"This job posting has been aggregated from external source"*. Naukri copied them from somewhere else. We keep them but add the flag "Copied by the portal from another site; check the company's own page".
+- Loading page 2 or 3 directly with the filter in the URL drops the filter (it showed 0 results), so the scraper clicks "Next" like a person.
+- Naukri's own job API answers `recaptcha required`, so we don't use it.
+- CSS classes on the detail page are hashed (`styles_jhc__stat__PgY67`) and change on every Naukri release, so we read the schema.org JSON block instead, plus partial class matches.
 
 ## 4. LinkedIn (guest search) 🔴
 
@@ -217,6 +228,6 @@ Uses the `ddgs` package (falls back to `duckduckgo_search`). Check: the package 
 | "Competitive stipend" was treated as unpaid | `filters.py` | ✅ fixed |
 | `schedule` package missing from requirements | `requirements.txt` | ✅ added |
 | `wait_for_human` is defined twice | `scraper_utils.py` | 🔴 |
-| Naukri `stipend_numeric` always 0 | `sites/naukri.py` | 🔴 |
+| Naukri `stipend_numeric` always 0 (and stipend text always empty) | `sites/naukri.py` | ✅ fixed |
 | RSS functions named after the wrong sites | `sites/rss_feeds.py` | 🔴 |
 | Link-only sources mixed in with real listings | `bigtech.py`, `government.py`, `niche.py` | 🔴 decide: remove or rebuild |

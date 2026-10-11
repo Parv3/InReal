@@ -100,6 +100,9 @@ def check_listing(item: dict):
     if item.get("stipend_numeric") in (None, 0) and "unpaid" not in str(item.get("stipend", "")).lower():
         flags.append("Stipend amount not stated")
 
+    if item.get("aggregated"):
+        flags.append("Copied by the portal from another site; check the company's own page")
+
     if re.search(COMMISSION_RE, text, re.I):
         flags.append("Pay depends on commission or performance")
 
