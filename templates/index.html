@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI/ML Internship Radar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Phosphor Icons for premium UI -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <div class="tech-background"></div>
+
+    <!-- Action Required Banner (Hidden by default) -->
+    <div id="action-banner" class="action-banner">
+        <div class="action-content">
+            <i class="ph ph-warning-circle banner-icon"></i>
+            <div class="action-text">
+                <h4 id="action-title">Action Required</h4>
+                <p id="action-message">Please check the scraper browser.</p>
+            </div>
+            <button id="action-dismiss-btn" class="dismiss-btn">Done</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="ph-fill ph-radar"></i>
+                <h2>AI/ML Radar</h2>
+            </div>
+
+            <button id="trigger-scrape-btn" class="scrape-btn">
+                <i class="ph ph-arrows-clockwise"></i>
+                <span id="scrape-btn-text">Run Scraper Now</span>
+            </button>
+
+            <div class="filter-section">
+                <h3>Search</h3>
+                <div class="search-box">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="text" id="search-input" placeholder="Role, company, skills...">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Location Type</h3>
+                <div class="button-group" id="location-filters">
+                    <button class="filter-btn active" data-val="all">🌍 All</button>
+                    <button class="filter-btn" data-val="Remote">📡 Remote</button>
+                    <button class="filter-btn" data-val="India">🇮🇳 India</button>
+                    <button class="filter-btn" data-val="International">🌐 Global</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Stipend (INR)</h3>
+                <div class="button-group vert" id="stipend-filters">
+                    <button class="filter-btn active" data-val="all">Any</button>
+                    <button class="filter-btn" data-val="paid">Paid Only (>0)</button>
+                    <button class="filter-btn" data-val="10k">> ₹10,000 / mo</button>
+                    <button class="filter-btn" data-val="20k">> ₹20,000 / mo</button>
+                    <button class="filter-btn" data-val="50k">> ₹50,000 / mo</button>
+                    <button class="filter-btn" data-val="unpaid">Unpaid / Hidden</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Source Platform</h3>
+                <select id="source-filter" class="custom-select">
+                    <option value="all">All Sources</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <div class="filter-section">
+                <h3>Organization Type</h3>
+                <div class="button-group" id="org-filters">
+                    <button class="filter-btn active" data-val="all">All</button>
+                    <button class="filter-btn" data-val="Company">Company</button>
+                    <button class="filter-btn" data-val="Institution">Institution</button>
+                    <button class="filter-btn" data-val="Government">Government</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Role Level</h3>
+                <div class="button-group" id="role-filters">
+                    <button class="filter-btn active" data-val="all">All</button>
+                    <button class="filter-btn" data-val="Research">Research Core</button>
+                    <button class="filter-btn" data-val="Applied">Applied Eng</button>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Auto-updates daily at 8:00 AM</p>
+                <div class="stats">
+                    Total listings: <span id="total-count">0</span>
+                </div>
+                <div class="logs-toggle mt-4">
+                    <button id="toggle-logs-btn" class="filter-btn"
+                        style="width: 100%; justify-content:center; display: flex; align-items: center; gap: 8px;">
+                        <i class="ph ph-terminal"></i> View Live Logs
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-nav">
+                <div class="header-left">
+                    <h1>Internship Opportunities</h1>
+                    <p class="subtitle">Your Personalized AI/ML Summer Radar</p>
+                </div>
+                <div class="nav-actions">
+                    <span class="showing-text">Showing <strong id="visible-count">0</strong> results</span>
+                    <button class="icon-btn" id="info-btn" title="How to use this scraper">
+                        <i class="ph ph-info"></i>
+                    </button>
+                    <button id="clear-data-btn" class="icon-btn" title="Clear all local data and logs"
+                        style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                        <i class="ph ph-trash"></i>
+                    </button>
+                    <button id="refresh-data-btn" class="icon-btn" title="Refresh local data" onclick="loadData()">
+                        <i class="ph ph-arrow-counter-clockwise"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="radar-container hidden" id="loading-spinner">
+                <div class="radar"></div>
+                <div class="radar-text" id="radar-text">SCANNING DATABANKS...</div>
+            </div>
+
+            <div class="main-scroll-area">
+
+                <!-- India / Global / All Quick Toggle -->
+                <div class="region-tabs" id="region-tab-bar">
+                    <button class="region-tab active" data-region="all" id="tab-all">
+                        <span class="tab-flag">🌍</span>
+                        <span class="tab-label">Everything</span>
+                        <span class="tab-count" id="tab-count-all">—</span>
+                    </button>
+                    <button class="region-tab" data-region="India" id="tab-india">
+                        <span class="tab-flag">🇮🇳</span>
+                        <span class="tab-label">India</span>
+                        <span class="tab-count" id="tab-count-india">—</span>
+                    </button>
+                    <button class="region-tab" data-region="International" id="tab-global">
+                        <span class="tab-flag">🌐</span>
+                        <span class="tab-label">Global / Abroad</span>
+                        <span class="tab-count" id="tab-count-global">—</span>
+                    </button>
+                    <button class="region-tab" data-region="Remote" id="tab-remote">
+                        <span class="tab-flag">📡</span>
+                        <span class="tab-label">Remote</span>
+                        <span class="tab-count" id="tab-count-remote">—</span>
+                    </button>
+                </div>
+
+                <div class="listings-grid" id="listings-container">
+                    <!-- Cards injected here by JS -->
+                </div>
+
+            </div><!-- /.main-scroll-area -->
+        </main>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div class="modal-overlay hidden" id="instructions-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="ph-fill ph-book-open"></i> How to Use the Radar</h2>
+                <button class="close-btn" id="close-modal-btn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Welcome to the ultimate AI/ML Summer Internship radar! Here's how to navigate your dashboard:</p>
+                <ul>
+                    <li><strong>Running the Scraper:</strong> Click the <em>Run Scraper Now</em> button in the sidebar.
+                        This fires off 16 automated engines in the background, including Playwright-stealth and
+                        DuckDuckGo Dork searches across the web, looking for hidden opportunities. This may take 5-10
+                        minutes. </li>
+                    <li><strong>Match Scores:</strong> Every internship is scored out of 100 based on core AI/ML
+                        research keywords and competitive stipends. Look for the glowing green <strong>High
+                            Score</strong> badges!</li>
+                    <li><strong>Smart Filtering:</strong> Use the sidebar to instantly filter by <em>Organization
+                            Type</em> (e.g., check only Academic Institutions for summer research), <em>Role Level</em>
+                        (Core Research vs Applied Engineering), Location, and Stipend. </li>
+                </ul>
+                <p><strong>Note:</strong> The scraper is hard-coded with NLP rules requiring the internship to start in
+                    the summer (May 20 onwards). Any generic rolling internship without a specified date defaults to
+                    approved so you don't miss out.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scraper Configuration Modal -->
+    <div class="modal-overlay hidden" id="scrape-config-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2><i class="ph-fill ph-gear"></i> Scraper Configuration</h2>
+                <button class="close-btn" id="close-config-btn"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 20px; color: var(--text-muted);">Select what you want to scrape to save time.
+                    Uncheck items to skip them.</p>
+
+                <form id="scrape-config-form">
+                    <div class="config-section">
+                        <h4>🌍 Regions</h4>
+                        <label><input type="checkbox" name="regions" value="india" checked> India</label>
+                        <label><input type="checkbox" name="regions" value="usa" checked> USA</label>
+                        <label><input type="checkbox" name="regions" value="europe" checked> Europe</label>
+                        <label><input type="checkbox" name="regions" value="remote" checked> Remote / WFH</label>
+                        <label><input type="checkbox" name="regions" value="worldwide" checked> Worldwide
+                            (General)</label>
+                    </div>
+
+                    <div class="config-section" style="margin-top: 20px;">
+                        <h4>🧠 Topics & Focus</h4>
+                        <label><input type="checkbox" name="topics" value="ml" checked> Machine Learning</label>
+                        <label><input type="checkbox" name="topics" value="ai" checked> Artificial Intelligence</label>
+                        <label><input type="checkbox" name="topics" value="nlp" checked> NLP</label>
+                        <label><input type="checkbox" name="topics" value="cv" checked> Computer Vision</label>
+                        <label><input type="checkbox" name="topics" value="ds" checked> Data Science</label>
+                        <label><input type="checkbox" name="topics" value="research" checked> Research Roles</label>
+                    </div>
+
+                    <div class="config-section" style="margin-top: 20px;">
+                        <h4>🎯 Platforms & Portals</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <label><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+                            <label><input type="checkbox" name="sources" value="internshala" checked>
+                                Internshala</label>
+                            <label><input type="checkbox" name="sources" value="unstop" checked> Unstop</label>
+                            <label><input type="checkbox" name="sources" value="naukri" checked> Indian Job Portals
+                                (Naukri, Shine, etc)</label>
+                            <label><input type="checkbox" name="sources" value="bigtech" checked> Big Tech (Google,
+                                Meta, Apple)</label>
+                            <label><input type="checkbox" name="sources" value="remotive" checked> Aggregators & Remote
+                                Boards</label>
+                            <label><input type="checkbox" name="sources" value="universities" checked> Academic Research
+                                (IITs, Global)</label>
+                            <label><input type="checkbox" name="sources" value="government" checked> Government Labs
+                                (DRDO, CDAC)</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="apply-btn"
+                        style="width: 100%; margin-top: 30px; padding: 12px; font-size: 16px;">
+                        <i class="ph ph-rocket"></i> Start Scraping
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Panel -->
+    <div id="logs-panel" class="logs-panel hidden">
+        <div class="logs-header">
+            <h3><i class="ph ph-terminal"></i> Activity Log</h3>
+            <button id="close-logs-btn" class="icon-btn" style="width: 28px; height: 28px;"><i
+                    class="ph ph-x"></i></button>
+        </div>
+        <div id="logs-content" class="logs-content"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

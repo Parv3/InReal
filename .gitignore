@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+
+# Debug / development artifacts
+debug_*.py
+debug_*.html
+debug_*.png
+*_debug.html
+*_debug.png
+*_card.html
+parse_unstop_debug.py
+replace_prints.py
+dump_unstop.py
+apna_card.html
+card.html
+test_phase1.py
+_test_uni.py
+
+# Playwright artifacts
+playwright-report/
+test-results/
+
+# Logs
+*.log
+scraper_run.log
+scraper_errors.log
+
+# Data files (regenerated on each run)
+internships.csv
+internships_log.json
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.suo
+.DS_Store
+Thumbs.db
+
+# Windows
+desktop.ini
+
+# Runtime alert file
+scraper_alerts.json
+
+# Test output from --dry-run
+test_output/
