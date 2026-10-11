@@ -15,7 +15,7 @@ python scraper.py --source <name> --dry-run
 | # | Platform | `--source` | File | How it reads the site | Status |
 |---|---|---|---|---|---|
 | 1 | Internshala | `internshala` | `sites/internshala.py` | Playwright + HTML | ✅ |
-| 2 | Unstop | `unstop` | `sites/unstop.py` | Playwright + site's JSON API (HTML fallback) | 🟡 |
+| 2 | Unstop | `unstop` | `sites/unstop.py` | Playwright + site's JSON API (HTML fallback) | ✅ |
 | 3 | Naukri | `naukri` | `sites/naukri.py` | Playwright + HTML | 🔴 |
 | 4 | LinkedIn (guest search) | `linkedin` | `sites/linkedin.py` | Playwright + HTML | 🔴 |
 | 5 | Shine | `shine` | `sites/misc_india.py` | Playwright + HTML | 🔴 |
@@ -62,7 +62,7 @@ What the first run taught us: about half of the 147 kept listings were not AI/ML
 
 No listing on Internshala mentioned a fee. That fits Internshala's rule against charging candidates, but it also means the fee check has not been proven on real data yet.
 
-## 2. Unstop 🟡
+## 2. Unstop ✅
 
 Checked on the live site: 12 Oct 2026.
 
@@ -86,7 +86,7 @@ On 12 Oct it returned 590 open internships, each with the full description, skil
 | Deadline | not read | `end_date` | — | new |
 | Closed | text "closed/expired" on the card | `status` = LIVE and `regnRequirements.reg_status` = STARTED | text check | fixed |
 
-Expected result on the laptop: about 16 AI/ML internships out of ~590 before the genuine check. No real fee demand was found in the 590 descriptions; the 8 that mention fees all say "no registration fee" or talk about the employer's own business, and the check correctly ignores them. New soft flag from Unstop data: pay that depends on commission or "performance".
+**Laptop test, 12 Oct 2026, 01:07:** 3 API pages, 589 open internships read in 26 seconds, **16 kept**. Dropped: 542 not AI/ML, 16 "Lead Generation" titles, 11 "Manager" titles, 3 unpaid, 1 senior. Flags on kept: 3 with no stated stipend (Zycus ×2, Sprinto), 1 "performance-based stipend" (VEYRA AI, whose description also says applications go to its own website). No real fee demand was found in the 590 descriptions; the 8 that mention fees all say "no registration fee" or talk about the employer's own business, and the check correctly ignores them. New soft flag from Unstop data: pay that depends on commission or "performance".
 
 Risk: this is an internal API, not a promised one. If it changes, the scraper logs a warning and falls back to the ~20 cards on the page.
 
