@@ -38,10 +38,10 @@
   <style>
     /* Warm Vibrant Yellow & Translucent Frosted Glass Palette */
     :root {
-      --bg-amber-warmth: radial-gradient(circle at 10% 10%, rgba(251, 191, 36, 0.18) 0%, transparent 45%),
-                         radial-gradient(circle at 90% 15%, rgba(249, 115, 22, 0.14) 0%, transparent 40%),
-                         radial-gradient(circle at 50% 85%, rgba(13, 148, 136, 0.12) 0%, transparent 50%),
-                         #FFFDF5;
+      --bg-amber-warmth: radial-gradient(circle at 10% 10%, rgba(251, 191, 36, 0.16) 0%, transparent 45%),
+                         radial-gradient(circle at 90% 15%, rgba(249, 115, 22, 0.12) 0%, transparent 40%),
+                         radial-gradient(circle at 50% 85%, rgba(13, 148, 136, 0.10) 0%, transparent 50%),
+                         #FFFDF7;
     }
 
     body {
@@ -51,112 +51,117 @@
       color: #0F172A;
     }
 
-    /* Glassmorphism Frosted Panels with Crisp Outlines */
+    /* Glassmorphism Frosted Panels with Crisp 14px / 16px Corners */
     .glass-panel {
-      background: rgba(255, 255, 255, 0.82);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1.5px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 12px 36px -10px rgba(245, 158, 11, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
-      border-radius: 24px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.02);
+      border-radius: 16px;
     }
 
+    /* Modern Professional Job Cards (14px radius, clean shadow) */
     .glass-card {
-      background: rgba(255, 255, 255, 0.86);
-      backdrop-filter: blur(16px) saturate(175%);
-      -webkit-backdrop-filter: blur(16px) saturate(175%);
-      border: 1.5px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
-      border-radius: 20px;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04), 0 2px 4px -1px rgba(15, 23, 42, 0.02);
+      border-radius: 14px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .glass-card:hover {
-      transform: translateY(-4px);
-      background: rgba(255, 255, 255, 0.96);
-      border-color: rgba(249, 115, 22, 0.35);
-      box-shadow: 0 20px 40px -12px rgba(249, 115, 22, 0.15), 0 6px 12px -2px rgba(15, 23, 42, 0.04);
+      transform: translateY(-3px);
+      border-color: #CBD5E1;
+      box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
     }
 
-    /* Flat Illustration Clean Color Blocks */
-    .flat-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 11px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    /* Flat Avatar Graphic Circles */
-    .flat-avatar {
-      display: inline-flex;
+    /* Flat Avatar Graphic Box (Corporate logo wrapper) */
+    .company-logo-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid #0F172A;
-      box-shadow: 2px 2px 0px #0F172A;
-      transition: transform 0.15s ease;
-    }
-    .flat-avatar:hover {
-      transform: translateY(-2px) scale(1.05);
+      border: 1px solid #E2E8F0;
+      background: #FFFFFF;
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
+      flex-shrink: 0;
     }
 
     /* Translucent Interactive Buttons */
     .glass-btn {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1.5px solid rgba(255, 255, 255, 0.95);
-      border-radius: 14px;
-      font-size: 12px;
-      font-weight: 700;
-      box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-      transition: all 0.18s ease;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+      transition: all 0.16s ease;
     }
     .glass-btn:hover {
-      background: rgba(255, 255, 255, 1);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px -3px rgba(15, 23, 42, 0.08);
+      background: #F8FAFC;
+      border-color: #94A3B8;
+      color: #0F172A;
     }
     .glass-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+      background: #F1F5F9;
     }
 
     .glass-btn-primary {
-      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+      background: #0F172A;
       color: #FFFFFF;
-      border: 1.5px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 6px 20px -4px rgba(249, 115, 22, 0.4);
+      border: 1px solid #0F172A;
+      box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.25);
     }
     .glass-btn-primary:hover {
-      background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
-      box-shadow: 0 8px 24px -4px rgba(249, 115, 22, 0.5);
+      background: #1E293B;
       color: #FFFFFF;
+      border-color: #1E293B;
     }
 
-    /* Apple iOS Segmented Control Rockers */
+    /* Filter Select Dropdowns */
+    .filter-select {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 9px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .filter-select:hover {
+      border-color: #CBD5E1;
+      background: #F8FAFC;
+    }
+    .filter-select:focus {
+      border-color: #F97316;
+      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
+    }
+
+    /* Segmented Control Pill Group (Apple iOS style) */
     .pill-segmented-group {
-      background: rgba(241, 245, 249, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: #F1F5F9;
       padding: 3px;
-      border-radius: 14px;
+      border-radius: 10px;
       display: inline-flex;
-      gap: 3px;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      gap: 2px;
+      border: 1px solid #E2E8F0;
     }
 
     .pill-segmented-item {
-      padding: 6px 14px;
-      border-radius: 11px;
-      font-size: 12px;
-      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
       color: #64748B;
       cursor: pointer;
-      transition: all 0.16s ease;
+      transition: all 0.15s ease;
       white-space: nowrap;
     }
     .pill-segmented-item:hover {
@@ -165,7 +170,7 @@
     .pill-segmented-item.active {
       background: #FFFFFF;
       color: #0F172A;
-      box-shadow: 0 3px 10px -2px rgba(15, 23, 42, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08);
     }
 
     /* Custom scrollbars */
@@ -179,7 +184,7 @@
 <body class="min-h-screen text-[#0F172A] flex flex-col relative antialiased selection:bg-orange-500 selection:text-white">
 
   <!-- Interactive 3D Flat Geometric Mesh Background Canvas -->
-  <canvas id="topo-radar-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-55"></canvas>
+  <canvas id="topo-radar-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-45"></canvas>
 
   <!-- Translucent Notification Banner -->
   <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full glass-panel p-4 shadow-xl border-l-4 border-l-orange-500">
@@ -197,40 +202,44 @@
     </div>
   </div>
 
-  <!-- Translucent Frosted Glass Header -->
-  <header class="sticky top-0 z-30 w-full bg-white/75 backdrop-blur-xl border-b border-white/80 shadow-xs">
+  <!-- Corporate Header with Clear Value Proposition & Actions -->
+  <header class="sticky top-0 z-30 w-full bg-white/85 backdrop-blur-xl border-b border-slate-200/80 shadow-xs">
     <div class="max-w-7xl mx-auto px-6 h-18 py-3.5 flex items-center justify-between gap-4">
       
-      <!-- Brand & Flat Geometric Logo -->
+      <!-- Brand & Sharp Corporate Subline -->
       <div class="flex items-center gap-3.5">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 shadow-md shadow-orange-500/20 flex items-center justify-center text-white border-2 border-slate-900">
-          <i class="ph ph-users-three text-xl font-bold"></i>
+        <div class="w-10 h-10 rounded-xl bg-slate-900 shadow-sm flex items-center justify-center text-white">
+          <i class="ph ph-cpu text-xl font-bold text-orange-400"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xl font-extrabold tracking-tight text-slate-900">InReal</span>
-            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 border border-amber-300 rounded-full text-[11px] font-bold">Talent Radar</span>
+            <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-bold">Talent Radar</span>
           </div>
-          <div class="text-[12px] text-slate-500 font-medium">Human-Centric AI & Robotics Opportunities</div>
+          <div class="text-[12px] text-slate-500 font-medium hidden sm:block">
+            Direct endpoints and lab-verified fellowships for students entering frontier tech.
+          </div>
         </div>
       </div>
 
-      <!-- Controls & Translucent LED Status Indicators -->
-      <div class="flex items-center gap-2.5">
-        <!-- Status Pill Indicator -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 glass-btn text-xs font-semibold text-slate-700">
-          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400"></span>
+      <!-- Header Action Buttons (Browse Openings & Submit an Opportunity) -->
+      <div class="flex items-center gap-3">
+        <!-- Live System Status Dot -->
+        <div id="status-indicator-pill" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600">
+          <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span id="scraper-status-text" class="text-[11px]">System Ready</span>
         </div>
 
-        <button id="open-logs-btn" class="glass-btn px-3.5 py-2 flex items-center gap-1.5 text-slate-700">
-          <i class="ph ph-terminal-window text-base text-slate-500"></i>
-          <span class="hidden md:inline">Console</span>
-        </button>
+        <!-- Secondary Outlined Button -->
+        <a href="#listings-container" class="glass-btn px-4 py-2 flex items-center gap-1.5 text-slate-700 hover:text-slate-900">
+          <i class="ph ph-list-magnifying-glass text-base"></i>
+          <span>Browse Openings</span>
+        </a>
 
+        <!-- Primary Accent Action Button -->
         <button id="trigger-scrape-btn" class="glass-btn glass-btn-primary px-4 py-2 flex items-center gap-1.5">
-          <i class="ph ph-broadcast text-base"></i>
-          <span>Sweep Feeds</span>
+          <i class="ph ph-paper-plane-tilt text-base text-orange-400"></i>
+          <span>Submit an Opportunity</span>
         </button>
       </div>
     </div>
@@ -240,35 +249,35 @@
   <main class="relative z-10 max-w-7xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
 
     <!-- Hero Section: Flat Illustration of People & Community Mission -->
-    <section class="glass-panel p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden bg-gradient-to-r from-amber-50/90 via-white/80 to-orange-50/90 border-2 border-white">
+    <section class="glass-panel p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden bg-gradient-to-r from-amber-50/80 via-white/90 to-orange-50/80 border border-slate-200/80">
       
       <!-- Left: Headline & Community Story -->
       <div class="flex-1 z-10">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-200/80 border border-amber-300 text-slate-900 text-xs font-bold mb-3.5 shadow-xs">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-bold mb-3.5">
           <span class="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
-          Curated for Engineers, Researchers & Builders
+          Lab-Verified Fellowships & Residencies
         </div>
         <h1 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
           Where Next-Gen Builders Find Their Breakthrough.
         </h1>
         <p class="text-sm md:text-base text-slate-600 mt-2.5 max-w-xl font-medium leading-relaxed">
-          Aggregating top internships across Google DeepMind, OpenAI, Figure AI, Tesla Autopilot, and leading robotics laboratories with clean transparency and zero fluff.
+          Aggregating top internships across Google DeepMind, Anthropic, Figure AI, Tesla Autopilot, and leading robotics institutes with transparent stipends and direct application links.
         </p>
 
         <!-- People Flat Avatars & Social Proof Block -->
         <div class="flex flex-wrap items-center gap-4 mt-6">
-          <div class="flex -space-x-2.5 overflow-hidden p-1">
-            <div class="w-10 h-10 rounded-full bg-[#EF4444] flat-avatar text-white font-bold text-xs" title="Researcher">
-              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+          <div class="flex -space-x-2 overflow-hidden p-0.5">
+            <div class="w-9 h-9 rounded-full bg-[#EF4444] border-2 border-white flex items-center justify-center text-white font-bold text-xs shadow-xs" title="Researcher">
+              <svg viewBox="0 0 36 36" class="w-6 h-6" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
             </div>
-            <div class="w-10 h-10 rounded-full bg-[#06B6D4] flat-avatar text-white font-bold text-xs" title="Robotics Engineer">
-              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            <div class="w-9 h-9 rounded-full bg-[#06B6D4] border-2 border-white flex items-center justify-center text-white font-bold text-xs shadow-xs" title="Robotics Engineer">
+              <svg viewBox="0 0 36 36" class="w-6 h-6" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
             </div>
-            <div class="w-10 h-10 rounded-full bg-[#F59E0B] flat-avatar text-white font-bold text-xs" title="AI Fellow">
-              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            <div class="w-9 h-9 rounded-full bg-[#F59E0B] border-2 border-white flex items-center justify-center text-white font-bold text-xs shadow-xs" title="AI Fellow">
+              <svg viewBox="0 0 36 36" class="w-6 h-6" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
             </div>
-            <div class="w-10 h-10 rounded-full bg-[#10B981] flat-avatar text-white font-bold text-xs" title="Hardware Lead">
-              <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
+            <div class="w-9 h-9 rounded-full bg-[#10B981] border-2 border-white flex items-center justify-center text-white font-bold text-xs shadow-xs" title="Hardware Lead">
+              <svg viewBox="0 0 36 36" class="w-6 h-6" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
             </div>
           </div>
           <div>
@@ -279,14 +288,14 @@
       </div>
 
       <!-- Right: User-Provided Flat Illustration Image Card -->
-      <div class="shrink-0 z-10 w-full md:w-80 lg:w-96">
-        <div class="relative rounded-3xl overflow-hidden border-3 border-slate-900 shadow-[6px_6px_0px_#0F172A] bg-amber-400">
+      <div class="shrink-0 z-10 w-full md:w-80 lg:w-92">
+        <div class="relative rounded-2xl overflow-hidden border-2 border-slate-900 shadow-[5px_5px_0px_#0F172A] bg-amber-400">
           <img 
             src="{{ url_for('static', filename='hero_team.png') }}" 
             alt="Flat Illustration Team of Students & Engineers" 
-            class="w-full h-auto object-cover object-center transform hover:scale-102 transition duration-300"
+            class="w-full h-auto object-cover object-center"
           >
-          <div class="absolute bottom-2.5 left-2.5 right-2.5 p-2 bg-white/90 backdrop-blur-md rounded-xl border border-slate-900/40 flex items-center justify-between text-xs font-bold text-slate-900">
+          <div class="absolute bottom-2.5 left-2.5 right-2.5 p-2 bg-white/95 backdrop-blur-md rounded-lg border border-slate-900/30 flex items-center justify-between text-xs font-bold text-slate-900">
             <span class="flex items-center gap-1.5"><i class="ph ph-heart-fill text-rose-500"></i> Open Community</span>
             <span class="text-orange-600 font-extrabold">100% Free</span>
           </div>
@@ -294,12 +303,12 @@
       </div>
     </section>
 
-    <!-- Visual Feature Highlights: Incorporating SVG Flat Illustrations -->
+    <!-- Visual Feature Highlights: Scalable SVG Illustrations -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-5">
       
       <!-- Feature Card 1: Mentorship, Verification & Interview Prep (SVG) -->
-      <div class="glass-card p-6 flex flex-col sm:flex-row items-center gap-5 relative overflow-hidden bg-gradient-to-br from-white/90 via-amber-50/50 to-orange-50/40">
-        <div class="w-full sm:w-44 shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-[4px_4px_0px_#0F172A] bg-white p-1">
+      <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 relative overflow-hidden bg-white">
+        <div class="w-full sm:w-44 shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 p-1">
           <img 
             src="{{ url_for('static', filename='illustration_interview.svg') }}" 
             alt="Flat Illustration of Mentorship and Interview Match" 
@@ -307,8 +316,8 @@
           >
         </div>
         <div class="flex-1">
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-300 mb-2">
-            <i class="ph ph-sparkle-fill text-orange-500"></i> Direct Verification
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-200 mb-2">
+            <i class="ph ph-shield-check text-emerald-600"></i> Direct Verification
           </div>
           <h3 class="text-base font-bold text-slate-900 leading-snug">Vetted by Engineers & Lab Mentors</h3>
           <p class="text-xs text-slate-600 mt-1.5 font-medium leading-relaxed">
@@ -318,8 +327,8 @@
       </div>
 
       <!-- Feature Card 2: Remote & Distributed Research Collaboration (SVG) -->
-      <div class="glass-card p-6 flex flex-col sm:flex-row items-center gap-5 relative overflow-hidden bg-gradient-to-br from-white/90 via-blue-50/50 to-teal-50/40">
-        <div class="w-full sm:w-44 shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-[4px_4px_0px_#0F172A] bg-white p-1">
+      <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 relative overflow-hidden bg-white">
+        <div class="w-full sm:w-44 shrink-0 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 p-1">
           <img 
             src="{{ url_for('static', filename='illustration_remote.svg') }}" 
             alt="Flat Illustration of Remote Robotics Tele-operation & Research" 
@@ -327,8 +336,8 @@
           >
         </div>
         <div class="flex-1">
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-800 text-[11px] font-bold border border-teal-300 mb-2">
-            <i class="ph ph-globe text-teal-600"></i> Distributed & Global
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-200 mb-2">
+            <i class="ph ph-globe text-blue-600"></i> Distributed & Global
           </div>
           <h3 class="text-base font-bold text-slate-900 leading-snug">Global & Remote Friendly</h3>
           <p class="text-xs text-slate-600 mt-1.5 font-medium leading-relaxed">
@@ -338,12 +347,12 @@
       </div>
     </section>
 
-    <!-- Translucent Overview Metric Cards with Flat Color Blocks -->
+    <!-- Translucent Overview Metric Cards -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Positions</span>
-          <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
             <i class="ph ph-database text-lg"></i>
           </div>
         </div>
@@ -354,7 +363,7 @@
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">New This Cycle</span>
-          <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
+          <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
             <i class="ph ph-sparkle text-lg"></i>
           </div>
         </div>
@@ -365,7 +374,7 @@
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funded Roles</span>
-          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
             <i class="ph ph-currency-circle-dollar text-lg"></i>
           </div>
         </div>
@@ -376,7 +385,7 @@
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tracked Sources</span>
-          <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+          <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
             <i class="ph ph-rss text-lg"></i>
           </div>
         </div>
@@ -385,42 +394,73 @@
       </div>
     </section>
 
-    <!-- Translucent Control Deck / Filter Deck -->
+    <!-- Professional Corporate Filter Bar Directly Above Job Cards -->
     <section class="glass-panel p-5 flex flex-col gap-4">
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      
+      <!-- Top Row: Search Input + Clean Dropdowns -->
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         
-        <!-- Search Input with Frosted Inner Field -->
+        <!-- Search Input -->
         <div class="relative flex-1">
           <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Search by role, company (Google, DeepMind, Figure), or tech stack (PyTorch, ROS, CUDA)..." 
-            class="w-full bg-white/70 border border-slate-200/80 rounded-xl pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition font-medium"
+            placeholder="Search by role, company (Anthropic, DeepMind, MPI), or tech stack (PyTorch, ROS, CUDA)..." 
+            class="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20 transition font-medium"
           >
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100/90 px-2 py-0.5 rounded-md font-semibold hidden sm:inline">⌘K</span>
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-semibold hidden sm:inline">⌘K</span>
         </div>
 
-        <!-- Filter Dropdowns & Quick Actions -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <select id="source-filter" class="glass-btn px-3 py-2.5 text-xs text-slate-700 font-semibold focus:outline-none cursor-pointer">
-            <option value="all">All Sources</option>
+        <!-- Corporate Filter Dropdowns: Role Type, Location, Min. Stipend, Source -->
+        <div class="flex flex-wrap items-center gap-2">
+          
+          <!-- Dropdown 1: Role Type -->
+          <select id="role-type-filter" class="filter-select">
+            <option value="all">Role: All Types</option>
+            <option value="research">Research</option>
+            <option value="applied">Applied / Eng</option>
+            <option value="fellow">Fellowship</option>
           </select>
 
-          <button id="filter-bookmarks-btn" class="glass-btn px-3.5 py-2.5 flex items-center gap-1.5 text-slate-700">
+          <!-- Dropdown 2: Location / Remote -->
+          <select id="location-select-filter" class="filter-select">
+            <option value="all">Location: All</option>
+            <option value="India">India</option>
+            <option value="Remote">Remote</option>
+            <option value="International">International</option>
+          </select>
+
+          <!-- Dropdown 3: Min. Stipend -->
+          <select id="stipend-select-filter" class="filter-select">
+            <option value="all">Min. Stipend: Any</option>
+            <option value="paid">Paid Only</option>
+            <option value="20k">&gt; ₹20,000 / mo</option>
+            <option value="50k">&gt; ₹50,000 / mo</option>
+            <option value="100k">&gt; ₹1,00,000 / mo</option>
+          </select>
+
+          <!-- Dropdown 4: Source Platform -->
+          <select id="source-filter" class="filter-select">
+            <option value="all">Source: All</option>
+          </select>
+
+          <!-- Saved Bookmarks Button -->
+          <button id="filter-bookmarks-btn" class="glass-btn px-3 py-2 flex items-center gap-1.5 text-slate-700">
             <i class="ph ph-bookmark-simple text-base text-rose-500"></i>
             <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="glass-btn px-3.5 py-2.5 flex items-center gap-1 text-slate-600 hover:text-slate-900">
+          <!-- Reset Filter Button -->
+          <button id="reset-filters-btn" class="glass-btn px-3 py-2 flex items-center gap-1 text-slate-600 hover:text-slate-900" title="Reset all filters">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
             <span>Reset</span>
           </button>
         </div>
       </div>
 
-      <!-- Segmented Control Rockers (Apple iOS-inspired Flat Design) -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60">
+      <!-- Quick Segmented Shortcuts -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
         <!-- Region Switches -->
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Region:</span>
@@ -448,7 +488,7 @@
     <!-- Translucent Card Grid Section -->
     <section class="w-full">
       <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Injected via JavaScript -->
+        <!-- Injected via JavaScript with Real Logos & Corporate Polish -->
       </div>
 
       <!-- Empty State with Flat Envelope SVG Illustration -->
@@ -469,14 +509,14 @@
 
   <!-- Translucent Slide-Over Detail Drawer -->
   <div id="detail-drawer-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white/92 backdrop-blur-2xl border-l border-white p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-slate-200 p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-4 border-b border-slate-200/80">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
         <div class="flex items-center gap-2">
-          <span id="drawer-match-badge" class="px-2.5 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold">98% Match</span>
-          <span id="drawer-org-badge" class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Company</span>
+          <span id="drawer-match-badge" class="px-2.5 py-1 bg-slate-100 text-slate-800 rounded-md text-xs font-bold">98% Match</span>
+          <span id="drawer-org-badge" class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-bold">Company</span>
         </div>
-        <button id="close-drawer-btn" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+        <button id="close-drawer-btn" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
@@ -484,17 +524,17 @@
       <div class="py-5 flex-1 flex flex-col gap-5">
         <div>
           <h2 id="drawer-role-title" class="text-xl font-bold leading-snug text-slate-900 tracking-tight">Role Title</h2>
-          <div id="drawer-company-name" class="text-sm font-bold text-orange-600 mt-1">Company Name</div>
+          <div id="drawer-company-name" class="text-sm font-bold text-slate-700 mt-1">Company Name</div>
           <div class="flex items-center gap-4 text-xs text-slate-500 mt-3 font-medium">
             <span class="flex items-center gap-1.5"><i class="ph ph-map-pin text-slate-400"></i> <span id="drawer-location">Location</span></span>
             <span class="flex items-center gap-1.5"><i class="ph ph-clock text-slate-400"></i> <span id="drawer-duration">Duration</span></span>
           </div>
         </div>
 
-        <div class="p-4 glass-card flex items-center justify-between">
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
           <div>
             <div class="text-[11px] text-slate-500 uppercase font-bold tracking-wide">Compensation</div>
-            <div id="drawer-stipend" class="text-base font-extrabold text-emerald-600 mt-0.5">-</div>
+            <div id="drawer-stipend" class="text-base font-extrabold text-slate-900 mt-0.5">-</div>
           </div>
           <div class="text-right">
             <div class="text-[11px] text-slate-500 uppercase font-bold tracking-wide">Deadline</div>
@@ -507,13 +547,13 @@
           <div id="drawer-skills-list" class="flex flex-wrap gap-1.5"></div>
         </div>
 
-        <div class="text-xs text-slate-500 border-t border-slate-200/80 pt-4 space-y-1 font-medium">
+        <div class="text-xs text-slate-500 border-t border-slate-200 pt-4 space-y-1 font-medium">
           <div>Source Platform: <span id="drawer-source" class="font-bold text-slate-700">Portal</span></div>
           <div>Scraped: <span id="drawer-date" class="font-bold text-slate-700">-</span></div>
         </div>
       </div>
 
-      <div class="pt-4 border-t border-slate-200/80 flex items-center gap-3">
+      <div class="pt-4 border-t border-slate-200 flex items-center gap-3">
         <button id="drawer-bookmark-btn" class="p-3 glass-btn">
           <i class="ph ph-bookmark text-base text-rose-500"></i>
         </button>
@@ -525,25 +565,14 @@
     </div>
   </div>
 
-  <!-- Translucent Scraper Telemetry Console -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-white/95 backdrop-blur-2xl border-t border-l border-white/90 rounded-tl-2xl shadow-2xl z-40 hidden transition-all duration-200">
-    <div class="p-3.5 bg-slate-50/80 border-b border-slate-200/70 rounded-tl-2xl flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-        <span class="text-xs font-bold text-slate-800">Scraper Activity Feed</span>
-      </div>
-      <button id="close-logs-btn" class="w-6 h-6 rounded-lg hover:bg-slate-200/80 flex items-center justify-center text-slate-500">
-        <i class="ph ph-x text-sm"></i>
-      </button>
-    </div>
-    <div id="logs-content" class="p-3.5 text-xs text-slate-700 max-h-60 overflow-y-auto font-mono bg-white/80 space-y-1 leading-relaxed"></div>
-  </div>
-
-  <!-- Translucent Scraper Config Modal -->
+  <!-- Translucent Scraper Config Modal (Replaced button trigger: Submit an Opportunity) -->
   <div id="scrape-config-modal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
     <div class="glass-panel max-w-md w-full p-6 shadow-2xl">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-200/80">
-        <h3 class="text-sm font-bold text-slate-900">Configure Scraping Fleet</h3>
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Submit an Opportunity / Sweep Feeds</h3>
+          <p class="text-[11px] text-slate-500">Configure target platforms and regions for opportunity discovery</p>
+        </div>
         <button id="close-config-btn" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500">
           <i class="ph ph-x text-base"></i>
         </button>
@@ -553,26 +582,26 @@
         <div>
           <label class="font-bold text-slate-700 block mb-2">Target Geographic Regions</label>
           <div class="grid grid-cols-3 gap-2">
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="usa" value="usa" checked> USA</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="usa" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
           </div>
         </div>
 
         <div>
           <label class="font-bold text-slate-700 block mb-2">Target Feeds & Platforms</label>
           <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl cursor-pointer hover:bg-white"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
           </div>
         </div>
 
         <button type="submit" class="w-full py-2.5 glass-btn glass-btn-primary text-xs font-bold transition mt-2">
-          Start Harvesting
+          Launch Opportunity Sweep
         </button>
       </form>
     </div>

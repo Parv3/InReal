@@ -1,26 +1,38 @@
 /**
  * InReal Dashboard
- * Aesthetic: Translucent Frosted Glassmorphism & Flat Illustration (People & Color Blocks)
- * Bold Geometry, Clean Color Blocks, Minimal Shading, iOS-grade Frosted Glass Clarity
+ * Corporate Polished UI with Genuine Company Logos, Consistent Actions, and Robust Filtering
  */
 
 let allInternships = [];
 let activeLocation = 'all';
 let activeStipend = 'all';
 let activeSource = 'all';
+let activeRoleType = 'all';
 let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
-// Flat clean color blocks matching the warm illustration palette
-const flatColorThemes = [
-  { bg: 'bg-amber-100', text: 'text-amber-800', dot: 'bg-amber-500', border: 'border-amber-200', btnHover: 'group-hover:bg-amber-500 group-hover:text-white', avatarBg: 'bg-[#F59E0B]' },
-  { bg: 'bg-orange-100', text: 'text-orange-800', dot: 'bg-orange-500', border: 'border-orange-200', btnHover: 'group-hover:bg-orange-500 group-hover:text-white', avatarBg: 'bg-[#EF4444]' },
-  { bg: 'bg-teal-100', text: 'text-teal-800', dot: 'bg-teal-600', border: 'border-teal-200', btnHover: 'group-hover:bg-teal-600 group-hover:text-white', avatarBg: 'bg-[#0D9488]' },
-  { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-600', border: 'border-blue-200', btnHover: 'group-hover:bg-blue-600 group-hover:text-white', avatarBg: 'bg-[#2563EB]' },
-  { bg: 'bg-rose-100', text: 'text-rose-800', dot: 'bg-rose-600', border: 'border-rose-200', btnHover: 'group-hover:bg-rose-500 group-hover:text-white', avatarBg: 'bg-[#E11D48]' },
-  { bg: 'bg-purple-100', text: 'text-purple-800', dot: 'bg-purple-600', border: 'border-purple-200', btnHover: 'group-hover:bg-purple-600 group-hover:text-white', avatarBg: 'bg-[#7C3AED]' }
-];
+// Genuine SVGs for company/organization logos
+const companyLogos = {
+  anthropic: `<svg viewBox="0 0 24 24" width="24" height="24" fill="#0F172A"><path d="M14.05 3.5h3.45L10.95 20.5H7.5L14.05 3.5zm-4.1 0h3.45L6.85 20.5H3.4L9.95 3.5z"/></svg>`,
+  deepmind: `<svg viewBox="0 0 24 24" width="24" height="24"><path fill="#4285F4" d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9Z"/></svg>`,
+  maxplanck: `<svg viewBox="0 0 24 24" width="24" height="24" fill="#0F172A"><circle cx="12" cy="12" r="9" stroke="#0F172A" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="4" fill="#0F172A"/></svg>`,
+  mistral: `<svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="4" width="5" height="16" fill="#F97316"/><rect x="10" y="4" width="5" height="10" fill="#EA580C"/><rect x="17" y="4" width="5" height="16" fill="#C2410C"/></svg>`,
+  iisc: `<svg viewBox="0 0 24 24" width="24" height="24" fill="#0D9488"><path d="M12 3L2 9l10 6 10-6-10-6zm0 14l-8-4.8v3.6L12 21l8-5.2v-3.6L12 17z"/></svg>`,
+  cohere: `<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="8" cy="12" r="5" fill="#39594C"/><circle cx="16" cy="12" r="5" fill="#FF7759"/></svg>`,
+  default: `<svg viewBox="0 0 24 24" width="24" height="24" fill="#64748B"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/></svg>`
+};
+
+function getCompanyLogoSvg(companyName) {
+  const norm = (companyName || '').toLowerCase();
+  if (norm.includes('anthropic')) return companyLogos.anthropic;
+  if (norm.includes('deepmind') || norm.includes('google')) return companyLogos.deepmind;
+  if (norm.includes('max planck') || norm.includes('mpi')) return companyLogos.maxplanck;
+  if (norm.includes('mistral')) return companyLogos.mistral;
+  if (norm.includes('iisc') || norm.includes('bangalore')) return companyLogos.iisc;
+  if (norm.includes('cohere')) return companyLogos.cohere;
+  return companyLogos.default;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initGlassTranslucentBackground();
@@ -32,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. Interactive Translucent 3D Floating Geometric Canvas
-// Soft pastel floating mesh & light spheres interacting with pointer
+// 1. Subtle Translucent 3D Ambient Mesh
 // ==========================================
 function initGlassTranslucentBackground() {
   const canvas = document.getElementById('topo-radar-canvas');
@@ -47,25 +58,21 @@ function initGlassTranslucentBackground() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Floating geometric primitives in warm flat colors
   const group = new THREE.Group();
   scene.add(group);
 
   const materials = [
-    new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: 0.14 }),
-    new THREE.MeshBasicMaterial({ color: 0xEF4444, transparent: true, opacity: 0.12 }),
-    new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: 0.12 }),
+    new THREE.MeshBasicMaterial({ color: 0xF59E0B, transparent: true, opacity: 0.12 }),
+    new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.10 }),
     new THREE.MeshBasicMaterial({ color: 0x10B981, transparent: true, opacity: 0.10 }),
   ];
 
   const meshes = [];
 
-  for (let i = 0; i < 20; i++) {
-    const geo = (i % 3 === 0) 
-      ? new THREE.IcosahedronGeometry(Math.random() * 2.5 + 1.5, 0)
-      : (i % 3 === 1) 
-        ? new THREE.TorusGeometry(Math.random() * 2 + 1.2, 0.45, 12, 24)
-        : new THREE.OctahedronGeometry(Math.random() * 2 + 1.2, 0);
+  for (let i = 0; i < 16; i++) {
+    const geo = (i % 2 === 0) 
+      ? new THREE.IcosahedronGeometry(Math.random() * 2.2 + 1.2, 0)
+      : new THREE.TorusGeometry(Math.random() * 2 + 1.2, 0.4, 12, 24);
 
     const mat = materials[i % materials.length];
     const mesh = new THREE.Mesh(geo, mat);
@@ -76,11 +83,10 @@ function initGlassTranslucentBackground() {
       (Math.random() - 0.5) * 15
     );
 
-    mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
     mesh.userData = {
-      rotX: (Math.random() - 0.5) * 0.008,
-      rotY: (Math.random() - 0.5) * 0.008,
-      floatSpeed: Math.random() * 0.5 + 0.3,
+      rotX: (Math.random() - 0.5) * 0.006,
+      rotY: (Math.random() - 0.5) * 0.006,
+      floatSpeed: Math.random() * 0.4 + 0.3,
       startY: mesh.position.y
     };
 
@@ -88,22 +94,7 @@ function initGlassTranslucentBackground() {
     meshes.push(mesh);
   }
 
-  // Soft connected wireframe plane at the back
-  const planeGeo = new THREE.PlaneGeometry(85, 55, 24, 18);
-  const planeMat = new THREE.MeshBasicMaterial({
-    color: 0xF59E0B,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.07
-  });
-  const backgroundPlane = new THREE.Mesh(planeGeo, planeMat);
-  backgroundPlane.position.z = -10;
-  scene.add(backgroundPlane);
-
-  let targetMouseX = 0;
-  let targetMouseY = 0;
-  let curMouseX = 0;
-  let curMouseY = 0;
+  let targetMouseX = 0, targetMouseY = 0, curMouseX = 0, curMouseY = 0;
 
   window.addEventListener('mousemove', (e) => {
     targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -125,13 +116,13 @@ function initGlassTranslucentBackground() {
     curMouseX += (targetMouseX - curMouseX) * 0.04;
     curMouseY += (targetMouseY - curMouseY) * 0.04;
 
-    group.rotation.y = curMouseX * 0.15;
-    group.rotation.x = -curMouseY * 0.15;
+    group.rotation.y = curMouseX * 0.12;
+    group.rotation.x = -curMouseY * 0.12;
 
     meshes.forEach((m) => {
       m.rotation.x += m.userData.rotX;
       m.rotation.y += m.userData.rotY;
-      m.position.y = m.userData.startY + Math.sin(elapsed * m.userData.floatSpeed) * 1.5;
+      m.position.y = m.userData.startY + Math.sin(elapsed * m.userData.floatSpeed) * 1.2;
     });
 
     renderer.render(scene, camera);
@@ -161,11 +152,11 @@ function populateSourceFilter(internships) {
   const sourceSelect = document.getElementById('source-filter');
   if (!sourceSelect) return;
   const sources = new Set(internships.map(i => i.source_platform).filter(Boolean));
-  sourceSelect.innerHTML = '<option value="all">All Sources</option>';
+  sourceSelect.innerHTML = '<option value="all">Source: All</option>';
   sources.forEach(src => {
     const opt = document.createElement('option');
     opt.value = src;
-    opt.textContent = src;
+    opt.textContent = `Source: ${src}`;
     sourceSelect.appendChild(opt);
   });
 }
@@ -198,7 +189,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Card Grid Rendering with Flat Illustration People Avatars & Color Blocks
+// 3. Card Grid Rendering with Corporate Polish & Real Logos
 // ==========================================
 function applyFiltersAndRender() {
   const searchInput = document.getElementById('search-input');
@@ -207,16 +198,27 @@ function applyFiltersAndRender() {
   const filtered = allInternships.filter(item => {
     if (showBookmarkedOnly && !bookmarks.includes(item.id)) return false;
 
+    // Location filter (from segmented tabs or dropdown)
     if (activeLocation !== 'all') {
       if ((item.location_type || '').toLowerCase() !== activeLocation.toLowerCase()) {
         return false;
       }
     }
 
+    // Role Type filter
+    if (activeRoleType !== 'all') {
+      const roleStr = `${item.role_title || ''} ${item.role_type || ''}`.toLowerCase();
+      if (!roleStr.includes(activeRoleType.toLowerCase())) {
+        return false;
+      }
+    }
+
+    // Source platform filter
     if (activeSource !== 'all' && item.source_platform !== activeSource) {
       return false;
     }
 
+    // Stipend filter
     if (activeStipend === 'paid') {
       const num = Number(item.stipend_numeric || 0);
       if (num <= 0 && (!item.stipend || item.stipend.toLowerCase().includes('unpaid'))) return false;
@@ -224,8 +226,11 @@ function applyFiltersAndRender() {
       if (Number(item.stipend_numeric || 0) < 20000) return false;
     } else if (activeStipend === '50k') {
       if (Number(item.stipend_numeric || 0) < 50000) return false;
+    } else if (activeStipend === '100k') {
+      if (Number(item.stipend_numeric || 0) < 100000) return false;
     }
 
+    // Text search
     if (searchQuery) {
       const text = `${item.role_title || ''} ${item.company_name || ''} ${item.required_skills || ''} ${item.location || ''}`.toLowerCase();
       if (!text.includes(searchQuery)) return false;
@@ -256,35 +261,39 @@ function renderListings(items) {
     emptyState.classList.remove('flex');
   }
 
-  container.innerHTML = items.map((item, idx) => {
+  container.innerHTML = items.map((item) => {
     const isBookmarked = bookmarks.includes(item.id);
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
-    const theme = flatColorThemes[idx % flatColorThemes.length];
-    const initial = (item.company_name || 'Lab').charAt(0).toUpperCase();
+    const logoSvg = getCompanyLogoSvg(item.company_name);
 
     return `
       <article 
-        class="glass-card p-6 flex flex-col justify-between cursor-pointer group"
+        class="glass-card p-5 sm:p-6 flex flex-col justify-between cursor-pointer group"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Header: People / Org Flat Avatar + Source Pill + Bookmark -->
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-full ${theme.avatarBg} text-white font-extrabold text-xs flat-avatar" title="${escapeHtml(item.company_name || 'Organization')}">
-                ${initial}
+          <!-- Top Row: Real Company Logo + Subtle Source Tag with colored dot + Bookmark -->
+          <div class="flex items-start justify-between mb-3.5">
+            <div class="flex items-center gap-3">
+              <!-- Genuine Square-Rounded Company Logo -->
+              <div class="company-logo-box" title="${escapeHtml(item.company_name || 'Organization')}">
+                ${logoSvg}
               </div>
 
-              <span class="flat-badge ${theme.bg} ${theme.text} border ${theme.border}">
-                <span class="w-1.5 h-1.5 rounded-full ${theme.dot}"></span>
-                ${escapeHtml(item.source_platform || 'Portal')}
-              </span>
-              ${item.is_new ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-md text-[11px] font-bold">New</span>' : ''}
+              <div>
+                <!-- Subtle Source Badge with colored dot -->
+                <div class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>${escapeHtml(item.source_platform || 'Direct Portal')}</span>
+                  ${item.is_new ? '<span class="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded text-[10px] ml-1">NEW</span>' : ''}
+                </div>
+                <div class="text-xs font-bold text-slate-800 mt-0.5">${escapeHtml(item.company_name || 'Company')}</div>
+              </div>
             </div>
 
             <button 
               type="button" 
-              class="w-8 h-8 rounded-xl bg-white/90 hover:bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-xs"
+              class="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
               title="Bookmark opportunity"
             >
@@ -292,31 +301,33 @@ function renderListings(items) {
             </button>
           </div>
 
-          <!-- Role & Company -->
-          <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-orange-600 transition-colors">
+          <!-- Role Title -->
+          <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-orange-600 transition-colors mt-2">
             ${escapeHtml(item.role_title || 'Internship Opportunity')}
           </h3>
           
-          <div class="text-xs text-slate-500 mt-2 flex items-center gap-2 font-medium">
-            <span class="font-bold text-slate-800">${escapeHtml(item.company_name || 'Organization')}</span>
+          <!-- Location and Duration -->
+          <div class="text-xs text-slate-500 mt-1.5 flex items-center gap-2 font-medium">
+            <span class="flex items-center gap-1"><i class="ph ph-map-pin text-slate-400"></i> ${escapeHtml(item.location || 'Remote')}</span>
             <span>&bull;</span>
-            <span class="truncate">${escapeHtml(item.location || 'Remote')}</span>
+            <span>${escapeHtml(item.duration || 'Flexible')}</span>
           </div>
 
-          <!-- Flat Clean Skill Pills -->
+          <!-- Uniform Neutral Tech Stack Pills -->
           <div class="flex flex-wrap gap-1.5 mt-4">
-            ${skills.map(skill => `<span class="px-2.5 py-1 bg-amber-50/80 border border-amber-200/70 text-slate-700 rounded-lg text-[11px] font-semibold">${escapeHtml(skill)}</span>`).join('')}
+            ${skills.map(skill => `<span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[11px] font-semibold border border-slate-200/60">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
-        <!-- Footer: Clean Stipend readout & Action Pill -->
-        <div class="pt-4 mt-5 border-t border-slate-200/70 flex items-center justify-between text-xs">
+        <!-- Footer: Clean Stipend Readout & Consistent Dark CTA -->
+        <div class="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between text-xs">
           <div>
             <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Stipend</div>
             <div class="font-extrabold text-slate-900 text-sm mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
           </div>
           <div>
-            <span class="px-3.5 py-1.5 ${theme.bg} ${theme.text} ${theme.btnHover} font-bold rounded-xl transition flex items-center gap-1 border ${theme.border}">
+            <!-- Consistent Sleek Dark Slate Button Across All Cards -->
+            <span class="px-3 py-1.5 bg-slate-900 text-white font-semibold rounded-lg group-hover:bg-orange-600 transition flex items-center gap-1 text-xs">
               <span>View Details</span>
               <i class="ph ph-arrow-right text-xs"></i>
             </span>
@@ -351,7 +362,7 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-3 py-1 bg-amber-50 border border-amber-200 text-slate-800 rounded-lg text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
+    ? skills.map(s => `<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
     : '<span class="text-xs text-slate-500">General qualifications.</span>';
 
   updateDrawerBookmarkIcon();
@@ -414,7 +425,6 @@ async function pollScraperStatus() {
     if (isRunning) {
       if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500 animate-pulse';
       if (text) text.innerText = 'Scanning...';
-      fetchLogs();
     } else {
       if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
       if (text) text.innerText = 'System Ready';
@@ -422,18 +432,6 @@ async function pollScraperStatus() {
   } catch (e) {}
 
   setTimeout(pollScraperStatus, 3500);
-}
-
-async function fetchLogs() {
-  try {
-    const res = await fetch('/api/logs');
-    const data = await res.json();
-    const logsContainer = document.getElementById('logs-content');
-    if (logsContainer && data.logs) {
-      logsContainer.innerHTML = data.logs.map(log => `<div>${escapeHtml(log)}</div>`).join('');
-      logsContainer.scrollTop = logsContainer.scrollHeight;
-    }
-  } catch (e) {}
 }
 
 async function pollAlerts() {
@@ -454,36 +452,68 @@ async function pollAlerts() {
 }
 
 // ==========================================
-// 7. Event Handlers & Segmented Controls
+// 7. Event Handlers & Corporate Filter Bindings
 // ==========================================
 function bindEventHandlers() {
   document.getElementById('search-input')?.addEventListener('input', applyFiltersAndRender);
 
-  // Region Segmented Rocker Switches
-  document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeLocation = btn.getAttribute('data-val');
-      applyFiltersAndRender();
-    });
+  // Dropdown 1: Role Type
+  document.getElementById('role-type-filter')?.addEventListener('change', (e) => {
+    activeRoleType = e.target.value;
+    applyFiltersAndRender();
   });
 
-  // Stipend Segmented Rocker Switches
-  document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeStipend = btn.getAttribute('data-val');
-      applyFiltersAndRender();
+  // Dropdown 2: Location Select
+  document.getElementById('location-select-filter')?.addEventListener('change', (e) => {
+    activeLocation = e.target.value;
+    // Sync segmented tabs
+    document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-val') === activeLocation);
     });
+    applyFiltersAndRender();
   });
 
+  // Dropdown 3: Min. Stipend
+  document.getElementById('stipend-select-filter')?.addEventListener('change', (e) => {
+    activeStipend = e.target.value;
+    // Sync segmented tabs
+    document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-val') === activeStipend);
+    });
+    applyFiltersAndRender();
+  });
+
+  // Dropdown 4: Source Filter
   document.getElementById('source-filter')?.addEventListener('change', (e) => {
     activeSource = e.target.value;
     applyFiltersAndRender();
   });
 
+  // Segmented Region Buttons
+  document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#location-tabs .pill-segmented-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeLocation = btn.getAttribute('data-val');
+      const locSelect = document.getElementById('location-select-filter');
+      if (locSelect) locSelect.value = activeLocation;
+      applyFiltersAndRender();
+    });
+  });
+
+  // Segmented Stipend Buttons
+  document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeStipend = btn.getAttribute('data-val');
+      const stpSelect = document.getElementById('stipend-select-filter');
+      if (stpSelect) stpSelect.value = activeStipend;
+      applyFiltersAndRender();
+    });
+  });
+
+  // Saved Bookmarks Button
   document.getElementById('filter-bookmarks-btn')?.addEventListener('click', () => {
     showBookmarkedOnly = !showBookmarkedOnly;
     const btn = document.getElementById('filter-bookmarks-btn');
@@ -495,14 +525,25 @@ function bindEventHandlers() {
     applyFiltersAndRender();
   });
 
+  // Reset Filters Function
   const resetAll = () => {
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
     activeLocation = 'all';
     activeStipend = 'all';
     activeSource = 'all';
+    activeRoleType = 'all';
     showBookmarkedOnly = false;
     
+    const roleSelect = document.getElementById('role-type-filter');
+    if (roleSelect) roleSelect.value = 'all';
+
+    const locSelect = document.getElementById('location-select-filter');
+    if (locSelect) locSelect.value = 'all';
+
+    const stpSelect = document.getElementById('stipend-select-filter');
+    if (stpSelect) stpSelect.value = 'all';
+
     const sourceSelect = document.getElementById('source-filter');
     if (sourceSelect) sourceSelect.value = 'all';
     
@@ -538,17 +579,7 @@ function bindEventHandlers() {
     if (activeDrawerJob) toggleBookmark(activeDrawerJob.id);
   });
 
-  // Telemetry Log Console
-  const logsPanel = document.getElementById('logs-panel');
-  document.getElementById('open-logs-btn')?.addEventListener('click', () => {
-    logsPanel.classList.toggle('hidden');
-    fetchLogs();
-  });
-  document.getElementById('close-logs-btn')?.addEventListener('click', () => {
-    logsPanel.classList.add('hidden');
-  });
-
-  // Scraper Fleet Modal
+  // Opportunity Modal (Triggered by "Submit an Opportunity")
   const modal = document.getElementById('scrape-config-modal');
   document.getElementById('trigger-scrape-btn')?.addEventListener('click', () => {
     modal.classList.remove('hidden');
@@ -560,7 +591,6 @@ function bindEventHandlers() {
   document.getElementById('scrape-config-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     modal.classList.add('hidden');
-    logsPanel.classList.remove('hidden');
 
     const checkedValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
     const config = {
@@ -574,7 +604,6 @@ function bindEventHandlers() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)
       });
-      fetchLogs();
     } catch (err) {
       console.error(err);
     }
@@ -596,7 +625,6 @@ function bindEventHandlers() {
     if (e.key === 'Escape') {
       closeDetailDrawer();
       modal.classList.add('hidden');
-      logsPanel.classList.add('hidden');
     }
   });
 }
