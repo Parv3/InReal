@@ -115,6 +115,7 @@ What we found:
 - Many posts say *"This job posting has been aggregated from external source"*. Naukri copied them from somewhere else. We keep them but add the flag "Copied by the portal from another site; check the company's own page".
 - Loading page 2 or 3 directly with the filter in the URL drops the filter (it showed 0 results), so the scraper clicks "Next" like a person.
 - Naukri's own job API answers `recaptcha required`, so we don't use it.
+- **Laptop test 1 (01:17): blocked.** Headless Chromium got no job cards in 20 s. Naukri now runs in a visible window of the installed Google Chrome (falls back to Playwright's Chromium), without a fake user agent. If a check appears, the scraper waits 60 s for you to solve it, and saves `test_output/naukri_blocked.png` + `.html` so we can see what Naukri showed.
 - CSS classes on the detail page are hashed (`styles_jhc__stat__PgY67`) and change on every Naukri release, so we read the schema.org JSON block instead, plus partial class matches.
 
 ## 4. LinkedIn (guest search) 🔴
@@ -227,7 +228,7 @@ Uses the `ddgs` package (falls back to `duckduckgo_search`). Check: the package 
 | A single "Artificial intelligence" skill tag let marketing/HR roles in | `filters.py` | ✅ title match or 2 real ML skills |
 | "Competitive stipend" was treated as unpaid | `filters.py` | ✅ fixed |
 | `schedule` package missing from requirements | `requirements.txt` | ✅ added |
-| `wait_for_human` is defined twice | `scraper_utils.py` | 🔴 |
+| `wait_for_human` is defined twice | `scraper_utils.py` | ✅ removed the copy |
 | Naukri `stipend_numeric` always 0 (and stipend text always empty) | `sites/naukri.py` | ✅ fixed |
 | RSS functions named after the wrong sites | `sites/rss_feeds.py` | 🔴 |
 | Link-only sources mixed in with real listings | `bigtech.py`, `government.py`, `niche.py` | 🔴 decide: remove or rebuild |

@@ -98,10 +98,26 @@ def wait_for_human(page, selector=None):
         page.wait_for_selector(selector, timeout=15000)
 
 
-def wait_for_human(page, selector=None):
-    """Scrolls randomly then waits, mimicking user behavior."""
-    human_delay(1.0, 2.5)
-    page.mouse.wheel(0, random.randint(300, 700))
-    human_delay(0.5, 1.5)
-    if selector:
-        page.wait_for_selector(selector, timeout=15000)
+def launch_browser(p, headless=True):
+    """
+    Starts the user's installed Google Chrome if there is one (it looks like a
+    normal visit to sites with strict bot checks, e.g. Naukri), otherwise the
+    Chromium that Playwright downloaded.
+    """
+    try:
+        return p.chromium.launch(channel="chrome", headless=headless, args=get_playwright_stealth_args())
+    except Exception as e:
+        logger.info(f"Installed Chrome not available ({str(e).splitlines()[0]}), using Playwright's Chromium")
+        return p.chromium.launch(headless=headless, args=get_playwright_stealth_args())
+
+
+def save_debug(page, name):
+    """Saves a screenshot and the HTML to test_output/ so we can see what the site showed."""
+    out = Path(__file__).parent / "test_output"
+    out.mkdir(exist_ok=True)
+    try:
+        page.screenshot(path=str(out / f"{name}.png"), full_page=False)
+        (out / f"{name}.html").write_text(page.content(), encoding="utf-8")
+        logger.warning(f"Saved what the page showed: test_output/{name}.png and .html (title: {page.title()!r})")
+    except Exception as e:
+        logger.warning(f"Could not save debug files: {e}")

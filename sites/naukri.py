@@ -29,11 +29,15 @@ from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
 from filters import calculate_match_score, internship_rejection_reason, stipend_rejection_reason
-from scraper_utils import get_playwright_stealth_args, human_delay
+from scraper_utils import action_required, action_resolved, human_delay, launch_browser, save_debug
 
 PAID_RANGES = ["0To10", "10To20", "20To30", "30To40", "40To50"]
 URL = "https://www.naukri.com/ai-ml-internship-jobs-in-india?" + "&".join(f"qcstipend={r}" for r in PAID_RANGES)
 MAX_PAGES = 10
+# Naukri blocks headless browsers (tested 12 Oct 2026: no cards within 20 s).
+# A visible Chrome window passes; if a check still appears, solve it in the window.
+HEADLESS = False
+WAIT_FOR_HUMAN_S = 60
 
 SEL = {
     "card": ".srp-jobtuple-wrapper",
@@ -153,12 +157,9 @@ def scrape_naukri():
     seen = set()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=get_playwright_stealth_args())
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                       "(KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
-            viewport={"width": 1440, "height": 900},
-        )
+        browser = launch_browser(p, headless=HEADLESS)
+        # No fake user agent: a UA that doesn't match the real Chrome version is itself a bot signal
+        context = browser.new_context(viewport={"width": 1440, "height": 900}, locale="en-IN")
         page = context.new_page()
         Stealth().apply_stealth_sync(page)
 
@@ -166,9 +167,21 @@ def scrape_naukri():
         page.goto(URL, timeout=45000, wait_until="domcontentloaded")
         try:
             page.wait_for_selector(SEL["card"], timeout=20000)
-        except Exception as e:
-            browser.close()
-            raise RuntimeError(f"Naukri: no job cards on the page (blocked or captcha?): {e}")
+        except Exception:
+            save_debug(page, "naukri_blocked")
+            if HEADLESS:
+                browser.close()
+                raise RuntimeError("Naukri: no job cards (blocked). Set HEADLESS = False in sites/naukri.py")
+            action_required("Naukri", f"No job cards yet. If the Chrome window shows a check, "
+                                      f"solve it there within {WAIT_FOR_HUMAN_S} seconds.", "captcha")
+            try:
+                page.wait_for_selector(SEL["card"], timeout=WAIT_FOR_HUMAN_S * 1000)
+                action_resolved("Naukri")
+            except Exception as e:
+                save_debug(page, "naukri_blocked")
+                browser.close()
+                raise RuntimeError(f"Naukri: still no job cards after {WAIT_FOR_HUMAN_S} s "
+                                   f"(see test_output/naukri_blocked.png): {e}")
 
         for page_num in range(1, MAX_PAGES + 1):
             human_delay(1.5, 2.5)
