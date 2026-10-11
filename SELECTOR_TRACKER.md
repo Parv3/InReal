@@ -15,7 +15,7 @@ python scraper.py --source <name> --dry-run
 | # | Platform | `--source` | File | How it reads the site | Status |
 |---|---|---|---|---|---|
 | 1 | Internshala | `internshala` | `sites/internshala.py` | Playwright + HTML | ✅ |
-| 2 | Unstop | `unstop` | `sites/unstop.py` | Playwright + HTML | 🔴 |
+| 2 | Unstop | `unstop` | `sites/unstop.py` | Playwright + site's JSON API (HTML fallback) | 🟡 |
 | 3 | Naukri | `naukri` | `sites/naukri.py` | Playwright + HTML | 🔴 |
 | 4 | LinkedIn (guest search) | `linkedin` | `sites/linkedin.py` | Playwright + HTML | 🔴 |
 | 5 | Shine | `shine` | `sites/misc_india.py` | Playwright + HTML | 🔴 |
@@ -62,22 +62,33 @@ What the first run taught us: about half of the 147 kept listings were not AI/ML
 
 No listing on Internshala mentioned a fee. That fits Internshala's rule against charging candidates, but it also means the fee check has not been proven on real data yet.
 
-## 2. Unstop 🔴
+## 2. Unstop 🟡
 
-URLs: `https://unstop.com/internships?domain=tech&specialization=ai-ml` and `?query=artificial+intelligence`, `machine+learning`, `deep+learning`, `data+science`, `computer+vision`, `nlp`
+Checked on the live site: 12 Oct 2026.
 
-| Field | Old selector | New selector | Status |
-|---|---|---|---|
-| Wait for | `a.item` | | 🔴 |
-| Card | `a.item` | | 🔴 |
-| Link | card `href` (+ `https://unstop.com`) | | 🔴 |
-| Title | `h3` | | 🔴 |
-| Company | `p` after the `h3` | | 🔴 |
-| Location | `span.job_location` | | 🔴 |
-| Stipend | `.cash_widget strong` (format "10 K/Month") | | 🔴 |
-| Closed / expired | text check on the card | | 🔴 |
+**The real problem was the URLs, not the selectors.** Both kinds of old URL (`?domain=tech&specialization=ai-ml` and `?query=machine+learning`) now redirect to `https://unstop.com/internship?oppstatus=open` and the filter is lost. So the old scraper read the same ~20 unfiltered cards (Social Media Marketing, Telesales …) seven times. The page only renders about 20 cards at a time.
 
-Check: Unstop builds the page with JavaScript, so the cards may appear late; `a.item` is a very generic class name.
+**New approach:** Unstop's own page loads its list from a public JSON API. We call that API from inside the page (same as the site does) and filter for AI/ML ourselves:
+`/api/public/opportunity/search-result?opportunity=internships&oppstatus=open&per_page=250&page=N`
+On 12 Oct it returned 590 open internships, each with the full description, skills and stipend. Its `searchTerm` parameter is unreliable ("Machine Learning" returned 2 unrelated results), so we don't use it.
+
+| Field | Old selector | New source (API field) | HTML fallback | Status |
+|---|---|---|---|---|
+| URL | 7 filtered URLs | API above, all open internships | `https://unstop.com/internships` | ❌ old URLs lose the filter, fixed |
+| Card | `a.item` | each item in `data.data` | `a.item` | old selector still works |
+| Link | card `href` | `public_url` | card `href` | still works |
+| Title | `h3` | `title` | `h3` | still works |
+| Company | `p` after the `h3` | `organisation.name` | `p` | still works |
+| Location | `span.job_location` | `jobDetail.type` (wfh / hybrid / in_office) + `locations[].city` | `span.job_location` | still works |
+| Stipend | `.cash_widget strong` | `jobDetail.min_salary` / `max_salary` / `paid_unpaid` / `show_salary` | `.cash_widget` | ❌ old one read only "12 K -" of "12 K - 15 K/Month", fixed |
+| Skills | not read | `required_skills[].skill_name` | — | new |
+| Description | not read | `details` (HTML), used by the fee check | — | new |
+| Deadline | not read | `end_date` | — | new |
+| Closed | text "closed/expired" on the card | `status` = LIVE and `regnRequirements.reg_status` = STARTED | text check | fixed |
+
+Expected result on the laptop: about 16 AI/ML internships out of ~590 before the genuine check. No real fee demand was found in the 590 descriptions; the 8 that mention fees all say "no registration fee" or talk about the employer's own business, and the check correctly ignores them. New soft flag from Unstop data: pay that depends on commission or "performance".
+
+Risk: this is an internal API, not a promised one. If it changes, the scraper logs a warning and falls back to the ~20 cards on the page.
 
 ## 3. Naukri 🔴
 

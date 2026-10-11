@@ -32,6 +32,12 @@ TASK_RE = (
     r"|\bmerchant\s+tasks?\b|\btelegram\s+tasks?\b"
 )
 
+# Pay that only comes from sales or "performance" (seen on Unstop, Oct 2026)
+COMMISSION_RE = (
+    r"\bcommission\b|\bearnings?\s+depend|\bperformance[- ]based\s+(pay|earnings?|stipend|income)\b"
+    r"|\bno\s+fixed\s+(stipend|salary|pay)\b"
+)
+
 # A selective internship does not "hire" this many people.
 MASS_HIRE_TOTAL = 10_000
 MASS_HIRE_PER_POST = 20
@@ -93,5 +99,8 @@ def check_listing(item: dict):
 
     if item.get("stipend_numeric") in (None, 0) and "unpaid" not in str(item.get("stipend", "")).lower():
         flags.append("Stipend amount not stated")
+
+    if re.search(COMMISSION_RE, text, re.I):
+        flags.append("Pay depends on commission or performance")
 
     return None, flags
