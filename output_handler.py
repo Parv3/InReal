@@ -14,7 +14,8 @@ CSV_HEADERS = [
     "duration", "stipend", "stipend_numeric", "stipend_currency",
     "required_skills", "application_deadline", "apply_link",
     "source_platform", "date_scraped", "is_new", 
-    "org_type", "role_type", "match_score"
+    "org_type", "role_type", "match_score",
+    "posted", "trust_flags"
 ]
 
 def load_log():
@@ -66,6 +67,13 @@ def append_to_csv(internships: list) -> int:
     log_data["last_run"] = today_str
     
     file_exists = CSV_FILE.exists()
+    if file_exists:
+        # Older CSVs were written before new columns were added; rewrite the header once
+        with open(CSV_FILE, "r", encoding="utf-8") as f:
+            header = f.readline().strip().split(",")
+        if header != CSV_HEADERS:
+            old = pd.read_csv(CSV_FILE)
+            old.reindex(columns=CSV_HEADERS).to_csv(CSV_FILE, index=False)
     
     with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)

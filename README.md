@@ -119,6 +119,26 @@ Aggregator sites often surface old 2024/2025 listings in their search results. T
 - **International**: Any compensation is fine
 - Explicit `"Unpaid"` or `0` always filtered out
 
+### 🛡️ Genuine-Only Check (`genuine.py`)
+A listing is **removed** only for things a real internship never does:
+- it asks the candidate to pay (registration / training / security fee, deposit, "pay ₹999 to book your slot")
+- it is a task-for-money scheme (like / review / prepaid tasks)
+- it is a mass programme, not a selective internship (for example 4 lakh people "hired" from 1,800 posts)
+
+Softer warnings are **kept** and written to the `trust_flags` column: very short duration, a brand-new employer with no hires yet, an employer that posts a lot but hires few, or no stated stipend. Big real companies can look odd on one number, so these never delete a listing on their own.
+
+### 🧪 Test One Platform
+```bash
+python scraper.py --source internshala --dry-run
+```
+Nothing is saved to `internships.csv`. It prints how many listings were kept or dropped and why, and writes every listing with its reason to `test_output/internshala.csv`. Offline parser tests (saved copies of the live pages): `python -m pytest tests -q`.
+
+### 🔧 Selector Upgrade Status
+| Platform | Checked on live site | Status |
+|---|---|---|
+| Internshala | 12 Oct 2026 | Selectors updated (title is now `h2 a.job-title-href`, location `.row-1-item.locations`, duration by calendar icon, last page by `#isLastPage`); detail page adds employer activity |
+| Unstop, Naukri, LinkedIn, Shine, Foundit, Apna, Cutshort, RSS, WWR | — | Not re-checked yet |
+
 ---
 
 ## �️ How to Set It Up (Actually Simple)
