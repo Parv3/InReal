@@ -8,9 +8,14 @@ import sys
 import os
 import tempfile
 
-# Import the scraper orchestrator
-# We need to add the current dir to path to import scraper properly if needed, but it's in the same dir
-from scraper import run_scrapers
+# Scraper will be lazily loaded when scrape is requested
+def get_run_scrapers():
+    try:
+        from scraper import run_scrapers
+        return run_scrapers
+    except Exception as e:
+        print(f"Warning: scraper could not be loaded: {e}")
+        return None
 
 app = Flask(__name__)
 DATA_FILE = Path(__file__).parent / "internships.csv"
@@ -46,8 +51,11 @@ def trigger_scrape():
     config = request.json if request.is_json else None
         
     def scrape_job(cfg):
-        # Running the full scraper
-        run_scrapers(dry_run=False, config=cfg)
+        runner = get_run_scrapers()
+        if runner:
+            runner(dry_run=False, config=cfg)
+        else:
+            print("Scraper dependencies missing.")
         
     scraper_t = threading.Thread(target=scrape_job, args=(config,))
     scraper_t.start()
