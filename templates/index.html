@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INREAL / MERCURY RADAR</title>
+  <title>InReal | Technical Field Index</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Resume Standards: Computer Modern / EB Garamond + Inter + Space Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -17,31 +18,16 @@
       theme: {
         extend: {
           fontFamily: {
-            brutal: ['"Cinzel"', 'serif'],
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"EB Garamond"', 'Georgia', 'serif'],
+            sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
             mono: ['"Space Mono"', 'monospace'],
+            sketch: ['"Caveat"', 'cursive'],
           },
           colors: {
-            cream: {
-              DEFAULT: '#F7F2E8',
-              50: '#FBF9F4',
-              100: '#F7F2E8',
-              200: '#EFE7D8',
-              300: '#E4D6BE',
-              border: '#3D0A11',
-            },
-            burgundy: {
-              DEFAULT: '#3B070E',
-              pure: '#2E040A',
-              blood: '#520B15',
-              vivid: '#700F1E',
-              border: '#540E18',
-            },
-            mercury: {
-              highlight: '#FFFFFF',
-              sheen: '#E2E8F0',
-              shadow: '#94A3B8',
-            }
+            amberbg: '#F5C744',
+            cream: '#FAF6EE',
+            ink: '#141414',
+            graphite: '#2C2B29',
           }
         }
       }
@@ -49,153 +35,151 @@
   </script>
 
   <style>
-    /* Ultrarealistic Brutalism Foundations */
     :root {
-      --bg-cream: #F7F2E8;
-      --burgundy: #3B070E;
-      --border-heavy: 2px solid #2E040A;
-      --shadow-brutal: 5px 5px 0px #2E040A;
-      --shadow-brutal-lg: 8px 8px 0px #2E040A;
+      --amber-bg: #F5C744;
+      --cream-paper: #FAF6EE;
+      --ink: #141414;
+      --graphite: #2C2B29;
     }
 
     body {
-      background-color: var(--bg-cream);
-      color: #2E040A;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--amber-bg);
+      color: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
     }
 
-    /* Brutalist Hard Edges & Heavy Stroke System */
-    .brutal-box {
-      border: 2px solid #2E040A;
-      box-shadow: 5px 5px 0px #2E040A;
-      background: #FFFFFF;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    /* Sketch / Hand-Drawn Wobbly Borders */
+    .sketch-card {
+      background: var(--cream-paper);
+      border: 2px solid var(--ink);
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      box-shadow: 4px 5px 0px rgba(20, 20, 20, 0.95);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .sketch-card:hover {
+      transform: translate(-3px, -3px) rotate(-0.3deg);
+      box-shadow: 7px 8px 0px rgba(20, 20, 20, 1);
     }
 
-    .brutal-box:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 7px 7px 0px #2E040A;
-    }
-
-    .brutal-btn {
-      border: 2px solid #2E040A;
-      box-shadow: 4px 4px 0px #2E040A;
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      transition: all 0.12s ease;
-    }
-
-    .brutal-btn:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 6px 6px 0px #2E040A;
-    }
-
-    .brutal-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0px #2E040A;
-    }
-
-    /* Metallic Chrome Mercury Surface Gradient */
-    .liquid-chrome-gradient {
-      background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 25%, #94A3B8 50%, #F1F5F9 75%, #CBD5E1 100%);
-      border: 2px solid #2E040A;
-      box-shadow: 5px 5px 0px #2E040A;
-    }
-
-    .mercury-card-header {
-      background: linear-gradient(90deg, #3B070E 0%, #520B15 100%);
-      border-bottom: 2px solid #2E040A;
-      color: #F7F2E8;
-    }
-
-    /* Filter pill brutalism */
-    .filter-pill {
-      border: 2px solid #2E040A;
-      box-shadow: 3px 3px 0px #2E040A;
-      background: #F7F2E8;
+    .sketch-btn {
+      background: var(--cream-paper);
+      border: 2px solid var(--ink);
+      border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
+      box-shadow: 3px 3px 0px rgba(20, 20, 20, 0.95);
       font-family: 'Space Mono', monospace;
       font-size: 11px;
       font-weight: 700;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      padding: 6px 12px;
+      transition: all 0.12s ease;
+    }
+    .sketch-btn:hover {
+      background: #FFFFFF;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px rgba(20, 20, 20, 1);
+    }
+    .sketch-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px rgba(20, 20, 20, 1);
+    }
+
+    .sketch-pill {
+      background: var(--cream-paper);
+      border: 1.5px solid var(--ink);
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      box-shadow: 2px 2px 0px rgba(20, 20, 20, 0.9);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 5px 12px;
       cursor: pointer;
       transition: all 0.12s ease;
     }
-    .filter-pill:hover {
+    .sketch-pill:hover {
       background: #FFFFFF;
       transform: translate(-1px, -1px);
-      box-shadow: 4px 4px 0px #2E040A;
+      box-shadow: 3px 3px 0px rgba(20, 20, 20, 1);
     }
-    .filter-pill.active {
-      background: #3B070E;
-      color: #F7F2E8;
-      box-shadow: 3px 3px 0px #2E040A;
+    .sketch-pill.active {
+      background: var(--ink);
+      color: var(--cream-paper) !important;
+      box-shadow: 2px 2px 0px rgba(20, 20, 20, 0.9);
     }
 
-    /* Custom brutal scrollbar */
+    /* Hand-drawn underline annotation */
+    .hand-annotation {
+      font-family: 'Caveat', cursive;
+      color: #9C2A1E;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #EFE7D8; border-left: 2px solid #2E040A; }
-    ::-webkit-scrollbar-thumb { background: #3B070E; border: 1px solid #2E040A; }
+    ::-webkit-scrollbar-track { background: #E5B837; border-left: 2px solid var(--ink); }
+    ::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 4px; }
   </style>
 </head>
 
-<body class="bg-[#F7F2E8] min-h-screen text-[#2E040A] flex flex-col relative antialiased selection:bg-[#3B070E] selection:text-[#F7F2E8] overflow-x-hidden">
+<body class="bg-[#F5C744] min-h-screen text-[#141414] flex flex-col relative antialiased selection:bg-[#141414] selection:text-[#F5C744] overflow-x-hidden">
 
-  <!-- Interactive Fullscreen 3D Liquid Mercury WebGL Canvas -->
-  <canvas id="liquid-mercury-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-80"></canvas>
+  <!-- Interactive 3D WebGL Liquid Ribbon Canvas -->
+  <canvas id="liquid-ribbon-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-90"></canvas>
 
   <!-- Action Required Alert Banner -->
-  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-md w-full bg-white border-2 border-[#2E040A] p-4 shadow-[6px_6px_0px_#2E040A]">
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-md w-full bg-[#FAF6EE] border-2 border-[#141414] p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[5px_5px_0px_#141414]">
     <div class="flex items-start gap-3">
-      <div class="p-2 bg-[#3B070E] text-[#F7F2E8]">
-        <i class="ph ph-warning text-xl"></i>
+      <div class="p-2 bg-[#141414] text-[#FAF6EE] rounded">
+        <i class="ph ph-warning-circle text-xl"></i>
       </div>
-      <div class="flex-1 font-mono">
-        <h4 id="action-title" class="font-bold text-xs uppercase tracking-wider text-[#3B070E]">System Alert</h4>
-        <p id="action-message" class="text-xs text-[#2E040A] mt-1 font-sans">Scraper requires manual confirmation.</p>
+      <div class="flex-1 font-sans">
+        <h4 id="action-title" class="font-bold text-xs uppercase tracking-wider text-[#141414]">Verification Alert</h4>
+        <p id="action-message" class="text-xs text-[#2C2B29] mt-0.5 font-serif">Please inspect the browser verification dialog.</p>
       </div>
-      <button id="action-dismiss-btn" class="brutal-btn px-3 py-1 bg-[#3B070E] text-[#F7F2E8] text-xs">
+      <button id="action-dismiss-btn" class="sketch-btn px-3 py-1 bg-[#141414] text-[#FAF6EE] text-xs">
         Dismiss
       </button>
     </div>
   </div>
 
-  <!-- Top Brutalist Header -->
-  <header class="sticky top-0 z-30 w-full bg-[#F7F2E8] border-b-2 border-[#2E040A]">
+  <!-- Hand-Sketched Header -->
+  <header class="sticky top-0 z-30 w-full bg-[#F5C744]/95 backdrop-blur-sm border-b-2 border-[#141414]">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
       
-      <!-- Brand & Brutalist Typography -->
+      <!-- Brand & Journal Header -->
       <div class="flex items-center gap-4">
-        <div class="w-11 h-11 bg-[#3B070E] border-2 border-[#2E040A] shadow-[3px_3px_0px_#2E040A] flex items-center justify-center text-[#F7F2E8]">
-          <i class="ph ph-shield-chevron text-2xl"></i>
+        <div class="w-11 h-11 bg-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#141414] flex items-center justify-center text-[#141414]">
+          <i class="ph ph-pen-nib-straight text-2xl"></i>
         </div>
         <div>
           <div class="flex items-center gap-3">
-            <span class="font-brutal text-2xl font-black tracking-widest text-[#2E040A]">INREAL</span>
-            <span class="font-mono text-[10px] tracking-widest px-2 py-0.5 border-2 border-[#2E040A] bg-white font-bold">MERCURY / SYSTEM 01</span>
+            <span class="font-serif text-3xl font-bold tracking-tight text-[#141414]">InReal</span>
+            <span class="font-mono text-[10px] tracking-widest px-2 py-0.5 border border-[#141414] bg-[#FAF6EE] font-bold rounded">DOC NO. 2026</span>
           </div>
-          <p class="font-mono text-[11px] text-[#3B070E]/80 tracking-tight font-semibold uppercase mt-0.5">Autonomous Opportunity Telemetry & Scraping Engine</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="font-sans text-xs text-[#2C2B29] font-medium tracking-tight">Curated Fellowship & Engineering Registry</span>
+            <span class="hand-annotation hidden sm:inline">&mdash; verified records only</span>
+          </div>
         </div>
       </div>
 
-      <!-- Live Controls -->
+      <!-- Controls & Status -->
       <div class="flex items-center gap-3">
         <!-- Status Indicator -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 bg-white border-2 border-[#2E040A] shadow-[2px_2px_0px_#2E040A] font-mono text-xs font-bold">
-          <span id="ping-dot" class="w-2.5 h-2.5 bg-emerald-700 border border-[#2E040A]"></span>
-          <span id="scraper-status-text" class="text-[10px] uppercase tracking-wider">Telemetry Live</span>
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 bg-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#141414] font-mono text-xs font-bold">
+          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-700 border border-[#141414]"></span>
+          <span id="scraper-status-text" class="text-[11px] uppercase tracking-wider">Index Ready</span>
         </div>
 
-        <!-- Terminal Logs -->
-        <button id="open-logs-btn" class="brutal-btn px-3.5 py-1.5 bg-white text-[#2E040A] text-xs flex items-center gap-2">
-          <i class="ph ph-terminal-window text-base text-[#3B070E]"></i>
+        <!-- Telemetry Logs -->
+        <button id="open-logs-btn" class="sketch-btn px-3.5 py-1.5 text-[#141414] text-xs flex items-center gap-2">
+          <i class="ph ph-terminal text-base"></i>
           <span class="hidden md:inline">Logs</span>
         </button>
 
-        <!-- Run Scraper Action -->
-        <button id="trigger-scrape-btn" class="brutal-btn px-4 py-2 bg-[#3B070E] text-[#F7F2E8] text-xs flex items-center gap-2 hover:bg-[#520B15]">
+        <!-- Scrape Action Button -->
+        <button id="trigger-scrape-btn" class="sketch-btn px-4 py-2 bg-[#141414] text-[#FAF6EE] text-xs flex items-center gap-2 hover:bg-[#2C2B29]">
           <i class="ph ph-arrows-clockwise text-sm"></i>
           <span>Scrape Now</span>
         </button>
@@ -203,113 +187,115 @@
     </div>
   </header>
 
-  <!-- Main Canvas Content -->
+  <!-- Main Content Layout -->
   <main class="relative z-10 max-w-7xl mx-auto px-6 py-8 flex-1 w-full flex flex-col gap-8">
 
-    <!-- Brutalist Hero Section with Chrome Elements -->
+    <!-- Journal Editorial Showcase -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
       
-      <!-- Primary Manifesto Box -->
-      <div class="lg:col-span-8 bg-white border-2 border-[#2E040A] shadow-[6px_6px_0px_#2E040A] p-8 flex flex-col justify-between relative overflow-hidden">
+      <!-- Primary Notebook Cover Box -->
+      <div class="lg:col-span-8 sketch-card p-8 flex flex-col justify-between relative overflow-hidden">
         <div class="max-w-2xl">
-          <div class="font-mono text-[11px] uppercase tracking-widest text-[#3B070E] font-bold pb-2 border-b-2 border-[#2E040A] inline-block">
-            Field Intelligence Database / Index 2026
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-[#141414]">
+            <span class="font-mono text-xs uppercase tracking-widest font-bold text-[#141414]">Academic & Research Portfolio</span>
+            <span class="hand-annotation">updated continuously</span>
           </div>
-          <h1 class="font-brutal text-4xl sm:text-5xl font-extrabold tracking-tight text-[#2E040A] mt-5 leading-[1.1]">
-            RAW TECHNICAL RIGOR. NO VIBE CODING.
+
+          <h1 class="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-[#141414] mt-4 leading-[1.15]">
+            Engineering & AI Fellowships, curated with resume precision.
           </h1>
-          <p class="text-sm font-sans text-[#2E040A]/85 mt-4 leading-relaxed font-semibold">
-            Real-time scraping radar across Big Tech careers, academic laboratories, and international research departments. Liquid mercury real-time telemetry indexing verified positions with strict technical criteria.
+          <p class="font-serif text-base text-[#2C2B29] mt-3 leading-relaxed">
+            Scraped across primary technical portals, academic research laboratories, and institutional announcements. Clean extraction of qualifications, competitive stipends, and direct submission endpoints.
           </p>
         </div>
 
-        <div class="grid grid-cols-3 gap-4 pt-6 mt-8 border-t-2 border-[#2E040A] bg-[#F7F2E8] p-4 border-2">
+        <div class="grid grid-cols-3 gap-6 pt-6 mt-8 border-t-2 border-[#141414] bg-[#F5C744]/20 p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] border-2 border-[#141414]">
           <div>
-            <div class="font-mono text-3xl font-extrabold text-[#3B070E]" id="stat-total-jobs">0</div>
-            <div class="font-mono text-[10px] text-[#2E040A] font-bold uppercase tracking-wider mt-1">Verified Feeds</div>
+            <div class="font-mono text-3xl font-bold text-[#141414]" id="stat-total-jobs">0</div>
+            <div class="font-sans text-xs text-[#2C2B29] font-medium mt-0.5">Archived Postings</div>
           </div>
           <div>
-            <div class="font-mono text-3xl font-extrabold text-[#3B070E]" id="stat-paid-jobs">0</div>
-            <div class="font-mono text-[10px] text-[#2E040A] font-bold uppercase tracking-wider mt-1">Funded Posts</div>
+            <div class="font-mono text-3xl font-bold text-[#141414]" id="stat-paid-jobs">0</div>
+            <div class="font-sans text-xs text-[#2C2B29] font-medium mt-0.5">Funded Fellowships</div>
           </div>
           <div>
-            <div class="font-mono text-3xl font-extrabold text-[#3B070E]" id="stat-sources">16+</div>
-            <div class="font-mono text-[10px] text-[#2E040A] font-bold uppercase tracking-wider mt-1">Active Portals</div>
+            <div class="font-mono text-3xl font-bold text-[#141414]" id="stat-sources">16+</div>
+            <div class="font-sans text-xs text-[#2C2B29] font-medium mt-0.5">Monitored Boards</div>
           </div>
         </div>
       </div>
 
-      <!-- Real World Brutal Chrome Focus Card -->
-      <div class="lg:col-span-4 bg-[#3B070E] border-2 border-[#2E040A] shadow-[6px_6px_0px_#2E040A] text-[#F7F2E8] p-7 flex flex-col justify-between relative">
+      <!-- Quick Curation Spotlight Card -->
+      <div class="lg:col-span-4 bg-[#141414] text-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[6px_6px_0px_#141414] p-7 flex flex-col justify-between relative">
         <div>
-          <div class="font-mono text-[10px] uppercase tracking-widest text-[#E4D6BE] font-bold border-b border-[#540E18] pb-2">
-            Automated Audit Standard
+          <div class="font-mono text-xs uppercase tracking-widest text-[#F5C744] font-bold border-b border-[#FAF6EE]/20 pb-2">
+            Standards & Selection
           </div>
-          <h2 class="font-brutal text-2xl font-bold mt-4 leading-snug">
-            DIRECT SPECIFICATION EXTRACTION.
+          <h2 class="font-serif text-2xl font-bold mt-4 leading-snug">
+            Strict engineering criteria. No generic filler.
           </h2>
-          <p class="font-sans text-xs text-[#EFE7D8]/80 mt-3 leading-relaxed">
-            Eliminating fluff cards and vague job summaries. Direct application pipelines, compensation tracking, and verified recruiter links.
+          <p class="font-sans text-xs text-[#FAF6EE]/80 mt-3 leading-relaxed">
+            Every entry requires verifiable technical depth in PyTorch, distributed systems, or core AI/ML architectures.
           </p>
         </div>
 
-        <div class="pt-6 border-t border-[#540E18] mt-6 flex items-center justify-between">
-          <span class="font-mono text-xs uppercase font-bold text-[#E4D6BE]">Saved Opportunities:</span>
-          <span id="spotlight-saved-count" class="font-mono font-bold text-sm bg-white text-[#3B070E] px-2.5 py-1 border border-[#2E040A]">0 Items</span>
+        <div class="pt-6 border-t border-[#FAF6EE]/20 mt-6 flex items-center justify-between text-xs">
+          <span class="font-mono uppercase font-bold text-[#FAF6EE]/70">Bookmarked Items:</span>
+          <span id="spotlight-saved-count" class="font-mono font-bold bg-[#F5C744] text-[#141414] px-2.5 py-1 border border-[#141414] rounded">0 Items</span>
         </div>
       </div>
     </section>
 
     <!-- Search & Faceted Filter System -->
-    <section class="bg-white border-2 border-[#2E040A] shadow-[6px_6px_0px_#2E040A] p-5 flex flex-col gap-4">
+    <section class="sketch-card p-5 flex flex-col gap-4">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <!-- Search -->
+        <!-- Search Input -->
         <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#2E040A] text-lg font-bold"></i>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#141414] text-lg font-bold"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="FILTER BY ROLE, INSTITUTION (ANTHROPIC, DEEPMIND), OR SKILL (PYTORCH, CUDA)..." 
-            class="w-full bg-[#F7F2E8] border-2 border-[#2E040A] pl-11 pr-20 py-2.5 font-mono text-xs text-[#2E040A] placeholder-[#2E040A]/50 focus:outline-none focus:bg-white transition uppercase font-bold"
+            placeholder="Search role, institution (Anthropic, DeepMind), or skill (PyTorch, JAX, CUDA)..." 
+            class="w-full bg-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] pl-11 pr-20 py-2.5 font-sans text-xs text-[#141414] placeholder-[#2C2B29]/60 focus:outline-none focus:bg-white transition shadow-sm font-medium"
           >
-          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#2E040A] bg-white px-2 py-0.5 border border-[#2E040A] font-bold hidden sm:inline">CTRL K</span>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#141414] bg-[#F5C744] px-2 py-0.5 border border-[#141414] font-bold rounded hidden sm:inline">Ctrl K</span>
         </div>
 
         <!-- Controls -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <select id="source-filter" class="bg-[#F7F2E8] border-2 border-[#2E040A] font-mono font-bold text-xs px-3 py-2.5 focus:outline-none uppercase">
-            <option value="all">ALL SOURCES</option>
+          <select id="source-filter" class="bg-[#FAF6EE] border-2 border-[#141414] font-mono text-xs px-3 py-2.5 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] font-bold shadow-sm focus:outline-none uppercase">
+            <option value="all">All Sources</option>
           </select>
 
-          <button id="filter-bookmarks-btn" class="brutal-btn px-3.5 py-2.5 bg-white text-[#2E040A] text-xs flex items-center gap-1.5">
-            <i class="ph ph-bookmark-simple text-sm text-[#3B070E]"></i>
-            <span>SAVED (<span id="bookmark-count">0</span>)</span>
+          <button id="filter-bookmarks-btn" class="sketch-pill px-3.5 py-2.5 flex items-center gap-1.5">
+            <i class="ph ph-bookmark-simple text-sm"></i>
+            <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="brutal-btn px-3 py-2.5 bg-[#F7F2E8] text-[#2E040A] text-xs flex items-center gap-1">
+          <button id="reset-filters-btn" class="sketch-pill px-3.5 py-2.5 flex items-center gap-1">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-            <span class="hidden sm:inline">RESET</span>
+            <span class="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>
 
       <!-- Segmented Region & Stipend Filters -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-[#2E040A]">
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-[#141414]">
         <!-- Region Tabs -->
         <div class="flex items-center gap-2" id="location-tabs">
-          <button class="filter-pill active" data-val="all">ALL REGIONS (<span id="count-all">0</span>)</button>
-          <button class="filter-pill" data-val="India">INDIA (<span id="count-india">0</span>)</button>
-          <button class="filter-pill" data-val="Remote">REMOTE (<span id="count-remote">0</span>)</button>
-          <button class="filter-pill" data-val="International">GLOBAL (<span id="count-global">0</span>)</button>
+          <button class="sketch-pill active" data-val="all">All Regions (<span id="count-all">0</span>)</button>
+          <button class="sketch-pill" data-val="India">India (<span id="count-india">0</span>)</button>
+          <button class="sketch-pill" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
+          <button class="sketch-pill" data-val="International">Global (<span id="count-global">0</span>)</button>
         </div>
 
-        <!-- Compensation Chips -->
+        <!-- Stipend Chips -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
-          <span class="font-mono text-[10px] uppercase font-bold text-[#3B070E]">STIPEND:</span>
-          <button class="filter-pill active" data-val="all">ALL</button>
-          <button class="filter-pill" data-val="paid">PAID ONLY</button>
-          <button class="filter-pill" data-val="20k">> INR 20,000</button>
-          <button class="filter-pill" data-val="50k">> INR 50,000</button>
+          <span class="font-mono text-[10px] uppercase font-bold text-[#141414]">Compensation:</span>
+          <button class="sketch-pill active" data-val="all">All</button>
+          <button class="sketch-pill" data-val="paid">Funded Only</button>
+          <button class="sketch-pill" data-val="20k">> INR 20k</button>
+          <button class="sketch-pill" data-val="50k">> INR 50k</button>
         </div>
       </div>
     </section>
@@ -317,90 +303,90 @@
     <!-- Cards Grid -->
     <section class="w-full">
       <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Injected via JavaScript -->
+        <!-- Rendered via JavaScript -->
       </div>
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden bg-white border-2 border-[#2E040A] shadow-[6px_6px_0px_#2E040A] p-12 text-center flex-col items-center justify-center">
-        <div class="w-14 h-14 bg-[#3B070E] text-[#F7F2E8] border-2 border-[#2E040A] flex items-center justify-center text-2xl mb-4">
+      <div id="empty-state" class="hidden sketch-card p-12 text-center flex-col items-center justify-center">
+        <div class="w-14 h-14 bg-[#141414] text-[#FAF6EE] border-2 border-[#141414] rounded-full flex items-center justify-center text-2xl mb-4">
           <i class="ph ph-magnifying-glass"></i>
         </div>
-        <h3 class="font-brutal text-2xl font-bold text-[#2E040A]">NO CORRESPONDING OPPORTUNITIES</h3>
-        <p class="font-mono text-xs text-[#2E040A]/80 max-w-sm mt-2 uppercase">ADJUST YOUR STIPEND OR SEARCH CRITERIA TO LOCATE MATCHING RECORDS.</p>
-        <button id="empty-reset-btn" class="mt-5 brutal-btn px-4 py-2 bg-[#3B070E] text-[#F7F2E8] text-xs">RESET FILTERS</button>
+        <h3 class="font-serif text-2xl font-bold text-[#141414]">No matching fellowship entries found</h3>
+        <p class="font-sans text-xs text-[#2C2B29] max-w-sm mt-2">Adjust your search parameters or run the scraper fleet to poll new listings.</p>
+        <button id="empty-reset-btn" class="mt-4 sketch-btn px-4 py-2 bg-[#141414] text-[#FAF6EE] text-xs">Reset Filters</button>
       </div>
     </section>
   </main>
 
   <!-- Slide-Over Inspection Drawer -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#2E040A]/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#F7F2E8] border-l-4 border-[#2E040A] p-8 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#141414]/50 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#FAF6EE] border-l-4 border-[#141414] p-8 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-5 border-b-2 border-[#2E040A]">
+      <div class="flex items-center justify-between pb-5 border-b-2 border-[#141414]">
         <div class="flex items-center gap-2">
-          <span id="drawer-match-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#3B070E] text-[#F7F2E8] border border-[#2E040A]">98% MATCH</span>
-          <span id="drawer-org-badge" class="px-3 py-1 font-mono font-bold text-xs bg-white text-[#2E040A] border border-[#2E040A]">COMPANY</span>
+          <span id="drawer-match-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#141414] text-[#FAF6EE] border border-[#141414] rounded">98% Match</span>
+          <span id="drawer-org-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#F5C744] text-[#141414] border border-[#141414] rounded">Company</span>
         </div>
-        <button id="close-drawer-btn" class="p-1.5 border-2 border-[#2E040A] bg-white hover:bg-[#3B070E] hover:text-[#F7F2E8] transition">
+        <button id="close-drawer-btn" class="p-1.5 border-2 border-[#141414] bg-[#FAF6EE] hover:bg-[#141414] hover:text-[#FAF6EE] rounded transition">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <div class="py-6 flex-1 flex flex-col gap-6">
         <!-- Photo banner in drawer -->
-        <div class="w-full h-44 border-2 border-[#2E040A] overflow-hidden relative shadow-[4px_4px_0px_#2E040A]">
-          <img id="drawer-image" src="" alt="Lab preview" class="w-full h-full object-cover grayscale contrast-125">
-          <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-[#2E040A] text-[#F7F2E8] font-mono text-[10px] uppercase font-bold">
-            DOCUMENTED LAB / FACILITY
+        <div class="w-full h-44 border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative shadow-[3px_3px_0px_#141414]">
+          <img id="drawer-image" src="" alt="Research lab" class="w-full h-full object-cover">
+          <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-[#141414] text-[#FAF6EE] font-mono text-[10px] uppercase font-bold rounded">
+            Documented Facility
           </div>
         </div>
 
         <div>
-          <h2 id="drawer-role-title" class="font-brutal text-2xl font-extrabold text-[#2E040A] leading-tight">AI RESEARCH FELLOW</h2>
-          <div id="drawer-company-name" class="font-mono text-sm font-bold text-[#3B070E] mt-1.5 uppercase">ANTHROPIC</div>
-          <div class="flex items-center gap-4 font-mono text-xs text-[#2E040A]/80 mt-3 font-semibold">
-            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">SAN FRANCISCO, CA</span></span>
-            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">6 MONTHS</span></span>
+          <h2 id="drawer-role-title" class="font-serif text-3xl font-bold text-[#141414] leading-tight">AI Safety Fellow</h2>
+          <div id="drawer-company-name" class="font-sans text-sm font-semibold text-[#2C2B29] mt-1">Anthropic</div>
+          <div class="flex items-center gap-4 font-sans text-xs text-[#2C2B29] mt-3 font-medium">
+            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">San Francisco, CA</span></span>
+            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">6 Months</span></span>
           </div>
         </div>
 
-        <div class="p-4 bg-white border-2 border-[#2E040A] shadow-[4px_4px_0px_#2E040A] flex items-center justify-between">
+        <div class="p-4 bg-white border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#141414] flex items-center justify-between">
           <div>
-            <div class="font-mono text-[10px] text-[#3B070E] uppercase font-bold">COMPENSATION</div>
-            <div id="drawer-stipend" class="font-mono text-lg font-extrabold text-[#2E040A] mt-0.5">$9,000 / MONTH</div>
+            <div class="font-mono text-[10px] text-[#2C2B29] uppercase font-bold">Compensation</div>
+            <div id="drawer-stipend" class="font-mono text-lg font-bold text-[#141414] mt-0.5">$9,000 / month</div>
           </div>
           <div class="text-right">
-            <div class="font-mono text-[10px] text-[#3B070E] uppercase font-bold">DEADLINE</div>
-            <div id="drawer-deadline" class="font-mono text-xs font-bold text-[#2E040A] mt-0.5">2026-11-15</div>
+            <div class="font-mono text-[10px] text-[#2C2B29] uppercase font-bold">Deadline</div>
+            <div id="drawer-deadline" class="font-mono text-xs font-bold text-[#141414] mt-0.5">2026-11-15</div>
           </div>
         </div>
 
         <div>
-          <h4 class="font-mono text-xs uppercase tracking-wider text-[#3B070E] font-bold mb-2">TECHNICAL REQUIREMENTS</h4>
+          <h4 class="font-mono text-xs uppercase tracking-wider text-[#141414] font-bold mb-2">Qualifications & Skills</h4>
           <div id="drawer-skills-list" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div>
-          <h4 class="font-mono text-xs uppercase tracking-wider text-[#3B070E] font-bold mb-2">RECORD METRICS</h4>
-          <div class="grid grid-cols-2 gap-3 text-xs font-mono font-semibold">
-            <div class="p-3 bg-white border-2 border-[#2E040A]">
-              <span class="text-[#3B070E]">SOURCE PLATFORM:</span>
-              <div id="drawer-source" class="font-bold text-[#2E040A] mt-0.5">LINKEDIN</div>
+          <h4 class="font-mono text-xs uppercase tracking-wider text-[#141414] font-bold mb-2">Registry Record</h4>
+          <div class="grid grid-cols-2 gap-3 text-xs font-sans font-medium">
+            <div class="p-3 bg-white border-2 border-[#141414] rounded">
+              <span class="text-[#2C2B29]">Source Portal:</span>
+              <div id="drawer-source" class="font-bold text-[#141414] mt-0.5">LinkedIn</div>
             </div>
-            <div class="p-3 bg-white border-2 border-[#2E040A]">
-              <span class="text-[#3B070E]">RECORDED ON:</span>
-              <div id="drawer-date" class="font-bold text-[#2E040A] mt-0.5">2026-10-11</div>
+            <div class="p-3 bg-white border-2 border-[#141414] rounded">
+              <span class="text-[#2C2B29]">Recorded Date:</span>
+              <div id="drawer-date" class="font-bold text-[#141414] mt-0.5">2026-10-11</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="pt-5 border-t-2 border-[#2E040A] flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-3 border-2 border-[#2E040A] bg-white text-[#2E040A] hover:bg-[#3B070E] hover:text-[#F7F2E8] transition shadow-[3px_3px_0px_#2E040A]">
+      <div class="pt-5 border-t-2 border-[#141414] flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 border-2 border-[#141414] bg-[#FAF6EE] text-[#141414] hover:bg-white transition rounded shadow-[2px_2px_0px_#141414]">
           <i class="ph ph-bookmark text-lg"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 brutal-btn bg-[#3B070E] text-[#F7F2E8] font-bold text-xs tracking-wider text-center flex items-center justify-center gap-2">
-          <span>APPLY ON SOURCE PORTAL</span>
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 sketch-btn bg-[#141414] text-[#FAF6EE] text-xs font-bold tracking-wider text-center flex items-center justify-center gap-2">
+          <span>Apply Directly on Portal</span>
           <i class="ph ph-arrow-up-right"></i>
         </a>
       </div>
@@ -408,55 +394,55 @@
   </div>
 
   <!-- Telemetry Slide Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#3B070E] border-t-4 border-l-4 border-[#2E040A] shadow-2xl z-40 hidden transition-all duration-300">
-    <div class="p-3 bg-[#2E040A] border-b-2 border-[#540E18] flex items-center justify-between">
-      <div class="flex items-center gap-2 font-mono text-xs text-[#F7F2E8] font-bold">
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#141414] border-t-4 border-l-4 border-[#141414] shadow-2xl z-40 hidden transition-all duration-300">
+    <div class="p-3 bg-[#141414] border-b border-[#FAF6EE]/20 flex items-center justify-between">
+      <div class="flex items-center gap-2 font-mono text-xs text-[#FAF6EE] font-bold">
         <i class="ph ph-terminal text-sm"></i>
-        <span>TELEMETRY STREAM</span>
+        <span>Telemetry Stream</span>
       </div>
-      <button id="close-logs-btn" class="p-1 border border-[#540E18] text-[#F7F2E8] hover:bg-[#520B15]">
+      <button id="close-logs-btn" class="p-1 text-[#FAF6EE] hover:bg-[#2C2B29] rounded">
         <i class="ph ph-x"></i>
       </button>
     </div>
-    <div id="logs-content" class="p-4 font-mono text-[11px] text-[#EFE7D8] max-h-64 overflow-y-auto space-y-1 bg-[#2E040A]"></div>
+    <div id="logs-content" class="p-4 font-mono text-[11px] text-[#FAF6EE] max-h-64 overflow-y-auto space-y-1 bg-[#141414]"></div>
   </div>
 
   <!-- Scraper Configuration Modal -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-[#2E040A]/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border-4 border-[#2E040A] shadow-[8px_8px_0px_#2E040A] max-w-lg w-full p-6">
-      <div class="flex items-center justify-between pb-4 border-b-2 border-[#2E040A]">
-        <h3 class="font-brutal text-xl font-black text-[#2E040A] flex items-center gap-2">
-          <span>CONFIGURE SCRAPER FLEET</span>
+  <div id="scrape-config-modal" class="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#FAF6EE] border-4 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[8px_8px_0px_#141414] max-w-lg w-full p-6">
+      <div class="flex items-center justify-between pb-4 border-b-2 border-[#141414]">
+        <h3 class="font-serif text-2xl font-bold text-[#141414] flex items-center gap-2">
+          <span>Configure Scraping Fleet</span>
         </h3>
-        <button id="close-config-btn" class="text-[#2E040A] p-1 border-2 border-[#2E040A]">
+        <button id="close-config-btn" class="text-[#141414] p-1 border-2 border-[#141414] rounded">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <form id="scrape-config-form" class="mt-4 space-y-4">
         <div>
-          <label class="font-mono text-[11px] uppercase font-bold text-[#3B070E] mb-2 block">TARGET REGIONS</label>
+          <label class="font-mono text-[11px] uppercase font-bold text-[#141414] mb-2 block">Target Regions</label>
           <div class="grid grid-cols-3 gap-2 font-mono text-xs font-bold">
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="regions" value="india" checked> INDIA</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="usa" value="usa" checked> USA</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="europe" value="europe" checked> EUROPE</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="remote" value="remote" checked> REMOTE</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="worldwide" value="worldwide" checked> GLOBAL</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="usa" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
           </div>
         </div>
 
         <div>
-          <label class="font-mono text-[11px] uppercase font-bold text-[#3B070E] mb-2 block">PORTALS</label>
+          <label class="font-mono text-[11px] uppercase font-bold text-[#141414] mb-2 block">Portals</label>
           <div class="grid grid-cols-2 gap-2 font-mono text-xs font-bold">
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LINKEDIN</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> INTERNSHALA</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> UNSTOP</label>
-            <label class="flex items-center gap-2 p-2 bg-[#F7F2E8] border-2 border-[#2E040A] cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> BIG TECH</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-3 brutal-btn bg-[#3B070E] text-[#F7F2E8] text-xs font-bold transition mt-3">
-          LAUNCH SCRAPING ENGINES
+        <button type="submit" class="w-full py-3 sketch-btn bg-[#141414] text-[#FAF6EE] text-xs font-bold transition mt-3">
+          Launch Scraping Fleet
         </button>
       </form>
     </div>
