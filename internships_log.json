@@ -1,0 +1,18 @@
+{
+  "last_run": "2026-10-12",
+  "total_scraped": 5,
+  "seen_ids": [
+    "c1a3caf58358cb27e11ce8fe75974ac2",
+    "b89bf7482b0fc04e0fe9872c65cb44ae",
+    "d7b89dc81948a25fd8893f5a289f86cc",
+    "3c1f216d2d954e7f7d55fb135d43b6a3",
+    "4e7296cd111179cc172ba84e71849edd"
+  ],
+  "run_history": [
+    {
+      "date": "2026-10-12",
+      "new_listings": 5,
+      "sources_failed": []
+    }
+  ]
+}
