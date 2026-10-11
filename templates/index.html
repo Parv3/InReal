@@ -1,43 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InReal &mdash; AI & Engineering Opportunity Radar</title>
+  <title>InReal | Intelligence Engine</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <!-- Tailwind Play CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Phosphor Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <!-- Three.js CDN for performant 3D Web Experience -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
+            display: ['"Cormorant Garamond"', 'serif'],
             sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
+            mono: ['"Space Mono"', 'monospace'],
           },
           colors: {
-            surface: {
-              DEFAULT: '#0b0f17',
-              muted: '#070a0f',
-              card: '#111726',
-              elevated: '#171f33',
-              border: 'rgba(255, 255, 255, 0.08)',
-              borderHover: 'rgba(255, 255, 255, 0.16)',
+            cream: {
+              50: '#FDFBF7',
+              100: '#F9F5EE',
+              200: '#F2EBDE',
+              300: '#E8DCB5',
+              border: '#E7DDD0',
             },
-            accent: {
-              primary: '#6366f1',
-              emerald: '#10b981',
-              cyan: '#06b6d4',
-              amber: '#f59e0b',
+            burgundy: {
+              DEFAULT: '#4A0E17',
+              dark: '#30080E',
+              deep: '#20050A',
+              light: '#6B1724',
+              muted: '#8A2A38',
+              surface: '#2B070D',
+              border: '#5C1621',
+            },
+            bronze: {
+              DEFAULT: '#B89065',
+              light: '#D4AF37',
+              muted: '#9E7A52',
             }
           }
         }
@@ -46,364 +50,391 @@
   </script>
 
   <style>
-    /* Custom scrollbars & smooth interactions */
+    :root {
+      --bg-cream: #F9F5EE;
+      --burgundy: #4A0E17;
+      --burgundy-deep: #20050A;
+      --border-warm: #E6DCce;
+    }
+
+    body {
+      background-color: #F9F5EE;
+      color: #20050A;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Metallic Chrome Surface Sheen */
+    .metallic-glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(247, 241, 230, 0.72) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(184, 144, 101, 0.30);
+      box-shadow: 0 10px 30px -10px rgba(74, 14, 23, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .metallic-pill {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F5EDE0 100%);
+      border: 1px solid rgba(184, 144, 101, 0.35);
+      box-shadow: 0 2px 5px rgba(74, 14, 23, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .metallic-pill:hover {
+      background: linear-gradient(180deg, #FFFFFF 0%, #ECE1CF 100%);
+      border-color: rgba(110, 24, 38, 0.5);
+    }
+
+    .metallic-pill.active {
+      background: linear-gradient(180deg, #4A0E17 0%, #30080E 100%);
+      color: #F9F5EE !important;
+      border-color: #30080E;
+      box-shadow: 0 4px 12px rgba(74, 14, 23, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-burgundy-metal {
+      background: linear-gradient(180deg, #5C141F 0%, #35080F 100%);
+      border: 1px solid #6E1826;
+      box-shadow: 0 4px 14px rgba(74, 14, 23, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .btn-burgundy-metal:hover {
+      background: linear-gradient(180deg, #6B1724 0%, #400A13 100%);
+      box-shadow: 0 6px 18px rgba(74, 14, 23, 0.32);
+    }
+
+    .card-liquid {
+      background: #FFFFFF;
+      border: 1px solid rgba(74, 14, 23, 0.08);
+      box-shadow: 0 4px 20px -2px rgba(74, 14, 23, 0.04);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-liquid:hover {
+      transform: translateY(-3px);
+      border-color: rgba(184, 144, 101, 0.45);
+      box-shadow: 0 16px 32px -8px rgba(74, 14, 23, 0.10), 0 0 0 1px rgba(184, 144, 101, 0.3);
+    }
+
+    /* Custom scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #070a0f; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
-
-    .glow-radar {
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.05) 50%, transparent 70%);
-    }
-
-    .glass-panel {
-      background: rgba(17, 23, 38, 0.72);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    
-    .glass-header {
-      background: rgba(11, 15, 23, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    .badge-ring {
-      box-shadow: 0 0 0 1px inset rgba(255, 255, 255, 0.1);
-    }
-
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.1); opacity: 0.3; }
-      100% { transform: scale(0.95); opacity: 0.8; }
-    }
-    .pulse-indicator {
-      animation: pulse-ring 2.5s infinite ease-in-out;
-    }
+    ::-webkit-scrollbar-track { background: #F2EBDE; }
+    ::-webkit-scrollbar-thumb { background: #D6C7B2; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4A0E17; }
   </style>
 </head>
 
-<body class="bg-[#070a0f] text-slate-200 min-h-screen antialiased selection:bg-indigo-500 selection:text-white font-sans flex flex-col relative overflow-x-hidden">
+<body class="bg-[#F9F5EE] min-h-screen text-burgundy-deep flex flex-col relative antialiased overflow-x-hidden selection:bg-burgundy selection:text-cream-50">
 
-  <!-- Interactive 3D WebGL Background Canvas -->
-  <canvas id="hero-3d-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-45"></canvas>
-  <div class="fixed inset-0 pointer-events-none z-0 glow-radar"></div>
+  <!-- Interactive 3D WebGL Liquid Metal Canvas -->
+  <canvas id="liquid-metal-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
 
   <!-- Action Required Alert Banner -->
-  <div id="action-banner" class="hidden fixed top-4 right-4 z-50 max-w-md w-full glass-panel border border-amber-500/40 rounded-xl p-4 shadow-2xl bg-amber-950/80 transition-all duration-300">
+  <div id="action-banner" class="hidden fixed top-5 right-5 z-50 max-w-md w-full metallic-glass rounded-xl p-4 border border-burgundy/30 shadow-2xl transition-all duration-300">
     <div class="flex items-start gap-3">
-      <div class="p-2 rounded-lg bg-amber-500/20 text-amber-400">
-        <i class="ph ph-warning-circle text-xl"></i>
+      <div class="p-2 rounded-lg bg-burgundy/10 text-burgundy">
+        <i class="ph ph-shield-warning text-xl"></i>
       </div>
       <div class="flex-1">
-        <h4 id="action-title" class="font-semibold text-white text-sm">Action Required</h4>
-        <p id="action-message" class="text-xs text-amber-200/80 mt-0.5">Please check the scraper browser verification prompt.</p>
+        <h4 id="action-title" class="font-semibold text-burgundy text-sm">Action Required</h4>
+        <p id="action-message" class="text-xs text-burgundy/80 mt-0.5">Scraper requires manual confirmation.</p>
       </div>
-      <button id="action-dismiss-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs rounded-lg transition-colors">
+      <button id="action-dismiss-btn" class="px-3 py-1.5 btn-burgundy-metal text-cream-50 font-medium text-xs rounded-lg transition-colors">
         Dismiss
       </button>
     </div>
   </div>
 
-  <!-- Top Navigation Header -->
-  <header class="sticky top-0 z-30 w-full glass-header">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-      <!-- Brand & Status -->
-      <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
-          <i class="ph-fill ph-radar text-white text-xl"></i>
+  <!-- Header -->
+  <header class="sticky top-0 z-30 w-full bg-[#F9F5EE]/85 backdrop-blur-md border-b border-[#E6DCce]">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
+      
+      <!-- Logo & Identity -->
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-burgundy via-burgundy-light to-burgundy-dark flex items-center justify-center text-cream-100 shadow-md border border-white/20">
+          <i class="ph ph-compass text-xl"></i>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-lg text-white tracking-tight">InReal</span>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wide bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">RADAR v2.0</span>
+          <div class="flex items-center gap-3">
+            <span class="font-display text-2xl font-bold tracking-tight text-burgundy-deep">InReal</span>
+            <span class="font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border border-burgundy/20 bg-burgundy/5 text-burgundy font-semibold">Radar Intelligence</span>
           </div>
-          <p class="text-[11px] text-slate-400 hidden sm:block">AI / ML & Robotics Internship Intelligence</p>
+          <p class="text-xs text-burgundy/70 hidden sm:block tracking-tight font-medium">Curated AI Research, Systems, and Machine Learning Fellowships</p>
         </div>
       </div>
 
-      <!-- Scraper Controls & Live Status Indicator -->
+      <!-- Controls & Status -->
       <div class="flex items-center gap-3">
-        <!-- Live Status Pill -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-slate-800 text-xs text-slate-400">
-          <span class="relative flex h-2 w-2">
-            <span id="ping-ring" class="hidden absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 pulse-indicator"></span>
-            <span id="ping-dot" class="relative inline-flex rounded-full h-2 w-2 bg-slate-500"></span>
-          </span>
-          <span id="scraper-status-text" class="font-mono text-[11px]">System Idle</span>
+        <!-- Live Status -->
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#E6DCce] text-xs font-mono text-burgundy/80 shadow-sm">
+          <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-600"></span>
+          <span id="scraper-status-text" class="text-[11px] tracking-tight">System Ready</span>
         </div>
 
-        <!-- Terminal Log Drawer Toggle -->
-        <button id="open-logs-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface-elevated border border-surface-border text-xs text-slate-300 transition font-mono">
-          <i class="ph ph-terminal text-sm text-cyan-400"></i>
-          <span class="hidden md:inline">Logs</span>
+        <!-- Telemetry Logs -->
+        <button id="open-logs-btn" class="metallic-pill px-3.5 py-1.5 rounded-xl text-xs font-mono text-burgundy font-medium flex items-center gap-2 transition">
+          <i class="ph ph-terminal-window text-sm text-burgundy"></i>
+          <span class="hidden md:inline">Telemetry</span>
         </button>
 
-        <!-- Trigger Scraper Button -->
-        <button id="trigger-scrape-btn" class="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+        <!-- Run Scraper Action -->
+        <button id="trigger-scrape-btn" class="btn-burgundy-metal px-4 py-2 rounded-xl text-cream-50 text-xs font-semibold tracking-wide flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]">
           <i class="ph ph-arrows-clockwise text-sm"></i>
-          <span>Run Radar</span>
+          <span>Scrape Now</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Layout -->
-  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col gap-6">
+  <!-- Main Workspace -->
+  <main class="relative z-10 max-w-7xl mx-auto px-6 py-8 flex-1 w-full flex flex-col gap-8">
 
-    <!-- Hero Stats & 3D Interactive Header -->
-    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
-        <div class="h-12 w-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl">
-          <i class="ph ph-briefcase"></i>
+    <!-- Editorial Hero Showcase -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div class="lg:col-span-8 metallic-glass rounded-2xl p-8 relative overflow-hidden flex flex-col justify-between">
+        <div class="max-w-2xl">
+          <span class="font-mono text-xs uppercase tracking-widest text-bronze font-bold">Research Radar Index</span>
+          <h1 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight text-burgundy-deep mt-2 leading-[1.15]">
+            Precision intelligence for elite AI and Engineering fellowships.
+          </h1>
+          <p class="text-sm text-burgundy/75 mt-3 leading-relaxed">
+            Continuously analyzing active career portals, university labs, and research institutions. Verified stipends, high match scoring, and direct application routes.
+          </p>
         </div>
-        <div>
-          <div class="text-2xl font-bold font-mono text-white" id="stat-total-jobs">0</div>
-          <div class="text-xs text-slate-400">Tracked Opportunities</div>
+
+        <div class="grid grid-cols-3 gap-6 pt-6 mt-6 border-t border-[#E6DCce]">
+          <div>
+            <div class="font-mono text-3xl font-bold text-burgundy" id="stat-total-jobs">0</div>
+            <div class="text-xs text-burgundy/60 font-medium mt-0.5">Active Opportunities</div>
+          </div>
+          <div>
+            <div class="font-mono text-3xl font-bold text-burgundy" id="stat-paid-jobs">0</div>
+            <div class="text-xs text-burgundy/60 font-medium mt-0.5">Funded Positions</div>
+          </div>
+          <div>
+            <div class="font-mono text-3xl font-bold text-burgundy" id="stat-sources">16+</div>
+            <div class="text-xs text-burgundy/60 font-medium mt-0.5">Integrated Sources</div>
+          </div>
         </div>
       </div>
 
-      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
-        <div class="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl">
-          <i class="ph ph-sparkle"></i>
-        </div>
+      <!-- Quick Curation Spotlight -->
+      <div class="lg:col-span-4 bg-burgundy rounded-2xl p-7 text-cream-100 flex flex-col justify-between shadow-xl relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-48 h-48 bg-burgundy-light rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         <div>
-          <div class="text-2xl font-bold font-mono text-emerald-300" id="stat-new-jobs">0</div>
-          <div class="text-xs text-slate-400">New This Cycle</div>
+          <span class="font-mono text-[11px] uppercase tracking-wider text-bronze font-semibold">Curation Standards</span>
+          <h2 class="font-display text-2xl font-bold mt-2 leading-tight">Zero vibe noise. Strict engineering rigor.</h2>
+          <p class="text-xs text-cream-200/80 mt-2.5 leading-relaxed">
+            Every position is parsed through NLP criteria requiring verifiable technical depth, competitive compensation, and direct institutional hosts.
+          </p>
         </div>
-      </div>
 
-      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
-        <div class="h-12 w-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-2xl">
-          <i class="ph ph-currency-circle-dollar"></i>
-        </div>
-        <div>
-          <div class="text-2xl font-bold font-mono text-cyan-300" id="stat-paid-jobs">0</div>
-          <div class="text-xs text-slate-400">Funded / High Stipend</div>
-        </div>
-      </div>
-
-      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
-        <div class="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl">
-          <i class="ph ph-globe-hemisphere-west"></i>
-        </div>
-        <div>
-          <div class="text-2xl font-bold font-mono text-amber-300" id="stat-sources">16+</div>
-          <div class="text-xs text-slate-400">Engines & University Feeds</div>
+        <div class="pt-6 border-t border-burgundy-border mt-6 flex items-center justify-between text-xs">
+          <span class="text-cream-200/70 font-mono">Saved Postings:</span>
+          <span id="spotlight-saved-count" class="font-mono font-bold text-bronze text-sm">0 Items</span>
         </div>
       </div>
     </section>
 
-    <!-- Search & Filter Control Bar -->
-    <section class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+    <!-- Search & Faceted Filter System -->
+    <section class="metallic-glass rounded-2xl p-5 flex flex-col gap-4">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <!-- Search Input -->
+        <!-- Search -->
         <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-burgundy/50 text-base"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Search by role title, company (Google, OpenAI), or skills (PyTorch, JAX, CUDA)..." 
-            class="w-full bg-[#0b0f17]/90 border border-surface-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+            placeholder="Search by role title, institution (Anthropic, DeepMind), or skills (PyTorch, JAX)..." 
+            class="w-full bg-white border border-[#E6DCce] rounded-xl pl-10 pr-12 py-2.5 text-xs text-burgundy-deep placeholder-burgundy/40 focus:outline-none focus:border-burgundy focus:ring-1 focus:ring-burgundy transition shadow-sm"
           >
-          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700 hidden sm:inline">⌘K</span>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-burgundy/40 bg-cream-100 px-1.5 py-0.5 rounded border border-[#E6DCce] hidden sm:inline">Ctrl K</span>
         </div>
 
-        <!-- Secondary Controls -->
+        <!-- Filter Controls -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <!-- Platform Source Selector -->
-          <select id="source-filter" class="bg-[#0b0f17] border border-surface-border text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500">
-            <option value="all">All Platforms</option>
+          <select id="source-filter" class="bg-white border border-[#E6DCce] text-burgundy text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-burgundy font-medium shadow-sm">
+            <option value="all">All Sources</option>
           </select>
 
-          <!-- Bookmarked Only Filter -->
-          <button id="filter-bookmarks-btn" class="px-3 py-2.5 rounded-xl border border-surface-border text-slate-400 hover:text-white hover:border-surface-borderHover bg-[#0b0f17] text-xs flex items-center gap-1.5 transition">
-            <i class="ph ph-bookmark-simple text-sm"></i>
+          <button id="filter-bookmarks-btn" class="metallic-pill px-3.5 py-2.5 rounded-xl text-burgundy text-xs flex items-center gap-1.5 transition font-medium">
+            <i class="ph ph-bookmark text-sm text-burgundy"></i>
             <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <!-- Reset Filters -->
-          <button id="reset-filters-btn" class="px-3 py-2.5 rounded-xl border border-surface-border text-slate-400 hover:text-white bg-[#0b0f17] text-xs flex items-center gap-1.5 transition">
+          <button id="reset-filters-btn" class="metallic-pill px-3 py-2.5 rounded-xl text-burgundy/70 hover:text-burgundy text-xs flex items-center gap-1.5 transition">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
             <span class="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>
 
-      <!-- Segmented Region & Filter Chips -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5">
+      <!-- Segmented Region & Stipend Filters -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#E6DCce]">
         <!-- Region Tabs -->
-        <div class="flex items-center gap-1.5 p-1 rounded-xl bg-[#070a0f] border border-surface-border" id="location-tabs">
-          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white active-tab bg-indigo-600/20 text-indigo-300 border border-indigo-500/30" data-val="all">
-            🌍 All Regions (<span id="count-all">0</span>)
+        <div class="flex items-center gap-1.5 p-1 rounded-xl bg-cream-200/70 border border-[#E6DCce]" id="location-tabs">
+          <button class="metallic-pill region-tab active px-3.5 py-1.5 rounded-lg text-xs font-semibold text-burgundy transition" data-val="all">
+            All Regions (<span id="count-all">0</span>)
           </button>
-          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white" data-val="India">
-            🇮🇳 India (<span id="count-india">0</span>)
+          <button class="metallic-pill region-tab px-3.5 py-1.5 rounded-lg text-xs font-medium text-burgundy/70 transition" data-val="India">
+            India (<span id="count-india">0</span>)
           </button>
-          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white" data-val="Remote">
-            📡 Remote (<span id="count-remote">0</span>)
+          <button class="metallic-pill region-tab px-3.5 py-1.5 rounded-lg text-xs font-medium text-burgundy/70 transition" data-val="Remote">
+            Remote (<span id="count-remote">0</span>)
           </button>
-          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white" data-val="International">
-            🌐 Global (<span id="count-global">0</span>)
+          <button class="metallic-pill region-tab px-3.5 py-1.5 rounded-lg text-xs font-medium text-burgundy/70 transition" data-val="International">
+            Global (<span id="count-global">0</span>)
           </button>
         </div>
 
-        <!-- Stipend Filter Chips -->
+        <!-- Stipend Chips -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
-          <span class="text-[11px] font-mono text-slate-500 mr-1 uppercase">Stipend:</span>
-          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-indigo-500/40 bg-indigo-500/10 text-indigo-300 active" data-val="all">Any</button>
-          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-surface-border text-slate-400 hover:text-white" data-val="paid">Paid (>0)</button>
-          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-surface-border text-slate-400 hover:text-white" data-val="20k">> ₹20k</button>
-          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-surface-border text-slate-400 hover:text-white" data-val="50k">> ₹50k</button>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-burgundy/50 mr-1 font-semibold">Compensation:</span>
+          <button class="metallic-pill stipend-chip active px-3 py-1 rounded-lg text-xs font-medium" data-val="all">All</button>
+          <button class="metallic-pill stipend-chip px-3 py-1 rounded-lg text-xs font-medium text-burgundy/80" data-val="paid">Funded Only</button>
+          <button class="metallic-pill stipend-chip px-3 py-1 rounded-lg text-xs font-medium text-burgundy/80" data-val="20k">> ₹20,000/mo</button>
+          <button class="metallic-pill stipend-chip px-3 py-1 rounded-lg text-xs font-medium text-burgundy/80" data-val="50k">> ₹50,000/mo</button>
         </div>
       </div>
     </section>
 
-    <!-- Main Listings Grid -->
-    <main class="w-full">
-      <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Rendered via JavaScript -->
+    <!-- Cards Grid -->
+    <section class="w-full">
+      <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Injected via JavaScript -->
       </div>
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden glass-panel rounded-2xl p-12 text-center flex-col items-center justify-center">
-        <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-3xl mb-4">
+      <div id="empty-state" class="hidden metallic-glass rounded-2xl p-14 text-center flex-col items-center justify-center">
+        <div class="w-14 h-14 rounded-2xl bg-burgundy/5 border border-burgundy/15 flex items-center justify-center text-burgundy text-2xl mb-4">
           <i class="ph ph-magnifying-glass"></i>
         </div>
-        <h3 class="text-base font-semibold text-white">No internships match your filter criteria</h3>
-        <p class="text-sm text-slate-400 max-w-md mt-1">Try resetting your search query, adjusting stipend expectations, or trigger the live scraper to retrieve fresh postings.</p>
-        <button id="empty-reset-btn" class="mt-4 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition">Reset All Filters</button>
+        <h3 class="font-display text-2xl font-bold text-burgundy">No opportunities match this filter criteria</h3>
+        <p class="text-xs text-burgundy/70 max-w-sm mt-1 leading-relaxed">Try adjusting the stipend parameters or resetting search parameters.</p>
+        <button id="empty-reset-btn" class="mt-4 px-4 py-2 rounded-xl btn-burgundy-metal text-xs font-semibold text-cream-50 transition">Reset All Filters</button>
       </div>
-    </main>
-  </div>
+    </section>
+  </main>
 
-  <!-- Slide-Over Drawer for Detailed Internship Specification -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-surface border-l border-surface-border p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
-      <div class="flex items-center justify-between pb-4 border-b border-surface-border">
+  <!-- Slide-Over Inspection Drawer -->
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-burgundy-deep/40 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#FAF7F0] border-l border-[#E6DCce] p-8 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-5 border-b border-[#E6DCce]">
         <div class="flex items-center gap-2">
-          <span id="drawer-match-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">95% Match</span>
-          <span id="drawer-org-badge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">Company</span>
+          <span id="drawer-match-badge" class="px-3 py-0.5 rounded-full text-xs font-mono font-bold bg-burgundy/10 text-burgundy border border-burgundy/20">98% Match</span>
+          <span id="drawer-org-badge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream-200 text-burgundy/80">Company</span>
         </div>
-        <button id="close-drawer-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-surface-elevated transition">
+        <button id="close-drawer-btn" class="p-1.5 rounded-lg text-burgundy/60 hover:text-burgundy hover:bg-cream-200 transition">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <div class="py-6 flex-1 flex flex-col gap-6">
         <div>
-          <h2 id="drawer-role-title" class="text-2xl font-bold text-white tracking-tight leading-snug">AI Research Intern</h2>
-          <div id="drawer-company-name" class="text-base text-indigo-400 font-medium mt-1">DeepMind Technologies</div>
-          <div class="flex items-center gap-3 text-xs text-slate-400 mt-3">
-            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">London, UK</span></span>
+          <h2 id="drawer-role-title" class="font-display text-3xl font-bold text-burgundy leading-tight">AI Research Fellow</h2>
+          <div id="drawer-company-name" class="text-sm font-semibold text-burgundy-muted mt-1">Anthropic</div>
+          <div class="flex items-center gap-3 text-xs text-burgundy/70 mt-3 font-medium">
+            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">San Francisco, CA</span></span>
             <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">6 Months</span></span>
           </div>
         </div>
 
-        <div class="p-4 rounded-xl bg-surface-card border border-surface-border flex items-center justify-between">
+        <div class="p-4 rounded-xl bg-white border border-[#E6DCce] flex items-center justify-between shadow-sm">
           <div>
-            <div class="text-[11px] font-mono text-slate-400 uppercase">Offered Compensation</div>
-            <div id="drawer-stipend" class="text-lg font-bold font-mono text-emerald-400 mt-0.5">£2,800 / month</div>
+            <div class="text-[10px] font-mono text-burgundy/60 uppercase tracking-wider font-semibold">Compensation</div>
+            <div id="drawer-stipend" class="text-lg font-bold font-mono text-burgundy mt-0.5">$9,000 / month</div>
           </div>
           <div class="text-right">
-            <div class="text-[11px] font-mono text-slate-400 uppercase">Deadline</div>
-            <div id="drawer-deadline" class="text-xs font-mono text-slate-200 mt-0.5">2026-11-30</div>
+            <div class="text-[10px] font-mono text-burgundy/60 uppercase tracking-wider font-semibold">Deadline</div>
+            <div id="drawer-deadline" class="text-xs font-mono text-burgundy mt-0.5 font-medium">2026-11-15</div>
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Required Skills & Keywords</h4>
+          <h4 class="text-xs font-mono uppercase tracking-wider text-burgundy/60 font-bold mb-2">Technical Requirements</h4>
           <div id="drawer-skills-list" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div>
-          <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Metadata & Provenance</h4>
+          <h4 class="text-xs font-mono uppercase tracking-wider text-burgundy/60 font-bold mb-2">System Record</h4>
           <div class="grid grid-cols-2 gap-3 text-xs">
-            <div class="p-3 rounded-lg bg-surface-card border border-surface-border">
-              <span class="text-slate-400">Scraped Source:</span>
-              <div id="drawer-source" class="font-medium text-slate-200 mt-0.5">LinkedIn</div>
+            <div class="p-3 rounded-xl bg-white border border-[#E6DCce]">
+              <span class="text-burgundy/60">Source Platform:</span>
+              <div id="drawer-source" class="font-semibold text-burgundy mt-0.5">LinkedIn</div>
             </div>
-            <div class="p-3 rounded-lg bg-surface-card border border-surface-border">
-              <span class="text-slate-400">Detection Date:</span>
-              <div id="drawer-date" class="font-medium text-slate-200 mt-0.5">2026-10-11</div>
+            <div class="p-3 rounded-xl bg-white border border-[#E6DCce]">
+              <span class="text-burgundy/60">Recorded On:</span>
+              <div id="drawer-date" class="font-semibold text-burgundy mt-0.5">2026-10-11</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="pt-4 border-t border-surface-border flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-3 rounded-xl border border-surface-border hover:border-slate-600 bg-surface-card text-slate-300 hover:text-white transition">
-          <i class="ph ph-bookmark-simple text-lg"></i>
+      <div class="pt-5 border-t border-[#E6DCce] flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 rounded-xl border border-[#E6DCce] bg-white text-burgundy hover:bg-cream-100 transition shadow-sm">
+          <i class="ph ph-bookmark text-lg"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-center text-sm text-white shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
-          <span>Apply Directly on Source Portal</span>
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 rounded-xl btn-burgundy-metal text-cream-50 font-semibold text-xs tracking-wider text-center shadow-lg transition flex items-center justify-center gap-2">
+          <span>Apply on Official Portal</span>
           <i class="ph ph-arrow-up-right"></i>
         </a>
       </div>
     </div>
   </div>
 
-  <!-- Terminal Activity Log Slide Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-surface-card border-t border-l border-surface-border rounded-tl-2xl shadow-2xl z-40 hidden transition-all duration-300">
-    <div class="p-3 bg-surface-elevated rounded-tl-2xl border-b border-surface-border flex items-center justify-between">
-      <div class="flex items-center gap-2 text-xs font-mono text-slate-300">
-        <i class="ph ph-terminal text-cyan-400"></i>
-        <span>Live Scraper Telemetry</span>
+  <!-- Telemetry Slide Drawer -->
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-burgundy-surface border-t border-l border-burgundy-border rounded-tl-2xl shadow-2xl z-40 hidden transition-all duration-300">
+    <div class="p-3 bg-burgundy-deep rounded-tl-2xl border-b border-burgundy-border flex items-center justify-between">
+      <div class="flex items-center gap-2 text-xs font-mono text-cream-100 font-semibold">
+        <i class="ph ph-terminal text-bronze"></i>
+        <span>Telemetry Stream</span>
       </div>
-      <button id="close-logs-btn" class="p-1 rounded text-slate-400 hover:text-white transition">
+      <button id="close-logs-btn" class="p-1 rounded text-cream-200/60 hover:text-white transition">
         <i class="ph ph-x"></i>
       </button>
     </div>
-    <div id="logs-content" class="p-4 font-mono text-[11px] text-slate-300 max-h-72 overflow-y-auto space-y-1.5 leading-relaxed bg-[#070a0f]">
-      <!-- Logs stream here -->
-    </div>
+    <div id="logs-content" class="p-4 font-mono text-[11px] text-cream-200/90 max-h-64 overflow-y-auto space-y-1 bg-burgundy-deep"></div>
   </div>
 
   <!-- Scraper Configuration Modal -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-panel border border-surface-border rounded-2xl max-w-lg w-full p-6 shadow-2xl bg-surface">
-      <div class="flex items-center justify-between pb-4 border-b border-surface-border">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="ph-fill ph-gear text-indigo-400"></i>
+  <div id="scrape-config-modal" class="fixed inset-0 bg-burgundy-deep/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#FAF7F0] border border-[#E6DCce] rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-[#E6DCce]">
+        <h3 class="font-display text-xl font-bold text-burgundy flex items-center gap-2">
+          <i class="ph ph-sliders text-bronze"></i>
           <span>Configure Scraping Engine</span>
         </h3>
-        <button id="close-config-btn" class="text-slate-400 hover:text-white">
+        <button id="close-config-btn" class="text-burgundy/60 hover:text-burgundy">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <form id="scrape-config-form" class="mt-4 space-y-4">
         <div>
-          <label class="text-xs font-mono uppercase text-slate-400 mb-1.5 block">Target Regions</label>
+          <label class="text-[11px] font-mono uppercase tracking-wider text-burgundy/70 mb-2 block font-semibold">Target Regions</label>
           <div class="grid grid-cols-3 gap-2 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="usa" checked> USA</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="worldwide" checked> Worldwide</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="usa" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="worldwide" value="worldwide" checked> Worldwide</label>
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-mono uppercase text-slate-400 mb-1.5 block">Platforms</label>
+          <label class="text-[11px] font-mono uppercase tracking-wider text-burgundy/70 mb-2 block font-semibold">Platforms</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
-            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#E6DCce] cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white transition mt-2">
-          Launch Scraping Fleet
+        <button type="submit" class="w-full py-2.5 rounded-xl btn-burgundy-metal text-cream-50 font-semibold text-xs tracking-wider transition mt-2">
+          Run Scraping Cycle
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="{{ url_for('static', filename='app_radar.js') }}"></script>
 </body>
 </html>
