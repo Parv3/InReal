@@ -258,7 +258,6 @@
         <!-- People Flat Avatars & Social Proof Block -->
         <div class="flex flex-wrap items-center gap-4 mt-6">
           <div class="flex -space-x-2.5 overflow-hidden p-1">
-            <!-- Flat Vector People Avatars -->
             <div class="w-10 h-10 rounded-full bg-[#EF4444] flat-avatar text-white font-bold text-xs" title="Researcher">
               <svg viewBox="0 0 36 36" class="w-7 h-7" fill="currentColor"><circle cx="18" cy="12" r="7"/><path d="M18 21c-6 0-11 3.5-11 8v2h22v-2c0-4.5-5-8-11-8z"/></svg>
             </div>
@@ -291,6 +290,50 @@
             <span class="flex items-center gap-1.5"><i class="ph ph-heart-fill text-rose-500"></i> Open Community</span>
             <span class="text-orange-600 font-extrabold">100% Free</span>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Feature Highlights: Incorporating SVG Flat Illustrations -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      
+      <!-- Feature Card 1: Mentorship, Verification & Interview Prep (SVG) -->
+      <div class="glass-card p-6 flex flex-col sm:flex-row items-center gap-5 relative overflow-hidden bg-gradient-to-br from-white/90 via-amber-50/50 to-orange-50/40">
+        <div class="w-full sm:w-44 shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-[4px_4px_0px_#0F172A] bg-white p-1">
+          <img 
+            src="{{ url_for('static', filename='illustration_interview.svg') }}" 
+            alt="Flat Illustration of Mentorship and Interview Match" 
+            class="w-full h-auto object-contain"
+          >
+        </div>
+        <div class="flex-1">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-300 mb-2">
+            <i class="ph ph-sparkle-fill text-orange-500"></i> Direct Verification
+          </div>
+          <h3 class="text-base font-bold text-slate-900 leading-snug">Vetted by Engineers & Lab Mentors</h3>
+          <p class="text-xs text-slate-600 mt-1.5 font-medium leading-relaxed">
+            Every posted opportunity is parsed directly from career endpoints and official job boards with exact compensation and deadline dates.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature Card 2: Remote & Distributed Research Collaboration (SVG) -->
+      <div class="glass-card p-6 flex flex-col sm:flex-row items-center gap-5 relative overflow-hidden bg-gradient-to-br from-white/90 via-blue-50/50 to-teal-50/40">
+        <div class="w-full sm:w-44 shrink-0 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-[4px_4px_0px_#0F172A] bg-white p-1">
+          <img 
+            src="{{ url_for('static', filename='illustration_remote.svg') }}" 
+            alt="Flat Illustration of Remote Robotics Tele-operation & Research" 
+            class="w-full h-auto object-contain"
+          >
+        </div>
+        <div class="flex-1">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-800 text-[11px] font-bold border border-teal-300 mb-2">
+            <i class="ph ph-globe text-teal-600"></i> Distributed & Global
+          </div>
+          <h3 class="text-base font-bold text-slate-900 leading-snug">Global & Remote Friendly</h3>
+          <p class="text-xs text-slate-600 mt-1.5 font-medium leading-relaxed">
+            Filter easily for remote research fellowships, high-stipend internships, and international visa sponsorship options.
+          </p>
         </div>
       </div>
     </section>
@@ -369,7 +412,7 @@
             <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="glass-btn px-3 py-2.5 flex items-center gap-1 text-slate-600 hover:text-slate-900">
+          <button id="reset-filters-btn" class="glass-btn px-3.5 py-2.5 flex items-center gap-1 text-slate-600 hover:text-slate-900">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
             <span>Reset</span>
           </button>
@@ -408,12 +451,16 @@
         <!-- Injected via JavaScript -->
       </div>
 
-      <!-- Empty State with Flat Illustration Avatar -->
-      <div id="empty-state" class="hidden glass-panel p-12 text-center flex-col items-center justify-center">
-        <div class="w-16 h-16 rounded-full bg-amber-400 border-2 border-slate-900 flex items-center justify-center mb-3 shadow-[3px_3px_0px_#0F172A]">
-          <i class="ph ph-binoculars text-2xl text-slate-900"></i>
+      <!-- Empty State with Flat Envelope SVG Illustration -->
+      <div id="empty-state" class="hidden glass-panel p-10 text-center flex-col items-center justify-center">
+        <div class="w-28 h-28 mx-auto mb-3">
+          <img 
+            src="{{ url_for('static', filename='illustration_envelope.svg') }}" 
+            alt="Flat Illustration of Empty Search Mail" 
+            class="w-full h-full object-contain"
+          >
         </div>
-        <h3 class="text-base font-bold text-slate-900">No Matching Opportunities</h3>
+        <h3 class="text-base font-bold text-slate-900">No Matching Opportunities Found</h3>
         <p class="text-xs text-slate-500 mt-1 max-w-sm font-medium">Try broadening your search keywords or resetting region and stipend filters.</p>
         <button id="empty-reset-btn" class="mt-4 glass-btn px-4 py-2 text-xs text-slate-800">Clear All Filters</button>
       </div>
