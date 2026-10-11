@@ -3,31 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INREAL // DIGITAL MALFUNCTION</title>
+  <title>InReal | Internship Platform</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            mono: ['"Share Tech Mono"', 'monospace'],
-            glitch: ['"VT323"', 'monospace'],
-            cyber: ['"Orbitron"', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
           },
           colors: {
-            void: '#050508',
-            cyanGlitch: '#00F0FF',
-            magentaGlitch: '#FF0055',
-            neonGreen: '#00FF66',
-            amberGlitch: '#FFE600',
-            matrixDark: '#0A0E17',
+            flat: {
+              canvas: '#F4F7FB',
+              surface: '#FFFFFF',
+              dark: '#181E29',
+              blue: '#3B82F6',
+              blueLight: '#EFF6FF',
+              purple: '#8B5CF6',
+              purpleLight: '#F5F3FF',
+              emerald: '#10B981',
+              emeraldLight: '#ECFDF5',
+              coral: '#F97316',
+              coralLight: '#FFF7ED',
+              yellow: '#FACC15',
+              yellowLight: '#FEFCE8',
+              pink: '#EC4899',
+              pinkLight: '#FDF2F8',
+              border: '#E2E8F0',
+            }
           }
         }
       }
@@ -35,283 +45,247 @@
   </script>
 
   <style>
-    /* Cyber CRT Scanline & Pixel Grid Overlay */
+    /* Flat Design 2.0: Bold Geometry, Crisp 1px Borders, Zero Skeuomorphism */
     body {
-      background-color: #050508;
-      color: #E2E8F0;
-      font-family: 'Share Tech Mono', monospace;
-      overflow-x: hidden;
+      background-color: #F4F7FB;
+      color: #181E29;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Scanlines effect */
-    .scanlines {
-      background: linear-gradient(
-        to bottom,
-        rgba(255,255,255,0),
-        rgba(255,255,255,0) 50%,
-        rgba(0, 0, 0, 0.45) 50%,
-        rgba(0, 0, 0, 0.45)
-      );
-      background-size: 100% 4px;
+    .flat-card {
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 20px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .flat-card:hover {
+      border-color: #CBD5E1;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.06);
     }
 
-    /* Glitch Chromatic Text Splitting */
-    .glitch-text {
-      position: relative;
-      display: inline-block;
-      text-shadow: 2px 0 #FF0055, -2px 0 #00F0FF;
+    .flat-btn {
+      border-radius: 12px;
+      font-weight: 700;
+      transition: all 0.16s ease;
     }
-    .glitch-text:hover {
-      animation: glitch-anim 0.3s infinite;
+    .flat-btn:hover {
+      transform: translateY(-1px);
     }
-
-    @keyframes glitch-anim {
-      0% { text-shadow: 2px 0 #FF0055, -2px 0 #00F0FF; transform: translate(0); }
-      20% { text-shadow: -3px 0 #FF0055, 3px 0 #00F0FF; transform: translate(-2px, 1px); }
-      40% { text-shadow: 3px 0 #FF0055, -3px 0 #00F0FF; transform: translate(1px, -1px); }
-      60% { text-shadow: -2px 0 #FF0055, 2px 0 #00F0FF; transform: translate(-1px, 2px); }
-      80% { text-shadow: 3px 0 #FF0055, -1px 0 #00F0FF; transform: translate(2px, -1px); }
-      100% { text-shadow: 2px 0 #FF0055, -2px 0 #00F0FF; transform: translate(0); }
+    .flat-btn:active {
+      transform: translateY(1px);
     }
 
-    /* Cyber Glitch Cards with Angled Chamfered Corners */
-    .cyber-card {
-      background: rgba(10, 14, 23, 0.88);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(0, 240, 255, 0.35);
-      clip-path: polygon(
-        0 0,
-        calc(100% - 14px) 0,
-        100% 14px,
-        100% 100%,
-        14px 100%,
-        0 calc(100% - 14px)
-      );
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.08), inset 0 0 15px rgba(255, 0, 85, 0.05);
-      transition: all 0.2s ease;
-    }
-    .cyber-card:hover {
-      border-color: #00F0FF;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.25), -3px 0 #FF0055, 3px 0 #00F0FF;
-      transform: translateY(-2px);
-    }
-
-    /* Cyber Button */
-    .cyber-btn {
-      position: relative;
-      background: #00F0FF;
-      color: #050508;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-      transition: all 0.15s ease;
-      box-shadow: 3px 3px 0px #FF0055;
-    }
-    .cyber-btn:hover {
-      background: #FF0055;
-      color: #FFFFFF;
-      box-shadow: -3px -3px 0px #00F0FF;
-      transform: translate(1px, 1px);
-    }
-
-    .cyber-btn-outline {
-      background: rgba(0, 240, 255, 0.05);
-      color: #00F0FF;
-      border: 1px solid #00F0FF;
-      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-      transition: all 0.15s ease;
-    }
-    .cyber-btn-outline:hover {
-      background: #00F0FF;
-      color: #050508;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
-    }
-
-    /* Filter Tabs */
-    .glitch-tab {
-      background: rgba(10, 14, 23, 0.9);
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      color: #94A3B8;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 6px 14px;
+    /* Minimalist Pill Tabs */
+    .filter-pill {
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 6px 16px;
+      color: #64748B;
       cursor: pointer;
       transition: all 0.15s ease;
     }
-    .glitch-tab:hover {
-      color: #00F0FF;
-      border-color: #00F0FF;
-      text-shadow: 0 0 8px #00F0FF;
+    .filter-pill:hover {
+      color: #181E29;
+      border-color: #CBD5E1;
+      background: #F8FAFC;
     }
-    .glitch-tab.active {
-      background: #00F0FF !important;
-      color: #050508 !important;
-      border-color: #00F0FF !important;
-      font-weight: 900;
-      box-shadow: 0 0 14px rgba(0, 240, 255, 0.7);
+    .filter-pill.active {
+      background: #181E29 !important;
+      color: #FFFFFF !important;
+      border-color: #181E29 !important;
     }
 
-    /* Custom cyber scrollbar */
+    /* Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #050508; }
-    ::-webkit-scrollbar-thumb { background: #00F0FF; border-radius: 0px; }
-    ::-webkit-scrollbar-thumb:hover { background: #FF0055; }
+    ::-webkit-scrollbar-track { background: #F4F7FB; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
   </style>
 </head>
 
-<body class="bg-[#050508] min-h-screen text-slate-200 flex flex-col relative antialiased selection:bg-[#FF0055] selection:text-white font-mono">
+<body class="bg-[#F4F7FB] min-h-screen text-[#181E29] flex flex-col antialiased selection:bg-[#3B82F6] selection:text-white">
 
-  <!-- Interactive 3D WebGL Digital Error & RGB Shift Glitch Mesh Canvas -->
-  <canvas id="glitch-mesh-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-80"></canvas>
-  <div class="fixed inset-0 pointer-events-none z-10 scanlines opacity-50"></div>
+  <!-- Interactive Background Canvas (Geometric Float Shapes) -->
+  <canvas id="flat-shapes-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
 
-  <!-- Error Notification Alert -->
-  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-[#0A0E17]/95 border-2 border-[#FF0055] p-4 shadow-[0_0_20px_rgba(255,0,85,0.4)]">
+  <!-- Notification Banner -->
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-white border border-[#E2E8F0] p-4 rounded-2xl shadow-xl transition-all">
     <div class="flex items-start gap-3">
-      <i class="ph ph-warning-octagon text-xl text-[#FF0055] animate-pulse"></i>
-      <div class="flex-1">
-        <h4 id="action-title" class="font-cyber text-xs uppercase tracking-wider text-[#FF0055]">SYSTEM INTERRUPT</h4>
-        <p id="action-message" class="text-xs text-slate-300 mt-0.5">MANUAL BYPASS REQUIRED IN BROWSER.</p>
+      <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+        <i class="ph ph-bell-ringing text-lg"></i>
       </div>
-      <button id="action-dismiss-btn" class="cyber-btn px-3 py-1 text-xs">
-        BYPASS
+      <div class="flex-1">
+        <h4 id="action-title" class="font-bold text-sm text-[#181E29]">Verification Notice</h4>
+        <p id="action-message" class="text-xs text-slate-500 mt-0.5">Please check the browser window.</p>
+      </div>
+      <button id="action-dismiss-btn" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded-lg transition">
+        Dismiss
       </button>
     </div>
   </div>
 
-  <!-- Cyber Glitch Header -->
-  <header class="sticky top-0 z-30 w-full bg-[#050508]/85 backdrop-blur-md border-b border-[#00F0FF]/30">
-    <div class="max-w-7xl mx-auto px-6 h-18 py-3 flex items-center justify-between gap-4">
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-30 w-full bg-white/90 backdrop-blur-md border-b border-[#E2E8F0]">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
       
-      <!-- Brand & RGB Splitting Logo -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-[#0A0E17] border border-[#00F0FF] flex items-center justify-center text-[#00F0FF] shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-          <i class="ph ph-terminal text-2xl"></i>
+      <!-- Brand & Flat Vector Icon -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i class="ph ph-briefcase text-2xl font-bold"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-cyber text-2xl font-black tracking-widest text-white glitch-text">INREAL</span>
-            <span class="px-2 py-0.5 bg-[#FF0055]/20 border border-[#FF0055] text-[10px] text-[#FF0055] font-bold">ERROR://2026</span>
+            <span class="font-display text-2xl font-black tracking-tight text-[#181E29]">InReal</span>
+            <span class="px-2.5 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">Radar</span>
           </div>
-          <span class="text-[11px] text-[#00F0FF]/80 tracking-widest uppercase hidden sm:inline">CYBER TELEMETRY RADAR</span>
+          <span class="text-xs text-slate-500 font-medium hidden sm:inline">Internship search</span>
         </div>
       </div>
 
-      <!-- Live Controls -->
+      <!-- Action Controls -->
       <div class="flex items-center gap-3">
-        <!-- Live Status Pill -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1 bg-[#0A0E17] border border-[#00FF66]/50 text-xs">
-          <span id="ping-dot" class="w-2 h-2 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66]"></span>
-          <span id="scraper-status-text" class="text-[#00FF66] text-[11px] uppercase tracking-wider">ONLINE</span>
+        <!-- Live Status -->
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-700">
+          <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="scraper-status-text">Active</span>
         </div>
 
-        <button id="open-logs-btn" class="cyber-btn-outline px-3.5 py-1.5 text-xs flex items-center gap-1.5">
-          <i class="ph ph-cpu text-sm text-[#00F0FF]"></i>
-          <span class="hidden md:inline">CONSOLE</span>
+        <button id="open-logs-btn" class="px-4 py-2 bg-white border border-[#E2E8F0] hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-700 transition flex items-center gap-1.5">
+          <i class="ph ph-terminal text-sm text-slate-500"></i>
+          <span class="hidden md:inline">Logs</span>
         </button>
 
-        <button id="trigger-scrape-btn" class="cyber-btn px-4 py-2 text-xs flex items-center gap-2 font-cyber">
-          <i class="ph ph-lightning text-sm"></i>
-          <span>EXECUTE</span>
+        <button id="trigger-scrape-btn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2">
+          <i class="ph ph-arrows-clockwise text-sm"></i>
+          <span>Scrape</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- Main Content Layout -->
-  <main class="relative z-20 max-w-7xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
+  <main class="relative z-10 max-w-6xl mx-auto px-6 py-8 flex-1 w-full flex flex-col gap-8">
 
-    <!-- Glitch Telemetry Data Meters -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="cyber-card p-4 relative overflow-hidden group">
-        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#00F0FF]/5 pointer-events-none group-hover:text-[#00F0FF]/15 transition">#01</div>
-        <div class="text-xs text-[#00F0FF] uppercase tracking-wider font-bold">FELLOWSHIPS FOUND</div>
-        <div class="font-cyber text-3xl font-black text-white mt-1" id="stat-total-jobs">0</div>
-        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
-          <div class="bg-[#00F0FF] h-full w-4/5 animate-pulse"></div>
+    <!-- Flat Illustration Hero Feature Banner -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+      
+      <!-- Primary Feature Banner -->
+      <div class="md:col-span-8 bg-white border border-[#E2E8F0] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden shadow-xs">
+        <div class="max-w-md relative z-10">
+          <span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold uppercase tracking-wide">
+            Curated Database
+          </span>
+          <h1 class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#181E29] mt-3 leading-tight">
+            Clear, technical internship opportunities.
+          </h1>
+          <p class="text-sm text-slate-500 mt-2.5 leading-relaxed font-medium">
+            Direct job links, verified stipends, and explicit qualifications aggregated across 16+ verified engineering boards and labs.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 pt-6 mt-6 border-t border-[#F1F5F9] relative z-10">
+          <div>
+            <div class="text-2xl font-black text-[#181E29]" id="stat-total-jobs">0</div>
+            <div class="text-xs text-slate-500 font-bold mt-0.5">Total Listings</div>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-emerald-600" id="stat-paid-jobs">0</div>
+            <div class="text-xs text-slate-500 font-bold mt-0.5">Paid Roles</div>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-purple-600">16+</div>
+            <div class="text-xs text-slate-500 font-bold mt-0.5">Sources Hooked</div>
+          </div>
+        </div>
+
+        <!-- Flat Vector Illustration Shapes in Background -->
+        <div class="absolute right-0 bottom-0 pointer-events-none opacity-85 hidden sm:block">
+          <svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="70" y="30" width="140" height="150" rx="20" fill="#EFF6FF"/>
+            <rect x="90" y="50" width="100" height="12" rx="6" fill="#3B82F6"/>
+            <rect x="90" y="74" width="70" height="8" rx="4" fill="#93C5FD"/>
+            <circle cx="50" cy="120" r="35" fill="#FEFCE8"/>
+            <circle cx="50" cy="120" r="22" fill="#FACC15"/>
+            <path d="M140 130L170 170H110L140 130Z" fill="#F5F3FF"/>
+            <circle cx="175" cy="45" r="14" fill="#EC4899"/>
+          </svg>
         </div>
       </div>
 
-      <div class="cyber-card p-4 relative overflow-hidden group">
-        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#FF0055]/5 pointer-events-none group-hover:text-[#FF0055]/15 transition">#02</div>
-        <div class="text-xs text-[#FF0055] uppercase tracking-wider font-bold">NEW DETECTIONS</div>
-        <div class="font-cyber text-3xl font-black text-white mt-1" id="stat-new-jobs">0</div>
-        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
-          <div class="bg-[#FF0055] h-full w-3/5 animate-pulse"></div>
+      <!-- Flat Curation Stat Card -->
+      <div class="md:col-span-4 bg-blue-600 text-white rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden shadow-lg shadow-blue-600/10">
+        <div>
+          <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white uppercase tracking-wider">
+            Verified Stack
+          </span>
+          <h3 class="font-display text-2xl font-extrabold mt-3 leading-snug">
+            Zero filler. Concrete specs only.
+          </h3>
+          <p class="text-xs text-blue-100 mt-2 leading-relaxed font-medium">
+            Filtered by verifiable engineering stacks: PyTorch, distributed systems, CUDA, and NLP.
+          </p>
         </div>
-      </div>
 
-      <div class="cyber-card p-4 relative overflow-hidden group">
-        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#00FF66]/5 pointer-events-none group-hover:text-[#00FF66]/15 transition">#03</div>
-        <div class="text-xs text-[#00FF66] uppercase tracking-wider font-bold">FUNDED STIPENDS</div>
-        <div class="font-cyber text-3xl font-black text-white mt-1" id="stat-paid-jobs">0</div>
-        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
-          <div class="bg-[#00FF66] h-full w-2/3 animate-pulse"></div>
-        </div>
-      </div>
-
-      <div class="cyber-card p-4 relative overflow-hidden group">
-        <div class="absolute -right-6 -bottom-6 text-7xl font-glitch text-[#FFE600]/5 pointer-events-none group-hover:text-[#FFE600]/15 transition">#04</div>
-        <div class="text-xs text-[#FFE600] uppercase tracking-wider font-bold">PORTALS HOOKED</div>
-        <div class="font-cyber text-3xl font-black text-white mt-1">16+</div>
-        <div class="w-full bg-slate-800 h-1 mt-3 overflow-hidden">
-          <div class="bg-[#FFE600] h-full w-full animate-pulse"></div>
+        <div class="pt-6 border-t border-white/20 mt-6 flex items-center justify-between">
+          <span class="text-xs text-blue-100 font-bold uppercase">Saved Bookmarks:</span>
+          <span id="spotlight-saved-count" class="px-3 py-1 bg-white text-blue-600 font-bold text-xs rounded-xl shadow-xs">0 Items</span>
         </div>
       </div>
     </section>
 
-    <!-- Search & Command Filter Console -->
-    <section class="cyber-card p-5 flex flex-col gap-4">
+    <!-- Search & Faceted Filter Control Bar -->
+    <section class="bg-white border border-[#E2E8F0] rounded-2xl p-5 flex flex-col gap-4 shadow-xs">
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
         <!-- Search Input -->
         <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#00F0FF] text-base"></i>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="QUERY ROLE, INSTITUTION (ANTHROPIC, GOOGLE), OR STACK (PYTORCH, CUDA)..." 
-            class="w-full bg-[#050508] border border-[#00F0FF]/40 pl-10 pr-4 py-2.5 text-xs text-cyanGlitch placeholder-slate-500 focus:outline-none focus:border-[#00F0FF] focus:shadow-[0_0_15px_rgba(0,240,255,0.4)] transition tracking-wider uppercase"
+            placeholder="Search by role, company (Google, Anthropic), or skills (PyTorch, JAX)..." 
+            class="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#181E29] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 transition font-medium"
           >
-          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[#00F0FF] bg-[#00F0FF]/10 px-1.5 py-0.5 border border-[#00F0FF]/30 hidden sm:inline">SYS_EXEC</span>
         </div>
 
         <!-- Controls -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <select id="source-filter" class="bg-[#050508] border border-[#00F0FF]/40 text-xs text-[#00F0FF] px-3 py-2.5 focus:outline-none uppercase tracking-wider">
-            <option value="all">ALL STREAMS</option>
+          <select id="source-filter" class="bg-[#F8FAFC] border border-[#E2E8F0] text-xs font-bold px-3 py-2.5 rounded-xl text-slate-700 focus:outline-none">
+            <option value="all">All Sources</option>
           </select>
 
-          <button id="filter-bookmarks-btn" class="cyber-btn-outline px-3.5 py-2.5 text-xs flex items-center gap-1.5">
-            <i class="ph ph-bookmark-simple text-sm text-[#FF0055]"></i>
-            <span>SAVED (<span id="bookmark-count">0</span>)</span>
+          <button id="filter-bookmarks-btn" class="px-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+            <i class="ph ph-bookmark-simple text-sm text-pink-500"></i>
+            <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="cyber-btn-outline px-3.5 py-2.5 text-xs flex items-center gap-1">
+          <button id="reset-filters-btn" class="px-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-            <span>RESET</span>
+            <span>Reset</span>
           </button>
         </div>
       </div>
 
-      <!-- Segmented Region & Stipend Console Tabs -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#00F0FF]/20">
-        <!-- Region Tabs -->
+      <!-- Segmented Region & Stipend Filter Pills -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#F1F5F9]">
+        <!-- Region Pills -->
         <div class="flex items-center gap-1.5" id="location-tabs">
-          <button class="glitch-tab active" data-val="all">GLOBAL (<span id="count-all">0</span>)</button>
-          <button class="glitch-tab" data-val="India">INDIA (<span id="count-india">0</span>)</button>
-          <button class="glitch-tab" data-val="Remote">REMOTE (<span id="count-remote">0</span>)</button>
-          <button class="glitch-tab" data-val="International">INTL (<span id="count-global">0</span>)</button>
+          <button class="filter-pill active" data-val="all">All (<span id="count-all">0</span>)</button>
+          <button class="filter-pill" data-val="India">India (<span id="count-india">0</span>)</button>
+          <button class="filter-pill" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
+          <button class="filter-pill" data-val="International">Global (<span id="count-global">0</span>)</button>
         </div>
 
-        <!-- Stipend Chips -->
+        <!-- Stipend Pills -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
-          <button class="glitch-tab active" data-val="all">ALL STIPENDS</button>
-          <button class="glitch-tab" data-val="paid">PAID ONLY</button>
-          <button class="glitch-tab" data-val="20k">> 20K</button>
-          <button class="glitch-tab" data-val="50k">> 50K</button>
+          <button class="filter-pill active" data-val="all">Any Stipend</button>
+          <button class="filter-pill" data-val="paid">Paid Only</button>
+          <button class="filter-pill" data-val="20k">> ₹20k</button>
+          <button class="filter-pill" data-val="50k">> ₹50k</button>
         </div>
       </div>
     </section>
@@ -323,64 +297,66 @@
       </div>
 
       <!-- Empty State -->
-      <div id="empty-state" class="hidden cyber-card p-10 text-center flex-col items-center justify-center">
-        <i class="ph ph-prohibit text-4xl mb-2 text-[#FF0055]"></i>
-        <h3 class="font-cyber text-lg font-bold text-white tracking-widest">DATA PACKET EMPTY</h3>
-        <p class="text-xs text-slate-400 mt-1 uppercase">NO MEMORY BLOCKS MATCHED SPECIFIED FILTER VECTOR.</p>
-        <button id="empty-reset-btn" class="mt-4 cyber-btn px-4 py-2 text-xs">RESET FILTERS</button>
+      <div id="empty-state" class="hidden flat-card p-12 text-center flex-col items-center justify-center">
+        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-3">
+          <i class="ph ph-magnifying-glass"></i>
+        </div>
+        <h3 class="font-display text-xl font-bold text-[#181E29]">No internships found</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm">Try broadening your search query or reset the applied filter parameters.</p>
+        <button id="empty-reset-btn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold">Reset filters</button>
       </div>
     </section>
   </main>
 
-  <!-- Slide-Over Inspection Terminal -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#050508]/80 backdrop-blur-md z-50 hidden transition-opacity duration-200">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#0A0E17] border-l-2 border-[#00F0FF] p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
+  <!-- Slide-Over Inspection Drawer -->
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-[#E2E8F0] p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-4 border-b border-[#00F0FF]/30">
-        <span id="drawer-org-badge" class="px-3 py-1 border border-[#00F0FF] text-[10px] font-bold text-[#00F0FF] uppercase tracking-widest bg-[#00F0FF]/10">COMPANY</span>
-        <button id="close-drawer-btn" class="p-1 hover:bg-[#FF0055] hover:text-white transition border border-[#00F0FF]/40 text-[#00F0FF]">
+      <div class="flex items-center justify-between pb-4 border-b border-[#F1F5F9]">
+        <span id="drawer-org-badge" class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase">Company</span>
+        <button id="close-drawer-btn" class="p-1 rounded-lg hover:bg-slate-100 text-slate-500 transition">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <div class="py-5 flex-1 flex flex-col gap-5">
         <div>
-          <h2 id="drawer-role-title" class="font-cyber text-2xl font-black text-white leading-tight tracking-wide glitch-text">ROLE TITLE</h2>
-          <div id="drawer-company-name" class="text-sm font-bold text-[#00F0FF] mt-1.5 uppercase tracking-wider">ORGANIZATION</div>
-          <div class="flex items-center gap-4 text-xs text-slate-400 mt-3 font-mono">
-            <span class="flex items-center gap-1"><i class="ph ph-map-pin text-[#FF0055]"></i> <span id="drawer-location">LOCATION</span></span>
-            <span class="flex items-center gap-1"><i class="ph ph-clock text-[#00FF66]"></i> <span id="drawer-duration">DURATION</span></span>
+          <h2 id="drawer-role-title" class="font-display text-2xl font-bold leading-tight text-[#181E29]">Role Title</h2>
+          <div id="drawer-company-name" class="text-base font-bold text-blue-600 mt-1">Company</div>
+          <div class="flex items-center gap-3 text-xs text-slate-500 mt-2 font-medium">
+            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">Location</span></span>
+            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">Duration</span></span>
           </div>
         </div>
 
-        <div class="p-4 bg-[#050508] border border-[#00F0FF]/40 flex items-center justify-between">
+        <div class="p-4 bg-slate-50 border border-[#E2E8F0] rounded-2xl flex items-center justify-between">
           <div>
-            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">COMPENSATION SPEC</div>
-            <div id="drawer-stipend" class="font-cyber text-lg font-bold text-[#00FF66] mt-0.5">-</div>
+            <div class="text-[11px] text-slate-500 uppercase font-bold">Stipend</div>
+            <div id="drawer-stipend" class="text-base font-bold text-emerald-600 mt-0.5">-</div>
           </div>
           <div class="text-right">
-            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">DEADLINE</div>
-            <div id="drawer-deadline" class="text-xs font-bold text-white mt-0.5">ROLLING</div>
+            <div class="text-[11px] text-slate-500 uppercase font-bold">Deadline</div>
+            <div id="drawer-deadline" class="text-xs font-bold text-slate-700 mt-0.5">Rolling</div>
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs uppercase font-bold text-[#00F0FF] mb-2 tracking-widest">REQUIRED PROTOCOLS / SKILLS</h4>
+          <h4 class="text-xs uppercase font-bold text-slate-500 mb-2">Required Skills</h4>
           <div id="drawer-skills-list" class="flex flex-wrap gap-1.5"></div>
         </div>
 
-        <div class="text-xs text-slate-400 border-t border-[#00F0FF]/20 pt-4 space-y-1 font-mono">
-          <div>SOURCE STREAM: <span id="drawer-source" class="text-[#00F0FF] font-bold">PORTAL</span></div>
-          <div>TIMESTAMP RECORDED: <span id="drawer-date" class="text-white font-bold">-</span></div>
+        <div class="text-xs text-slate-500 border-t border-[#F1F5F9] pt-4 space-y-1">
+          <div>Source: <span id="drawer-source" class="font-bold text-[#181E29]">Portal</span></div>
+          <div>Recorded: <span id="drawer-date" class="font-bold text-[#181E29]">-</span></div>
         </div>
       </div>
 
-      <div class="pt-4 border-t border-[#00F0FF]/30 flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-3 cyber-btn-outline">
+      <div class="pt-4 border-t border-[#F1F5F9] flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 transition">
           <i class="ph ph-bookmark text-base"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 cyber-btn text-center text-xs font-black flex items-center justify-center gap-2">
-          <span>CONNECT SOURCE PORTAL</span>
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-center text-xs font-bold transition flex items-center justify-center gap-1.5">
+          <span>Apply on Official Site</span>
           <i class="ph ph-arrow-up-right text-xs"></i>
         </a>
       </div>
@@ -388,50 +364,50 @@
   </div>
 
   <!-- Telemetry Slide Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#0A0E17] border-t-2 border-l-2 border-[#00F0FF] shadow-2xl z-40 hidden transition-all duration-200">
-    <div class="p-3 bg-[#050508] border-b border-[#00F0FF]/30 flex items-center justify-between">
-      <span class="text-xs font-cyber tracking-widest text-[#00F0FF]">LIVE TELEMETRY STREAM</span>
-      <button id="close-logs-btn" class="p-1 hover:bg-[#FF0055] text-white">
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-white border-t border-l border-[#E2E8F0] rounded-tl-2xl shadow-xl z-40 hidden transition-all duration-200">
+    <div class="p-3 bg-slate-50 border-b border-[#E2E8F0] rounded-tl-2xl flex items-center justify-between">
+      <span class="text-xs font-bold text-slate-700">Scraper Activity Log</span>
+      <button id="close-logs-btn" class="p-1 hover:bg-white rounded text-slate-500">
         <i class="ph ph-x"></i>
       </button>
     </div>
-    <div id="logs-content" class="p-3 text-xs text-[#00FF66] max-h-60 overflow-y-auto font-mono bg-[#050508] space-y-1"></div>
+    <div id="logs-content" class="p-3 text-xs text-slate-700 max-h-60 overflow-y-auto font-mono bg-white space-y-1"></div>
   </div>
 
   <!-- Scraper Configuration Modal -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-[#050508]/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="cyber-card max-w-md w-full p-6">
-      <div class="flex items-center justify-between pb-3 border-b border-[#00F0FF]/30">
-        <h3 class="font-cyber text-sm font-bold text-white tracking-widest">CONFIGURE HARVEST ENGINES</h3>
-        <button id="close-config-btn" class="p-1 hover:bg-[#FF0055] text-white">
+  <div id="scrape-config-modal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2E8F0] rounded-3xl shadow-xl max-w-md w-full p-6">
+      <div class="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
+        <h3 class="font-display text-lg font-bold text-[#181E29]">Scraper Settings</h3>
+        <button id="close-config-btn" class="p-1 rounded-lg hover:bg-slate-100 text-slate-500">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
 
       <form id="scrape-config-form" class="mt-4 space-y-4">
         <div>
-          <label class="text-xs font-bold text-[#00F0FF] block mb-1.5 uppercase tracking-wider">TARGET GEOGRAPHIES</label>
-          <div class="grid grid-cols-3 gap-2 text-xs">
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="india" checked> INDIA</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="usa" checked> USA</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="europe" value="europe" checked> EUROPE</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="remote" value="remote" checked> REMOTE</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="worldwide" value="worldwide" checked> GLOBAL</label>
+          <label class="text-xs font-bold text-slate-700 block mb-1.5">Target Regions</label>
+          <div class="grid grid-cols-3 gap-2 text-xs font-medium">
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="usa" value="usa" checked> USA</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-[#00F0FF] block mb-1.5 uppercase tracking-wider">INJECTION TARGETS</label>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="sources" value="linkedin" checked> LINKEDIN</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="internshala" value="internshala" checked> INTERNSHALA</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="unstop" value="unstop" checked> UNSTOP</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="bigtech" value="bigtech" checked> BIG TECH</label>
+          <label class="text-xs font-bold text-slate-700 block mb-1.5">Target Sources</label>
+          <div class="grid grid-cols-2 gap-2 text-xs font-medium">
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-1.5 p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2.5 cyber-btn text-xs font-bold transition mt-2">
-          EXECUTE SCRAPING DAEMON
+        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition mt-2">
+          Start Scraper
         </button>
       </form>
     </div>

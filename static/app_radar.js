@@ -1,6 +1,6 @@
 /**
- * INREAL // GLITCH ART CYBER ENGINE
- * Digital Errors, RGB Chromatic Aberrations, Pixel Corruption, and Interactive Scanline Distortion
+ * InReal Dashboard
+ * Flat Illustration 2.0: Bold Geometry, Clean Color Blocks, Minimal Shading, and iOS-grade clarity.
  */
 
 let allInternships = [];
@@ -11,8 +11,17 @@ let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
+// Clean flat color blocks for category tags & badges
+const flatBadgeThemes = [
+  { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100', dot: 'bg-blue-500' },
+  { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100', dot: 'bg-purple-500' },
+  { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', dot: 'bg-emerald-500' },
+  { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100', dot: 'bg-orange-500' },
+  { bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-100', dot: 'bg-pink-500' }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
-  initGlitchArtCanvas();
+  initFlatShapesBackground();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -21,147 +30,73 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. 3D Web Experience: Interactive GLSL Glitch Art & RGB Displacement Shader
-// Real-time digital signal corruption, scanline tears, and cursor chromatic shift
+// 1. Interactive Flat Geometric Shapes Background Canvas
+// Bold geometric blocks & circles floating gently with pointer parallax
 // ==========================================
-function initGlitchArtCanvas() {
-  const canvas = document.getElementById('glitch-mesh-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+function initFlatShapesBackground() {
+  const canvas = document.getElementById('flat-shapes-canvas');
+  if (!canvas) return;
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-  const renderer = new THREE.WebGLRenderer({ 
-    canvas, 
-    alpha: true, 
-    antialias: false, // Intentional pixel-sharp digital corruption
-    powerPreference: 'high-performance' 
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-  const uniforms = {
-    u_time: { value: 0.0 },
-    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-    u_mouse: { value: new THREE.Vector2(0.5, 0.5) }
-  };
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = vec4(position, 1.0);
-    }
-  `;
-
-  // Glitch Art Fragment Shader with RGB Split, Block Pixel Corruption, and Scanline Noise
-  const fragmentShader = `
-    uniform float u_time;
-    uniform vec2 u_resolution;
-    uniform vec2 u_mouse;
-    varying vec2 vUv;
-
-    // Pseudorandom noise generator
-    float random(vec2 st) {
-      return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-    }
-
-    // Block noise for digital compression artifacts
-    float blockNoise(vec2 p) {
-      vec2 ipos = floor(p);
-      return random(ipos);
-    }
-
-    void main() {
-      vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-      float time = u_time * 1.5;
-
-      // Distance to cursor
-      float distToMouse = length(uv - u_mouse);
-      float mouseImpact = exp(-distToMouse * 4.0);
-
-      // Digital scanline & horizontal glitch displacement slice
-      float sliceNoise = blockNoise(vec2(0.0, floor(uv.y * 35.0) + time * 12.0));
-      float sliceDisplacement = step(0.88, sliceNoise) * (random(vec2(time, uv.y)) - 0.5) * 0.12;
-
-      // Cursor-triggered localized glitch shockwave
-      float cursorGlitch = sin(distToMouse * 25.0 - time * 8.0) * mouseImpact * 0.08;
-      
-      vec2 glitchUv = uv;
-      glitchUv.x += sliceDisplacement + cursorGlitch;
-
-      // Multi-frequency pixel grid corruption
-      vec2 grid = floor(glitchUv * vec2(120.0, 75.0));
-      float pixelCorrupt = random(grid + floor(time * 6.0));
-
-      // Chromatic Aberration RGB Shift calculation
-      float rOffset = 0.008 + mouseImpact * 0.02;
-      float bOffset = -0.008 - mouseImpact * 0.02;
-
-      // Channel generation with synthetic digital errors
-      float rPattern = sin((glitchUv.x + rOffset) * 45.0 + time * 2.0) * cos(glitchUv.y * 30.0);
-      float gPattern = sin(glitchUv.x * 45.0 + time * 1.5) * cos(glitchUv.y * 30.0);
-      float bPattern = sin((glitchUv.x + bOffset) * 45.0 + time * 1.2) * cos(glitchUv.y * 30.0);
-
-      // Color matrix
-      float r = smoothstep(0.4, 0.9, rPattern) + step(0.96, pixelCorrupt) * 0.8;
-      float g = smoothstep(0.5, 0.95, gPattern) * 0.4;
-      float b = smoothstep(0.35, 0.85, bPattern) * 1.2 + step(0.94, pixelCorrupt) * 0.9;
-
-      // Add digital noise grain
-      float grain = random(uv * 50.0 + time) * 0.12;
-      r += grain;
-      g += grain * 0.6;
-      b += grain;
-
-      // Cyber palette tuning: Cyan (#00F0FF), Magenta (#FF0055), Matrix Dark
-      vec3 col = vec3(r * 0.95, g * 0.8, b * 1.05);
-
-      // Deep void background attenuation
-      col *= 0.35 + mouseImpact * 0.45;
-
-      gl_FragColor = vec4(col, 0.85);
-    }
-  `;
-
-  const material = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms
-  });
-
-  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-  scene.add(quad);
-
-  // Mouse interaction
-  let mouseTargetX = 0.5, mouseTargetY = 0.5;
-  let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
-
-  window.addEventListener('mousemove', (e) => {
-    mouseTargetX = e.clientX / window.innerWidth;
-    mouseTargetY = 1.0 - (e.clientY / window.innerHeight);
-  }, { passive: true });
+  const ctx = canvas.getContext('2d');
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
 
   window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
   });
 
-  const clock = new THREE.Clock();
+  // Flat illustration geometric floating primitives
+  const shapes = [
+    { type: 'circle', x: width * 0.1, y: height * 0.2, radius: 45, color: '#EFF6FF', vx: 0.1, vy: 0.15 },
+    { type: 'circle', x: width * 0.85, y: height * 0.15, radius: 60, color: '#FEFCE8', vx: -0.12, vy: 0.1 },
+    { type: 'rect', x: width * 0.05, y: height * 0.7, size: 70, color: '#F5F3FF', angle: 0.2, vx: 0.08, vy: -0.1 },
+    { type: 'pill', x: width * 0.9, y: height * 0.75, w: 90, h: 40, color: '#ECFDF5', angle: -0.3, vx: -0.1, vy: -0.08 },
+    { type: 'circle', x: width * 0.5, y: height * 0.9, radius: 35, color: '#FDF2F8', vx: 0.15, vy: -0.12 }
+  ];
 
-  function animate() {
-    requestAnimationFrame(animate);
-    const elapsed = clock.getElapsedTime();
+  let mouseX = 0, mouseY = 0;
+  window.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX - width / 2) * 0.02;
+    mouseY = (e.clientY - height / 2) * 0.02;
+  }, { passive: true });
 
-    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.1;
-    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.1;
+  function render() {
+    requestAnimationFrame(render);
+    ctx.clearRect(0, 0, width, height);
 
-    uniforms.u_time.value = elapsed;
-    uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
+    shapes.forEach(s => {
+      s.x += s.vx;
+      s.y += s.vy;
 
-    renderer.render(scene, camera);
+      if (s.x < -100) s.x = width + 100;
+      if (s.x > width + 100) s.x = -100;
+      if (s.y < -100) s.y = height + 100;
+      if (s.y > height + 100) s.y = -100;
+
+      ctx.fillStyle = s.color;
+      ctx.save();
+      ctx.translate(s.x + mouseX, s.y + mouseY);
+
+      if (s.type === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, s.radius, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (s.type === 'rect') {
+        ctx.rotate(s.angle);
+        ctx.beginPath();
+        ctx.roundRect(-s.size / 2, -s.size / 2, s.size, s.size, 16);
+        ctx.fill();
+      } else if (s.type === 'pill') {
+        ctx.rotate(s.angle);
+        ctx.beginPath();
+        ctx.roundRect(-s.w / 2, -s.h / 2, s.w, s.h, 20);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
   }
-  animate();
+  render();
 }
 
 // ==========================================
@@ -185,25 +120,23 @@ function populateSourceFilter(internships) {
   const sourceSelect = document.getElementById('source-filter');
   if (!sourceSelect) return;
   const sources = new Set(internships.map(i => i.source_platform).filter(Boolean));
-  sourceSelect.innerHTML = '<option value="all">ALL STREAMS</option>';
+  sourceSelect.innerHTML = '<option value="all">All Sources</option>';
   sources.forEach(src => {
     const opt = document.createElement('option');
     opt.value = src;
-    opt.textContent = src.toUpperCase();
+    opt.textContent = src;
     sourceSelect.appendChild(opt);
   });
 }
 
 function renderOverviewStats() {
   const total = allInternships.length;
-  const newCount = allInternships.filter(i => i.is_new).length;
   const paidCount = allInternships.filter(i => {
     const val = Number(i.stipend_numeric || 0);
     return val > 0 || (i.stipend && !i.stipend.toLowerCase().includes('unpaid'));
   }).length;
 
   document.getElementById('stat-total-jobs').innerText = total;
-  document.getElementById('stat-new-jobs').innerText = newCount;
   document.getElementById('stat-paid-jobs').innerText = paidCount;
 
   document.getElementById('count-all').innerText = total;
@@ -213,7 +146,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Cyberpunk Glitch Card Grid Rendering
+// 3. Card Grid Rendering with Flat Illustration Aesthetics
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -266,59 +199,64 @@ function renderListings(items) {
   emptyState.classList.add('hidden');
   emptyState.classList.remove('flex');
 
-  container.innerHTML = items.map(item => {
+  container.innerHTML = items.map((item, idx) => {
     const isBookmarked = bookmarks.includes(item.id);
     const score = item.match_score || 95;
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
+    const theme = flatBadgeThemes[idx % flatBadgeThemes.length];
 
     return `
       <article 
-        class="cyber-card p-5 flex flex-col justify-between cursor-pointer group"
+        class="flat-card p-6 flex flex-col justify-between cursor-pointer group"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Header Bar -->
-          <div class="flex items-center justify-between mb-3">
+          <!-- Top Row: Source block & Save -->
+          <div class="flex items-center justify-between mb-3.5">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 bg-[#00F0FF]/15 border border-[#00F0FF] text-[10px] font-bold text-[#00F0FF] font-mono tracking-wider">
-                ${score}% SYNC
+              <span class="px-2.5 py-1 ${theme.bg} ${theme.text} rounded-lg text-xs font-bold tracking-tight flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full ${theme.dot}"></span>
+                ${escapeHtml(item.source_platform || 'Portal')}
               </span>
-              ${item.is_new ? '<span class="px-2 py-0.5 bg-[#FF0055]/20 border border-[#FF0055] text-[10px] font-bold text-[#FF0055] font-mono">NEW_ENTRY</span>' : ''}
+              ${item.is_new ? '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[11px] font-bold">New</span>' : ''}
             </div>
 
             <button 
               type="button" 
-              class="p-1 text-slate-400 hover:text-[#FF0055] transition"
+              class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-pink-500 transition"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
             >
-              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#FF0055]' : 'ph-bookmark'} text-base"></i>
+              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-pink-500' : 'ph-bookmark'} text-base"></i>
             </button>
           </div>
 
           <!-- Role & Company -->
-          <h3 class="font-cyber text-base font-black text-white leading-snug tracking-wide group-hover:text-[#00F0FF] transition-colors line-clamp-2">
-            ${escapeHtml(item.role_title || 'RESEARCH ENG')}
+          <h3 class="font-display text-lg font-bold text-[#181E29] leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
+            ${escapeHtml(item.role_title || 'Internship')}
           </h3>
           
-          <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5 font-mono">
-            <span class="text-[#00F0FF] font-bold">${escapeHtml(item.company_name || 'ENTITY')}</span>
-            <span>//</span>
-            <span class="truncate text-slate-300">${escapeHtml(item.location || 'UNKNOWN')}</span>
+          <div class="text-xs text-slate-500 mt-1.5 flex items-center gap-2 font-medium">
+            <span class="font-bold text-[#181E29]">${escapeHtml(item.company_name || 'Organization')}</span>
+            <span>&bull;</span>
+            <span class="truncate">${escapeHtml(item.location || 'Location Not Specified')}</span>
           </div>
 
-          <!-- Skills tags -->
+          <!-- Flat skill pills -->
           <div class="flex flex-wrap gap-1.5 mt-4">
-            ${skills.map(skill => `<span class="px-2 py-0.5 text-[11px] bg-[#050508] border border-[#00F0FF]/30 text-slate-300 font-mono">${escapeHtml(skill)}</span>`).join('')}
+            ${skills.map(skill => `<span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
         <!-- Footer -->
-        <div class="pt-3.5 mt-5 border-t border-[#00F0FF]/20 flex items-center justify-between text-xs font-mono">
+        <div class="pt-4 mt-5 border-t border-[#F1F5F9] flex items-center justify-between text-xs">
           <div>
-            <span class="text-[#00FF66] font-bold tracking-wider">${escapeHtml(item.stipend || 'UNLISTED')}</span>
+            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Stipend</div>
+            <div class="font-extrabold text-[#181E29] text-sm mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
           </div>
           <div>
-            <span class="text-[#00F0FF] text-[11px] uppercase tracking-wider group-hover:underline">INSPECT &gt;&gt;</span>
+            <span class="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold rounded-xl group-hover:bg-blue-600 group-hover:text-white transition">
+              Details &rarr;
+            </span>
           </div>
         </div>
       </article>
@@ -334,15 +272,15 @@ function openDetailDrawer(id) {
   if (!item) return;
 
   activeDrawerJob = item;
-  document.getElementById('drawer-role-title').innerText = item.role_title || 'FELLOWSHIP';
+  document.getElementById('drawer-role-title').innerText = item.role_title || 'Internship';
   document.getElementById('drawer-company-name').innerText = item.company_name || '';
-  document.getElementById('drawer-location').innerText = item.location || 'REMOTE';
-  document.getElementById('drawer-duration').innerText = item.duration || 'FLEXIBLE';
-  document.getElementById('drawer-stipend').innerText = item.stipend || 'UNSPECIFIED';
-  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'OPEN';
-  document.getElementById('drawer-source').innerText = (item.source_platform || 'PORTAL').toUpperCase();
-  document.getElementById('drawer-date').innerText = item.date_scraped || 'RECENT';
-  document.getElementById('drawer-org-badge').innerText = (item.org_type || 'ORGANIZATION').toUpperCase();
+  document.getElementById('drawer-location').innerText = item.location || 'Remote';
+  document.getElementById('drawer-duration').innerText = item.duration || 'Flexible';
+  document.getElementById('drawer-stipend').innerText = item.stipend || 'Unspecified';
+  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'Rolling';
+  document.getElementById('drawer-source').innerText = item.source_platform || 'Portal';
+  document.getElementById('drawer-date').innerText = item.date_scraped || 'Recent';
+  document.getElementById('drawer-org-badge').innerText = item.org_type || 'Company';
 
   const applyLink = document.getElementById('drawer-apply-link');
   applyLink.href = item.apply_link || '#';
@@ -350,8 +288,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-[#050508] border border-[#00F0FF] text-xs font-mono text-[#00F0FF]">${escapeHtml(s)}</span>`).join('')
-    : '<span class="text-xs text-slate-500">STANDARD ARCHITECTURE PROTOCOLS.</span>';
+    ? skills.map(s => `<span class="px-3 py-1 bg-slate-100 text-slate-800 rounded-xl text-xs font-bold">${escapeHtml(s)}</span>`).join('')
+    : '<span class="text-xs text-slate-500">Standard qualifications.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -372,7 +310,7 @@ function updateDrawerBookmarkIcon() {
   const btn = document.getElementById('drawer-bookmark-btn');
   if (!btn || !activeDrawerJob) return;
   const isBookmarked = bookmarks.includes(activeDrawerJob.id);
-  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#FF0055]' : 'ph-bookmark'} text-base"></i>`;
+  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-pink-500' : 'ph-bookmark'} text-base"></i>`;
 }
 
 // ==========================================
@@ -395,7 +333,9 @@ function toggleBookmark(id) {
 function updateBookmarkCounter() {
   const count = bookmarks.length;
   const counter = document.getElementById('bookmark-count');
+  const spotlight = document.getElementById('spotlight-saved-count');
   if (counter) counter.innerText = count;
+  if (spotlight) spotlight.innerText = `${count} Items`;
 }
 
 // ==========================================
@@ -411,14 +351,12 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      dot.className = 'w-2 h-2 rounded-full bg-[#FF0055] shadow-[0_0_8px_#FF0055] animate-ping';
-      text.innerText = 'HARVESTING';
-      text.className = 'text-[#FF0055] text-[11px] uppercase tracking-wider font-bold';
+      dot.className = 'w-2 h-2 rounded-full bg-orange-500 animate-pulse';
+      text.innerText = 'Scraping';
       fetchLogs();
     } else {
-      dot.className = 'w-2 h-2 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66]';
-      text.innerText = 'ONLINE';
-      text.className = 'text-[#00FF66] text-[11px] uppercase tracking-wider';
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+      text.innerText = 'Active';
     }
   } catch (e) {}
 
@@ -431,7 +369,7 @@ async function fetchLogs() {
     const data = await res.json();
     const logsContainer = document.getElementById('logs-content');
     if (logsContainer && data.logs) {
-      logsContainer.innerHTML = data.logs.map(log => `<div>&gt;&gt; ${escapeHtml(log)}</div>`).join('');
+      logsContainer.innerHTML = data.logs.map(log => `<div>${escapeHtml(log)}</div>`).join('');
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
   } catch (e) {}
@@ -444,8 +382,8 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'SYSTEM INTERRUPT';
-      document.getElementById('action-message').innerText = data.alert.message || 'MANUAL BYPASS REQUIRED';
+      document.getElementById('action-title').innerText = data.alert.title || 'Notice';
+      document.getElementById('action-message').innerText = data.alert.message || 'Please check browser';
       banner.classList.remove('hidden');
     } else {
       banner.classList.add('hidden');
@@ -460,18 +398,18 @@ async function pollAlerts() {
 function bindEventHandlers() {
   document.getElementById('search-input')?.addEventListener('input', applyFiltersAndRender);
 
-  document.querySelectorAll('#location-tabs .glitch-tab').forEach(btn => {
+  document.querySelectorAll('#location-tabs .filter-pill').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#location-tabs .glitch-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#location-tabs .filter-pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeLocation = btn.getAttribute('data-val');
       applyFiltersAndRender();
     });
   });
 
-  document.querySelectorAll('#stipend-filters .glitch-tab').forEach(btn => {
+  document.querySelectorAll('#stipend-filters .filter-pill').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#stipend-filters .glitch-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#stipend-filters .filter-pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeStipend = btn.getAttribute('data-val');
       applyFiltersAndRender();
@@ -487,9 +425,9 @@ function bindEventHandlers() {
     showBookmarkedOnly = !showBookmarkedOnly;
     const btn = document.getElementById('filter-bookmarks-btn');
     if (showBookmarkedOnly) {
-      btn.classList.add('bg-[#FF0055]', 'text-white', 'border-[#FF0055]');
+      btn.classList.add('active');
     } else {
-      btn.classList.remove('bg-[#FF0055]', 'text-white', 'border-[#FF0055]');
+      btn.classList.remove('active');
     }
     applyFiltersAndRender();
   });
@@ -501,7 +439,7 @@ function bindEventHandlers() {
     activeSource = 'all';
     showBookmarkedOnly = false;
     document.getElementById('source-filter').value = 'all';
-    document.getElementById('filter-bookmarks-btn')?.classList.remove('bg-[#FF0055]', 'text-white', 'border-[#FF0055]');
+    document.getElementById('filter-bookmarks-btn')?.classList.remove('active');
 
     const allTab = document.querySelector('#location-tabs [data-val="all"]');
     if (allTab) allTab.click();
