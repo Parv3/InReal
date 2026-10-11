@@ -1,8 +1,8 @@
 /**
  * InReal Dashboard
- * Handwritten / Sketched Art Style + SideNote Font Stack
- * Interactive Liquid Mercury Background (smooth, eye-strain-friendly flow with cursor interaction)
- * No unnecessary vibe-coded text filler.
+ * Colorful Hand-Sketched Art Design + SideNote Font Stack
+ * Interactive Holographic Liquid Mercury Canvas (Gentle on the eyes, dynamic pointer interaction)
+ * No unnecessary vibe-coded filler text.
  */
 
 let allInternships = [];
@@ -13,8 +13,18 @@ let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
+// Palette for cards: cheerful pastel tints that pop on paper
+const cardBgPalette = [
+  '#FEF08A', // pastel yellow
+  '#BAE6FD', // pastel sky
+  '#A7F3D0', // pastel mint
+  '#DDD6FE', // pastel lavender
+  '#FED7AA', // pastel peach
+  '#FBCFE8'  // pastel pink
+];
+
 document.addEventListener('DOMContentLoaded', () => {
-  initLiquidMercuryFlow();
+  initHolographicLiquidMercury();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -23,9 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. 3D Web Experience: Interactive Liquid Mercury Flow (Eye-Strain Free)
+// 1. 3D Web Experience: Holographic Liquid Chrome / Mercury Shader
+// Soft, prismatic, flowing with cursor, comfortable on eyes
 // ==========================================
-function initLiquidMercuryFlow() {
+function initHolographicLiquidMercury() {
   const canvas = document.getElementById('liquid-river-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
 
@@ -44,12 +55,7 @@ function initLiquidMercuryFlow() {
   const uniforms = {
     u_time: { value: 0.0 },
     u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-    u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
-    u_colorFoam: { value: new THREE.Color('#E8FFF7') },
-    u_colorMint: { value: new THREE.Color('#B7F0F5') },
-    u_colorSky: { value: new THREE.Color('#A6D9F3') },
-    u_colorDeepSky: { value: new THREE.Color('#6FB0C8') },
-    u_colorMidnight: { value: new THREE.Color('#0F2E3A') }
+    u_mouse: { value: new THREE.Vector2(0.5, 0.5) }
   };
 
   const vertexShader = `
@@ -60,16 +66,11 @@ function initLiquidMercuryFlow() {
     }
   `;
 
-  // Soft, organic liquid mercury shader that flows with cursor movements without blinding glare
+  // Soft holographic pearl/mercury liquid flow shader
   const fragmentShader = `
     uniform float u_time;
     uniform vec2 u_resolution;
     uniform vec2 u_mouse;
-    uniform vec3 u_colorFoam;
-    uniform vec3 u_colorMint;
-    uniform vec3 u_colorSky;
-    uniform vec3 u_colorDeepSky;
-    uniform vec3 u_colorMidnight;
     varying vec2 vUv;
 
     vec2 hash(vec2 p) {
@@ -98,45 +99,49 @@ function initLiquidMercuryFlow() {
       vec2 aspectMouse = u_mouse;
       aspectMouse.x *= u_resolution.x / u_resolution.y;
 
-      // Cursor fluid interaction
+      // Cursor fluid push
       float distToMouse = length(aspectSt - aspectMouse);
-      float mouseInfluence = exp(-distToMouse * 3.5);
+      float mouseInfluence = exp(-distToMouse * 3.2);
 
-      vec2 mousePush = (aspectSt - aspectMouse) * mouseInfluence * 1.5;
-      vec2 vortex = vec2(-aspectSt.y + aspectMouse.y, aspectSt.x - aspectMouse.x) * mouseInfluence * 1.8;
+      vec2 mousePush = (aspectSt - aspectMouse) * mouseInfluence * 1.6;
+      vec2 vortex = vec2(-aspectSt.y + aspectMouse.y, aspectSt.x - aspectMouse.x) * mouseInfluence * 2.0;
 
-      // Large organic flow scale
-      vec2 p = aspectSt * 1.45 + mousePush + vortex;
-      float t = u_time * 0.24;
+      // Fluid domain coordinates
+      vec2 p = aspectSt * 1.5 + mousePush + vortex;
+      float t = u_time * 0.22;
 
-      // Domain warping (flowing liquid waves)
-      vec2 q = vec2(0.0);
-      q.x = noise(p + vec2(0.0, 0.0) + t * 0.32);
-      q.y = noise(p + vec2(5.2, 1.3) + t * 0.28);
+      // Layered domain warping
+      vec2 q = vec2(
+        noise(p + vec2(0.0, 0.0) + t * 0.3),
+        noise(p + vec2(5.2, 1.3) + t * 0.28)
+      );
 
-      vec2 r = vec2(0.0);
-      r.x = noise(p + 3.0 * q + vec2(1.7, 9.2) + 0.14 * t + (u_mouse - 0.5) * 0.6);
-      r.y = noise(p + 3.0 * q + vec2(8.3, 2.8) + 0.12 * t + (u_mouse - 0.5) * 0.6);
+      vec2 r = vec2(
+        noise(p + 3.2 * q + vec2(1.7, 9.2) + 0.15 * t + (u_mouse - 0.5) * 0.6),
+        noise(p + 3.2 * q + vec2(8.3, 2.8) + 0.12 * t + (u_mouse - 0.5) * 0.6)
+      );
 
-      float f = noise(p + 3.4 * r + t * 0.18);
+      float f = noise(p + 3.5 * r + t * 0.18);
 
-      // Smooth mercury specular reflection
-      float chromeContour = sin(f * 5.8 + r.x * 3.8 + r.y * 3.4);
-      float specular = pow(clamp(chromeContour, 0.0, 1.0), 2.8);
-      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 1.6);
+      // Liquid specular highlight
+      float chromeContour = sin(f * 6.0 + r.x * 4.0 + r.y * 3.5);
+      float specular = pow(clamp(chromeContour, 0.0, 1.0), 3.0);
+      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 1.8);
 
-      // Harmonious palette: Deep Sky -> Mint -> Foam (gentle contrast to prevent eye strain)
-      vec3 col = mix(u_colorDeepSky, u_colorSky, clamp(f * f * 2.5, 0.0, 1.0));
-      col = mix(col, u_colorMint, clamp(length(q) * 1.1, 0.0, 1.0));
-      col = mix(col, u_colorFoam, clamp(length(r.x) * 1.2, 0.0, 1.0));
+      // Cheerful holographic pastel palette: Warm Gold -> Soft Mint -> Sky Blue -> Pearl
+      vec3 colGold = vec3(0.99, 0.88, 0.54);
+      vec3 colMint = vec3(0.65, 0.95, 0.82);
+      vec3 colSky  = vec3(0.73, 0.90, 0.99);
+      vec3 colPaper = vec3(0.98, 0.96, 0.93);
+      vec3 colInk = vec3(0.12, 0.11, 0.09);
+
+      vec3 col = mix(colPaper, colSky, clamp(f * f * 2.2, 0.0, 1.0));
+      col = mix(col, colMint, clamp(length(q) * 1.1, 0.0, 1.0));
+      col = mix(col, colGold, clamp(length(r.x) * 1.2, 0.0, 1.0));
       
-      // Soft liquid chrome sheen
-      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.72);
-      col = mix(col, u_colorMidnight * 0.6, darkCrevice * 0.55);
-
-      // Very subtle grain
-      float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.02;
-      col += grain;
+      // Chrome highlight
+      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.85);
+      col = mix(col, colInk * 0.6, darkCrevice * 0.35);
 
       gl_FragColor = vec4(col, 1.0);
     }
@@ -213,6 +218,16 @@ function populateSourceFilter(internships) {
 
 function renderOverviewStats() {
   const total = allInternships.length;
+  const newCount = allInternships.filter(i => i.is_new).length;
+  const paidCount = allInternships.filter(i => {
+    const val = Number(i.stipend_numeric || 0);
+    return val > 0 || (i.stipend && !i.stipend.toLowerCase().includes('unpaid'));
+  }).length;
+
+  document.getElementById('stat-total-jobs').innerText = total;
+  document.getElementById('stat-new-jobs').innerText = newCount;
+  document.getElementById('stat-paid-jobs').innerText = paidCount;
+
   document.getElementById('count-all').innerText = total;
   document.getElementById('count-india').innerText = allInternships.filter(i => (i.location_type || '').toLowerCase() === 'india').length;
   document.getElementById('count-remote').innerText = allInternships.filter(i => (i.location_type || '').toLowerCase() === 'remote').length;
@@ -220,7 +235,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Card Grid Rendering
+// 3. Card Grid Rendering with Colorful Palette
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -273,55 +288,57 @@ function renderListings(items) {
   emptyState.classList.add('hidden');
   emptyState.classList.remove('flex');
 
-  container.innerHTML = items.map(item => {
+  container.innerHTML = items.map((item, idx) => {
     const isBookmarked = bookmarks.includes(item.id);
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
+    const cardColor = cardBgPalette[idx % cardBgPalette.length];
 
     return `
       <article 
-        class="sketch-card p-4 flex flex-col justify-between cursor-pointer"
+        class="sketch-card p-5 flex flex-col justify-between cursor-pointer"
+        style="background-color: ${cardColor};"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
           <!-- Header -->
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-[#0F2E3A]/70 uppercase">
-              ${escapeHtml(item.source_platform || 'Direct')}
+            <span class="px-2 py-0.5 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-[11px] font-bold uppercase">
+              ${escapeHtml(item.source_platform || 'Portal')}
             </span>
 
             <button 
               type="button" 
-              class="p-1 rounded text-[#0F2E3A] hover:bg-white transition"
+              class="p-1.5 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-[#1E1B18] hover:scale-105 transition shadow-[1px_1px_0px_#1E1B18]"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
             >
-              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-base"></i>
+              <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#F472B6]' : 'ph-bookmark'} text-base"></i>
             </button>
           </div>
 
           <!-- Role & Company -->
-          <h3 class="text-lg font-bold text-[#0F2E3A] leading-snug line-clamp-2">
+          <h3 class="text-xl font-bold text-[#1E1B18] leading-snug line-clamp-2 mt-1">
             ${escapeHtml(item.role_title || 'Internship')}
           </h3>
           
-          <div class="text-xs text-[#0F2E3A]/85 mt-1 flex items-center gap-1.5 font-bold">
-            <span class="text-[#0F2E3A]">${escapeHtml(item.company_name || 'Organization')}</span>
+          <div class="text-xs text-[#1E1B18]/85 mt-1.5 flex items-center gap-1.5 font-bold">
+            <span class="text-[#1E1B18] font-black">${escapeHtml(item.company_name || 'Organization')}</span>
             <span>&bull;</span>
             <span class="truncate">${escapeHtml(item.location || 'Location Not Specified')}</span>
           </div>
 
           <!-- Skills tags -->
-          <div class="flex flex-wrap gap-1 mt-3">
-            ${skills.map(skill => `<span class="px-2 py-0.5 text-xs bg-white border border-[#0F2E3A]/40 rounded font-bold">${escapeHtml(skill)}</span>`).join('')}
+          <div class="flex flex-wrap gap-1.5 mt-4">
+            ${skills.map(skill => `<span class="px-2.5 py-0.5 text-xs bg-white border-1.5 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] font-bold">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
         <!-- Footer -->
-        <div class="pt-3 mt-4 border-t-2 border-[#0F2E3A]/20 flex items-center justify-between text-xs font-bold">
+        <div class="pt-3.5 mt-5 border-t-2 border-[#1E1B18]/25 flex items-center justify-between text-xs font-bold">
           <div>
-            <span class="text-[#0F2E3A] font-bold">${escapeHtml(item.stipend || 'Unspecified')}</span>
+            <span class="text-[#1E1B18] font-black">${escapeHtml(item.stipend || 'Unspecified')}</span>
           </div>
           <div>
-            <span class="text-xs font-bold text-[#0F2E3A]/70">Details &rarr;</span>
+            <span class="px-2 py-1 bg-white border border-[#1E1B18] rounded text-xs font-bold">Details &rarr;</span>
           </div>
         </div>
       </article>
@@ -353,8 +370,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-white border border-[#0F2E3A] text-xs font-bold rounded">${escapeHtml(s)}</span>`).join('')
-    : '<span class="text-xs text-[#0F2E3A]/70">Standard qualifications.</span>';
+    ? skills.map(s => `<span class="px-3 py-1 bg-white border-2 border-[#1E1B18] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-xs font-bold">${escapeHtml(s)}</span>`).join('')
+    : '<span class="text-xs text-[#1E1B18]/70">Standard qualifications.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -375,7 +392,7 @@ function updateDrawerBookmarkIcon() {
   const btn = document.getElementById('drawer-bookmark-btn');
   if (!btn || !activeDrawerJob) return;
   const isBookmarked = bookmarks.includes(activeDrawerJob.id);
-  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-base"></i>`;
+  btn.innerHTML = `<i class="ph ${isBookmarked ? 'ph-fill ph-bookmark text-[#F472B6]' : 'ph-bookmark'} text-base"></i>`;
 }
 
 // ==========================================
@@ -414,12 +431,12 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
-      text.innerText = 'Scraping';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-[#FB923C] animate-pulse border border-[#1E1B18]';
+      text.innerText = 'Scraping Live';
       fetchLogs();
     } else {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-600';
-      text.innerText = 'Ready';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-[#34D399] border border-[#1E1B18]';
+      text.innerText = 'Radar Active';
     }
   } catch (e) {}
 
