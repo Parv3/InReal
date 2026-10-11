@@ -6,6 +6,8 @@
 [![Playwright](https://img.shields.io/badge/playwright-stealth-blueviolet.svg)](https://playwright.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> **InReal** by Team Chiranjeevi (CodeX 3.0, PIET Panipat, Oct 2026): we took the open-source *AI/ML Internship Radar* (MIT licence), updated its scrapers to the portals' current page structure, and added a genuine-only check that removes listings asking for money, task-for-money schemes and mass "internship" programmes. The first commit in this repo is the original code, unchanged; every later commit is our work.
+
 ---
 
 ## � The Problem
@@ -147,8 +149,8 @@ Nothing is saved to `internships.csv`. It prints how many listings were kept or 
 
 ```bash
 # 1. Clone the project
-git clone https://github.com/YOUR_USERNAME/ai-ml-internship-radar.git
-cd ai-ml-internship-radar/internship_scraper
+git clone https://github.com/abhishekgoswami0720/InReal.git
+cd InReal
 
 # 2. Create virtual environment
 python -m venv venv
@@ -157,7 +159,7 @@ source venv/bin/activate   # Mac/Linux
 
 # 3. Install everything
 pip install -r requirements.txt
-playwright install chromium
+python -m playwright install chromium
 
 # 4. Run it
 python app.py
