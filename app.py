@@ -8,9 +8,14 @@ import sys
 import os
 import tempfile
 
-# Import the scraper orchestrator
-# We need to add the current dir to path to import scraper properly if needed, but it's in the same dir
-from scraper import run_scrapers
+# Lazy import function for scraper
+def get_run_scrapers():
+    try:
+        from scraper import run_scrapers
+        return run_scrapers
+    except Exception as e:
+        print(f"Notice: Scraper dependencies not loaded or missing ({e}). App running in dashboard mode.")
+        return None
 
 app = Flask(__name__)
 DATA_FILE = Path(__file__).parent / "internships.csv"
@@ -46,8 +51,11 @@ def trigger_scrape():
     config = request.json if request.is_json else None
         
     def scrape_job(cfg):
-        # Running the full scraper
-        run_scrapers(dry_run=False, config=cfg)
+        runner = get_run_scrapers()
+        if runner:
+            runner(dry_run=False, config=cfg)
+        else:
+            print("Scraper dependencies missing or not installed in this environment.")
         
     scraper_t = threading.Thread(target=scrape_job, args=(config,))
     scraper_t.start()
@@ -143,4 +151,5 @@ def clear_data():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
