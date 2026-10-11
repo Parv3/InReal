@@ -1,277 +1,409 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI/ML Internship Radar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Phosphor Icons for premium UI -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InReal &mdash; AI & Engineering Opportunity Radar</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Three.js CDN for performant 3D Web Experience -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surface: {
+              DEFAULT: '#0b0f17',
+              muted: '#070a0f',
+              card: '#111726',
+              elevated: '#171f33',
+              border: 'rgba(255, 255, 255, 0.08)',
+              borderHover: 'rgba(255, 255, 255, 0.16)',
+            },
+            accent: {
+              primary: '#6366f1',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              amber: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars & smooth interactions */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #070a0f; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+    .glow-radar {
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.05) 50%, transparent 70%);
+    }
+
+    .glass-panel {
+      background: rgba(17, 23, 38, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    
+    .glass-header {
+      background: rgba(11, 15, 23, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .badge-ring {
+      box-shadow: 0 0 0 1px inset rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-indicator {
+      animation: pulse-ring 2.5s infinite ease-in-out;
+    }
+  </style>
 </head>
 
-<body>
-    <div class="tech-background"></div>
+<body class="bg-[#070a0f] text-slate-200 min-h-screen antialiased selection:bg-indigo-500 selection:text-white font-sans flex flex-col relative overflow-x-hidden">
 
-    <!-- Action Required Banner (Hidden by default) -->
-    <div id="action-banner" class="action-banner">
-        <div class="action-content">
-            <i class="ph ph-warning-circle banner-icon"></i>
-            <div class="action-text">
-                <h4 id="action-title">Action Required</h4>
-                <p id="action-message">Please check the scraper browser.</p>
-            </div>
-            <button id="action-dismiss-btn" class="dismiss-btn">Done</button>
+  <!-- Interactive 3D WebGL Background Canvas -->
+  <canvas id="hero-3d-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-45"></canvas>
+  <div class="fixed inset-0 pointer-events-none z-0 glow-radar"></div>
+
+  <!-- Action Required Alert Banner -->
+  <div id="action-banner" class="hidden fixed top-4 right-4 z-50 max-w-md w-full glass-panel border border-amber-500/40 rounded-xl p-4 shadow-2xl bg-amber-950/80 transition-all duration-300">
+    <div class="flex items-start gap-3">
+      <div class="p-2 rounded-lg bg-amber-500/20 text-amber-400">
+        <i class="ph ph-warning-circle text-xl"></i>
+      </div>
+      <div class="flex-1">
+        <h4 id="action-title" class="font-semibold text-white text-sm">Action Required</h4>
+        <p id="action-message" class="text-xs text-amber-200/80 mt-0.5">Please check the scraper browser verification prompt.</p>
+      </div>
+      <button id="action-dismiss-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs rounded-lg transition-colors">
+        Dismiss
+      </button>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-30 w-full glass-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/20">
+          <i class="ph-fill ph-radar text-white text-xl"></i>
         </div>
-    </div>
-
-    <div class="app-container">
-        <!-- Sidebar Filters -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <i class="ph-fill ph-radar"></i>
-                <h2>AI/ML Radar</h2>
-            </div>
-
-            <button id="trigger-scrape-btn" class="scrape-btn">
-                <i class="ph ph-arrows-clockwise"></i>
-                <span id="scrape-btn-text">Run Scraper Now</span>
-            </button>
-
-            <div class="filter-section">
-                <h3>Search</h3>
-                <div class="search-box">
-                    <i class="ph ph-magnifying-glass"></i>
-                    <input type="text" id="search-input" placeholder="Role, company, skills...">
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <h3>Location Type</h3>
-                <div class="button-group" id="location-filters">
-                    <button class="filter-btn active" data-val="all">🌍 All</button>
-                    <button class="filter-btn" data-val="Remote">📡 Remote</button>
-                    <button class="filter-btn" data-val="India">🇮🇳 India</button>
-                    <button class="filter-btn" data-val="International">🌐 Global</button>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <h3>Stipend (INR)</h3>
-                <div class="button-group vert" id="stipend-filters">
-                    <button class="filter-btn active" data-val="all">Any</button>
-                    <button class="filter-btn" data-val="paid">Paid Only (>0)</button>
-                    <button class="filter-btn" data-val="10k">> ₹10,000 / mo</button>
-                    <button class="filter-btn" data-val="20k">> ₹20,000 / mo</button>
-                    <button class="filter-btn" data-val="50k">> ₹50,000 / mo</button>
-                    <button class="filter-btn" data-val="unpaid">Unpaid / Hidden</button>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <h3>Source Platform</h3>
-                <select id="source-filter" class="custom-select">
-                    <option value="all">All Sources</option>
-                    <!-- Populated dynamically -->
-                </select>
-            </div>
-
-            <div class="filter-section">
-                <h3>Organization Type</h3>
-                <div class="button-group" id="org-filters">
-                    <button class="filter-btn active" data-val="all">All</button>
-                    <button class="filter-btn" data-val="Company">Company</button>
-                    <button class="filter-btn" data-val="Institution">Institution</button>
-                    <button class="filter-btn" data-val="Government">Government</button>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <h3>Role Level</h3>
-                <div class="button-group" id="role-filters">
-                    <button class="filter-btn active" data-val="all">All</button>
-                    <button class="filter-btn" data-val="Research">Research Core</button>
-                    <button class="filter-btn" data-val="Applied">Applied Eng</button>
-                </div>
-            </div>
-
-            <div class="sidebar-footer">
-                <p>Auto-updates daily at 8:00 AM</p>
-                <div class="stats">
-                    Total listings: <span id="total-count">0</span>
-                </div>
-                <div class="logs-toggle mt-4">
-                    <button id="toggle-logs-btn" class="filter-btn"
-                        style="width: 100%; justify-content:center; display: flex; align-items: center; gap: 8px;">
-                        <i class="ph ph-terminal"></i> View Live Logs
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="top-nav">
-                <div class="header-left">
-                    <h1>Internship Opportunities</h1>
-                    <p class="subtitle">Your Personalized AI/ML Summer Radar</p>
-                </div>
-                <div class="nav-actions">
-                    <span class="showing-text">Showing <strong id="visible-count">0</strong> results</span>
-                    <button class="icon-btn" id="info-btn" title="How to use this scraper">
-                        <i class="ph ph-info"></i>
-                    </button>
-                    <button id="clear-data-btn" class="icon-btn" title="Clear all local data and logs"
-                        style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
-                        <i class="ph ph-trash"></i>
-                    </button>
-                    <button id="refresh-data-btn" class="icon-btn" title="Refresh local data" onclick="loadData()">
-                        <i class="ph ph-arrow-counter-clockwise"></i>
-                    </button>
-                </div>
-            </header>
-
-            <div class="radar-container hidden" id="loading-spinner">
-                <div class="radar"></div>
-                <div class="radar-text" id="radar-text">SCANNING DATABANKS...</div>
-            </div>
-
-            <div class="main-scroll-area">
-
-                <!-- India / Global / All Quick Toggle -->
-                <div class="region-tabs" id="region-tab-bar">
-                    <button class="region-tab active" data-region="all" id="tab-all">
-                        <span class="tab-flag">🌍</span>
-                        <span class="tab-label">Everything</span>
-                        <span class="tab-count" id="tab-count-all">—</span>
-                    </button>
-                    <button class="region-tab" data-region="India" id="tab-india">
-                        <span class="tab-flag">🇮🇳</span>
-                        <span class="tab-label">India</span>
-                        <span class="tab-count" id="tab-count-india">—</span>
-                    </button>
-                    <button class="region-tab" data-region="International" id="tab-global">
-                        <span class="tab-flag">🌐</span>
-                        <span class="tab-label">Global / Abroad</span>
-                        <span class="tab-count" id="tab-count-global">—</span>
-                    </button>
-                    <button class="region-tab" data-region="Remote" id="tab-remote">
-                        <span class="tab-flag">📡</span>
-                        <span class="tab-label">Remote</span>
-                        <span class="tab-count" id="tab-count-remote">—</span>
-                    </button>
-                </div>
-
-                <div class="listings-grid" id="listings-container">
-                    <!-- Cards injected here by JS -->
-                </div>
-
-            </div><!-- /.main-scroll-area -->
-        </main>
-    </div>
-
-    <!-- Instructions Modal -->
-    <div class="modal-overlay hidden" id="instructions-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="ph-fill ph-book-open"></i> How to Use the Radar</h2>
-                <button class="close-btn" id="close-modal-btn"><i class="ph ph-x"></i></button>
-            </div>
-            <div class="modal-body">
-                <p>Welcome to the ultimate AI/ML Summer Internship radar! Here's how to navigate your dashboard:</p>
-                <ul>
-                    <li><strong>Running the Scraper:</strong> Click the <em>Run Scraper Now</em> button in the sidebar.
-                        This fires off 16 automated engines in the background, including Playwright-stealth and
-                        DuckDuckGo Dork searches across the web, looking for hidden opportunities. This may take 5-10
-                        minutes. </li>
-                    <li><strong>Match Scores:</strong> Every internship is scored out of 100 based on core AI/ML
-                        research keywords and competitive stipends. Look for the glowing green <strong>High
-                            Score</strong> badges!</li>
-                    <li><strong>Smart Filtering:</strong> Use the sidebar to instantly filter by <em>Organization
-                            Type</em> (e.g., check only Academic Institutions for summer research), <em>Role Level</em>
-                        (Core Research vs Applied Engineering), Location, and Stipend. </li>
-                </ul>
-                <p><strong>Note:</strong> The scraper is hard-coded with NLP rules requiring the internship to start in
-                    the summer (May 20 onwards). Any generic rolling internship without a specified date defaults to
-                    approved so you don't miss out.</p>
-            </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-lg text-white tracking-tight">InReal</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wide bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">RADAR v2.0</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">AI / ML & Robotics Internship Intelligence</p>
         </div>
-    </div>
+      </div>
 
-    <!-- Scraper Configuration Modal -->
-    <div class="modal-overlay hidden" id="scrape-config-modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h2><i class="ph-fill ph-gear"></i> Scraper Configuration</h2>
-                <button class="close-btn" id="close-config-btn"><i class="ph ph-x"></i></button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 20px; color: var(--text-muted);">Select what you want to scrape to save time.
-                    Uncheck items to skip them.</p>
-
-                <form id="scrape-config-form">
-                    <div class="config-section">
-                        <h4>🌍 Regions</h4>
-                        <label><input type="checkbox" name="regions" value="india" checked> India</label>
-                        <label><input type="checkbox" name="regions" value="usa" checked> USA</label>
-                        <label><input type="checkbox" name="regions" value="europe" checked> Europe</label>
-                        <label><input type="checkbox" name="regions" value="remote" checked> Remote / WFH</label>
-                        <label><input type="checkbox" name="regions" value="worldwide" checked> Worldwide
-                            (General)</label>
-                    </div>
-
-                    <div class="config-section" style="margin-top: 20px;">
-                        <h4>🧠 Topics & Focus</h4>
-                        <label><input type="checkbox" name="topics" value="ml" checked> Machine Learning</label>
-                        <label><input type="checkbox" name="topics" value="ai" checked> Artificial Intelligence</label>
-                        <label><input type="checkbox" name="topics" value="nlp" checked> NLP</label>
-                        <label><input type="checkbox" name="topics" value="cv" checked> Computer Vision</label>
-                        <label><input type="checkbox" name="topics" value="ds" checked> Data Science</label>
-                        <label><input type="checkbox" name="topics" value="research" checked> Research Roles</label>
-                    </div>
-
-                    <div class="config-section" style="margin-top: 20px;">
-                        <h4>🎯 Platforms & Portals</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <label><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-                            <label><input type="checkbox" name="sources" value="internshala" checked>
-                                Internshala</label>
-                            <label><input type="checkbox" name="sources" value="unstop" checked> Unstop</label>
-                            <label><input type="checkbox" name="sources" value="naukri" checked> Indian Job Portals
-                                (Naukri, Shine, etc)</label>
-                            <label><input type="checkbox" name="sources" value="bigtech" checked> Big Tech (Google,
-                                Meta, Apple)</label>
-                            <label><input type="checkbox" name="sources" value="remotive" checked> Aggregators & Remote
-                                Boards</label>
-                            <label><input type="checkbox" name="sources" value="universities" checked> Academic Research
-                                (IITs, Global)</label>
-                            <label><input type="checkbox" name="sources" value="government" checked> Government Labs
-                                (DRDO, CDAC)</label>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="apply-btn"
-                        style="width: 100%; margin-top: 30px; padding: 12px; font-size: 16px;">
-                        <i class="ph ph-rocket"></i> Start Scraping
-                    </button>
-                </form>
-            </div>
+      <!-- Scraper Controls & Live Status Indicator -->
+      <div class="flex items-center gap-3">
+        <!-- Live Status Pill -->
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-slate-800 text-xs text-slate-400">
+          <span class="relative flex h-2 w-2">
+            <span id="ping-ring" class="hidden absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 pulse-indicator"></span>
+            <span id="ping-dot" class="relative inline-flex rounded-full h-2 w-2 bg-slate-500"></span>
+          </span>
+          <span id="scraper-status-text" class="font-mono text-[11px]">System Idle</span>
         </div>
-    </div>
 
-    <!-- Logs Panel -->
-    <div id="logs-panel" class="logs-panel hidden">
-        <div class="logs-header">
-            <h3><i class="ph ph-terminal"></i> Activity Log</h3>
-            <button id="close-logs-btn" class="icon-btn" style="width: 28px; height: 28px;"><i
-                    class="ph ph-x"></i></button>
+        <!-- Terminal Log Drawer Toggle -->
+        <button id="open-logs-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card hover:bg-surface-elevated border border-surface-border text-xs text-slate-300 transition font-mono">
+          <i class="ph ph-terminal text-sm text-cyan-400"></i>
+          <span class="hidden md:inline">Logs</span>
+        </button>
+
+        <!-- Trigger Scraper Button -->
+        <button id="trigger-scrape-btn" class="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+          <i class="ph ph-arrows-clockwise text-sm"></i>
+          <span>Run Radar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col gap-6">
+
+    <!-- Hero Stats & 3D Interactive Header -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
+        <div class="h-12 w-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-2xl">
+          <i class="ph ph-briefcase"></i>
         </div>
-        <div id="logs-content" class="logs-content"></div>
-    </div>
+        <div>
+          <div class="text-2xl font-bold font-mono text-white" id="stat-total-jobs">0</div>
+          <div class="text-xs text-slate-400">Tracked Opportunities</div>
+        </div>
+      </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
+        <div class="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl">
+          <i class="ph ph-sparkle"></i>
+        </div>
+        <div>
+          <div class="text-2xl font-bold font-mono text-emerald-300" id="stat-new-jobs">0</div>
+          <div class="text-xs text-slate-400">New This Cycle</div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
+        <div class="h-12 w-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-2xl">
+          <i class="ph ph-currency-circle-dollar"></i>
+        </div>
+        <div>
+          <div class="text-2xl font-bold font-mono text-cyan-300" id="stat-paid-jobs">0</div>
+          <div class="text-xs text-slate-400">Funded / High Stipend</div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-4 flex items-center gap-4">
+        <div class="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl">
+          <i class="ph ph-globe-hemisphere-west"></i>
+        </div>
+        <div>
+          <div class="text-2xl font-bold font-mono text-amber-300" id="stat-sources">16+</div>
+          <div class="text-xs text-slate-400">Engines & University Feeds</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Filter Control Bar -->
+    <section class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search by role title, company (Google, OpenAI), or skills (PyTorch, JAX, CUDA)..." 
+            class="w-full bg-[#0b0f17]/90 border border-surface-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+          >
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700 hidden sm:inline">⌘K</span>
+        </div>
+
+        <!-- Secondary Controls -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+          <!-- Platform Source Selector -->
+          <select id="source-filter" class="bg-[#0b0f17] border border-surface-border text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:border-indigo-500">
+            <option value="all">All Platforms</option>
+          </select>
+
+          <!-- Bookmarked Only Filter -->
+          <button id="filter-bookmarks-btn" class="px-3 py-2.5 rounded-xl border border-surface-border text-slate-400 hover:text-white hover:border-surface-borderHover bg-[#0b0f17] text-xs flex items-center gap-1.5 transition">
+            <i class="ph ph-bookmark-simple text-sm"></i>
+            <span>Saved (<span id="bookmark-count">0</span>)</span>
+          </button>
+
+          <!-- Reset Filters -->
+          <button id="reset-filters-btn" class="px-3 py-2.5 rounded-xl border border-surface-border text-slate-400 hover:text-white bg-[#0b0f17] text-xs flex items-center gap-1.5 transition">
+            <i class="ph ph-arrow-counter-clockwise text-sm"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Segmented Region & Filter Chips -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5">
+        <!-- Region Tabs -->
+        <div class="flex items-center gap-1.5 p-1 rounded-xl bg-[#070a0f] border border-surface-border" id="location-tabs">
+          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white active-tab bg-indigo-600/20 text-indigo-300 border border-indigo-500/30" data-val="all">
+            🌍 All Regions (<span id="count-all">0</span>)
+          </button>
+          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white" data-val="India">
+            🇮🇳 India (<span id="count-india">0</span>)
+          </button>
+          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white" data-val="Remote">
+            📡 Remote (<span id="count-remote">0</span>)
+          </button>
+          <button class="region-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 transition hover:text-white" data-val="International">
+            🌐 Global (<span id="count-global">0</span>)
+          </button>
+        </div>
+
+        <!-- Stipend Filter Chips -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
+          <span class="text-[11px] font-mono text-slate-500 mr-1 uppercase">Stipend:</span>
+          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-indigo-500/40 bg-indigo-500/10 text-indigo-300 active" data-val="all">Any</button>
+          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-surface-border text-slate-400 hover:text-white" data-val="paid">Paid (>0)</button>
+          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-surface-border text-slate-400 hover:text-white" data-val="20k">> ₹20k</button>
+          <button class="stipend-chip px-2.5 py-1 rounded-lg text-xs border border-surface-border text-slate-400 hover:text-white" data-val="50k">> ₹50k</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Listings Grid -->
+    <main class="w-full">
+      <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden glass-panel rounded-2xl p-12 text-center flex-col items-center justify-center">
+        <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-3xl mb-4">
+          <i class="ph ph-magnifying-glass"></i>
+        </div>
+        <h3 class="text-base font-semibold text-white">No internships match your filter criteria</h3>
+        <p class="text-sm text-slate-400 max-w-md mt-1">Try resetting your search query, adjusting stipend expectations, or trigger the live scraper to retrieve fresh postings.</p>
+        <button id="empty-reset-btn" class="mt-4 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white transition">Reset All Filters</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Slide-Over Drawer for Detailed Internship Specification -->
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-surface border-l border-surface-border p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-surface-border">
+        <div class="flex items-center gap-2">
+          <span id="drawer-match-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">95% Match</span>
+          <span id="drawer-org-badge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">Company</span>
+        </div>
+        <button id="close-drawer-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-surface-elevated transition">
+          <i class="ph ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <div class="py-6 flex-1 flex flex-col gap-6">
+        <div>
+          <h2 id="drawer-role-title" class="text-2xl font-bold text-white tracking-tight leading-snug">AI Research Intern</h2>
+          <div id="drawer-company-name" class="text-base text-indigo-400 font-medium mt-1">DeepMind Technologies</div>
+          <div class="flex items-center gap-3 text-xs text-slate-400 mt-3">
+            <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">London, UK</span></span>
+            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">6 Months</span></span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-card border border-surface-border flex items-center justify-between">
+          <div>
+            <div class="text-[11px] font-mono text-slate-400 uppercase">Offered Compensation</div>
+            <div id="drawer-stipend" class="text-lg font-bold font-mono text-emerald-400 mt-0.5">£2,800 / month</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[11px] font-mono text-slate-400 uppercase">Deadline</div>
+            <div id="drawer-deadline" class="text-xs font-mono text-slate-200 mt-0.5">2026-11-30</div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Required Skills & Keywords</h4>
+          <div id="drawer-skills-list" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Metadata & Provenance</h4>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-lg bg-surface-card border border-surface-border">
+              <span class="text-slate-400">Scraped Source:</span>
+              <div id="drawer-source" class="font-medium text-slate-200 mt-0.5">LinkedIn</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-card border border-surface-border">
+              <span class="text-slate-400">Detection Date:</span>
+              <div id="drawer-date" class="font-medium text-slate-200 mt-0.5">2026-10-11</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-surface-border flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 rounded-xl border border-surface-border hover:border-slate-600 bg-surface-card text-slate-300 hover:text-white transition">
+          <i class="ph ph-bookmark-simple text-lg"></i>
+        </button>
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-center text-sm text-white shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+          <span>Apply Directly on Source Portal</span>
+          <i class="ph ph-arrow-up-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terminal Activity Log Slide Drawer -->
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-surface-card border-t border-l border-surface-border rounded-tl-2xl shadow-2xl z-40 hidden transition-all duration-300">
+    <div class="p-3 bg-surface-elevated rounded-tl-2xl border-b border-surface-border flex items-center justify-between">
+      <div class="flex items-center gap-2 text-xs font-mono text-slate-300">
+        <i class="ph ph-terminal text-cyan-400"></i>
+        <span>Live Scraper Telemetry</span>
+      </div>
+      <button id="close-logs-btn" class="p-1 rounded text-slate-400 hover:text-white transition">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div id="logs-content" class="p-4 font-mono text-[11px] text-slate-300 max-h-72 overflow-y-auto space-y-1.5 leading-relaxed bg-[#070a0f]">
+      <!-- Logs stream here -->
+    </div>
+  </div>
+
+  <!-- Scraper Configuration Modal -->
+  <div id="scrape-config-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel border border-surface-border rounded-2xl max-w-lg w-full p-6 shadow-2xl bg-surface">
+      <div class="flex items-center justify-between pb-4 border-b border-surface-border">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="ph-fill ph-gear text-indigo-400"></i>
+          <span>Configure Scraping Engine</span>
+        </h3>
+        <button id="close-config-btn" class="text-slate-400 hover:text-white">
+          <i class="ph ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <form id="scrape-config-form" class="mt-4 space-y-4">
+        <div>
+          <label class="text-xs font-mono uppercase text-slate-400 mb-1.5 block">Target Regions</label>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="regions" value="worldwide" checked> Worldwide</label>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-mono uppercase text-slate-400 mb-1.5 block">Platforms</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 rounded-lg bg-surface-card border border-surface-border cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-xs text-white transition mt-2">
+          Launch Scraping Fleet
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='app_radar.js') }}"></script>
 </body>
-
 </html>
