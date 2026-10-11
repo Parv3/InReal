@@ -1,6 +1,7 @@
 /**
  * InReal Dashboard
- * Hand-Sketched / Editorial Resume Look + Flowing Liquid Mercury/Gold Ribbon Simulation
+ * Palette: #A6D9F3, #B7F0F5, #E8FFF7, #6FB0C8, #0F2E3A
+ * Interactive 3D Flowing Liquid Mercury River Simulation
  * Zero emojis, zero em dashes.
  */
 
@@ -13,7 +14,7 @@ let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  initFlowingLiquidRibbon();
+  initLiquidMercuryRiver();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -22,15 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. 3D Web Experience: Flowing Liquid Chrome & Gold Wave Ribbon
+// 1. 3D Web Experience: Full-On Interactive Liquid Chrome Mercury River
 // ==========================================
-function initFlowingLiquidRibbon() {
-  const canvas = document.getElementById('liquid-ribbon-canvas');
+function initLiquidMercuryRiver() {
+  const canvas = document.getElementById('liquid-river-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 10, 60);
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 22, 55);
 
   const renderer = new THREE.WebGLRenderer({ 
     canvas, 
@@ -41,75 +42,73 @@ function initFlowingLiquidRibbon() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
-  // Generate a continuous organic spline curve resembling the liquid ribbon wave
-  const curvePoints = [];
-  const segments = 40;
-  for (let i = 0; i <= segments; i++) {
-    const t = (i / segments) * Math.PI * 3.5;
-    curvePoints.push(new THREE.Vector3(
-      (i - segments / 2) * 3.2,
-      Math.sin(t) * 9.5 + Math.cos(t * 0.7) * 4.0,
-      Math.cos(t) * 12.0
-    ));
-  }
-  const spline = new THREE.CatmullRomCurve3(curvePoints);
+  // Dense liquid river wave grid spanning the entire viewport
+  const geometry = new THREE.PlaneGeometry(180, 140, 72, 72);
+  geometry.rotateX(-Math.PI / 2.3);
 
-  // Dynamic tube geometry following the ribbon
-  const tubeGeometry = new THREE.TubeGeometry(spline, 120, 3.8, 28, false);
-
-  // Chrome mercury material with specular liquid sheen
-  const chromeMaterial = new THREE.MeshStandardMaterial({
-    color: 0xE2E8F0,           // Liquid Chrome Silver
-    metalness: 0.96,           // Mirror metal
-    roughness: 0.12,           // Ultra-slick liquid finish
+  // Liquid mercury material: pure high-specular chrome reflections with ice-tinted highlights
+  const riverMaterial = new THREE.MeshStandardMaterial({
+    color: 0xE8FFF7,           // Tinted arctic foam silver
+    metalness: 0.98,           // Pure liquid mercury mirror
+    roughness: 0.09,           // Ultra-low friction mirror reflection
+    wireframe: false,
     transparent: true,
-    opacity: 0.75,
+    opacity: 0.38,
   });
 
-  const liquidRibbon = new THREE.Mesh(tubeGeometry, chromeMaterial);
-  scene.add(liquidRibbon);
+  const riverMesh = new THREE.Mesh(geometry, riverMaterial);
+  scene.add(riverMesh);
 
-  // Swirling outer liquid swirl wire / contour
-  const outerCurvePoints = [];
-  for (let i = 0; i <= segments; i++) {
-    const t = (i / segments) * Math.PI * 3.5;
-    outerCurvePoints.push(new THREE.Vector3(
-      (i - segments / 2) * 3.3,
-      Math.sin(t + 0.3) * 11.0 + Math.cos(t * 0.9) * 3.0,
-      Math.cos(t + 0.3) * 14.0
-    ));
-  }
-  const outerSpline = new THREE.CatmullRomCurve3(outerCurvePoints);
-  const outerGeometry = new THREE.TubeGeometry(outerSpline, 120, 1.2, 16, false);
-
-  const blackGoldMaterial = new THREE.MeshStandardMaterial({
-    color: 0x141414,           // Deep liquid ink black vein
-    metalness: 0.90,
-    roughness: 0.20,
+  // Second layer: Floating liquid mercury eddies & swirls (flowing river beads)
+  const dropletCount = 24;
+  const dropletGeometry = new THREE.SphereGeometry(1.6, 20, 20);
+  const dropletMaterial = new THREE.MeshStandardMaterial({
+    color: 0xB7F0F5,
+    metalness: 0.99,
+    roughness: 0.05,
     transparent: true,
-    opacity: 0.85,
+    opacity: 0.55,
   });
 
-  const outerRibbon = new THREE.Mesh(outerGeometry, blackGoldMaterial);
-  scene.add(outerRibbon);
+  const droplets = [];
+  for (let i = 0; i < dropletCount; i++) {
+    const bead = new THREE.Mesh(dropletGeometry, dropletMaterial);
+    bead.position.set(
+      (Math.random() - 0.5) * 140,
+      Math.random() * 8 + 3,
+      (Math.random() - 0.5) * 90
+    );
+    const scale = 0.6 + Math.random() * 1.8;
+    bead.scale.set(scale, scale * 0.6, scale); // Beveled surface droplet
+    scene.add(bead);
+    droplets.push({
+      mesh: bead,
+      flowSpeedZ: 0.08 + Math.random() * 0.12,
+      lateralSpeedX: (Math.random() - 0.5) * 0.05,
+      baseY: bead.position.y
+    });
+  }
 
-  // Studio lighting tuned to amber background
-  const ambientLight = new THREE.AmbientLight(0xF5C744, 2.0);
+  // Dramatic studio lights tuned to the arctic color palette
+  const ambientLight = new THREE.AmbientLight(0xE8FFF7, 1.8);
   scene.add(ambientLight);
 
-  const keyLight = new THREE.DirectionalLight(0xFFFFFF, 3.5);
-  keyLight.position.set(40, 60, 40);
+  // Key light: Ice sky chrome specular reflection (#A6D9F3)
+  const keyLight = new THREE.DirectionalLight(0xFFFFFF, 3.8);
+  keyLight.position.set(50, 70, 40);
   scene.add(keyLight);
 
-  const warmRimLight = new THREE.DirectionalLight(0xF59E0B, 3.0);
-  warmRimLight.position.set(-50, -20, -30);
-  scene.add(warmRimLight);
+  // Rim reflection: Deep arctic midnight (#0F2E3A / #6FB0C8)
+  const rimLight = new THREE.DirectionalLight(0x6FB0C8, 4.5);
+  rimLight.position.set(-60, 15, -30);
+  scene.add(rimLight);
 
-  // Interactive mouse tracking
+  // Interactive mouse ripples & parallax
   let mouseX = 0, mouseY = 0;
+  let targetMouseX = 0, targetMouseY = 0;
   window.addEventListener('mousemove', (e) => {
-    mouseX = (e.clientX - window.innerWidth / 2) * 0.0006;
-    mouseY = (e.clientY - window.innerHeight / 2) * 0.0006;
+    targetMouseX = (e.clientX - window.innerWidth / 2) * 0.0008;
+    targetMouseY = (e.clientY - window.innerHeight / 2) * 0.0008;
   }, { passive: true });
 
   window.addEventListener('resize', () => {
@@ -118,22 +117,47 @@ function initFlowingLiquidRibbon() {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
+  const pos = geometry.attributes.position;
+  const initialPositions = pos.clone();
   const clock = new THREE.Clock();
+
   function animate() {
     requestAnimationFrame(animate);
-    const time = clock.getElapsedTime() * 0.8;
+    const time = clock.getElapsedTime() * 1.1;
 
-    // Organic liquid undulating flow
-    liquidRibbon.rotation.x = Math.sin(time * 0.3) * 0.15 + mouseY * 1.5;
-    liquidRibbon.rotation.y = time * 0.12 + mouseX * 2.0;
-    liquidRibbon.position.y = Math.sin(time * 0.6) * 2.5;
+    // Smooth mouse lerping
+    mouseX += (targetMouseX - mouseX) * 0.05;
+    mouseY += (targetMouseY - mouseY) * 0.05;
 
-    outerRibbon.rotation.x = liquidRibbon.rotation.x;
-    outerRibbon.rotation.y = liquidRibbon.rotation.y;
-    outerRibbon.position.y = liquidRibbon.position.y;
+    // Physical flowing liquid mercury wave dynamics
+    for (let i = 0; i < pos.count; i++) {
+      const u = initialPositions.getX(i);
+      const v = initialPositions.getY(i);
+      
+      // River downstream flow vector combined with harmonic transverse ripples
+      const riverFlow = (v * 0.06 - time * 1.5);
+      const wave = Math.sin(u * 0.08 + riverFlow) * 4.8 +
+                   Math.cos(v * 0.07 + time * 0.9) * 3.6 +
+                   Math.sin((u + v) * 0.05 + time) * 2.2;
+      pos.setZ(i, wave);
+    }
+    pos.needsUpdate = true;
 
-    camera.position.x = mouseX * 20;
-    camera.position.y = 10 - mouseY * 15;
+    // Flowing mercury beads moving along the liquid river currents
+    droplets.forEach(d => {
+      d.mesh.position.z += d.flowSpeedZ;
+      d.mesh.position.x += d.lateralSpeedX;
+      d.mesh.position.y = d.baseY + Math.sin(time * 3 + d.mesh.position.x * 0.2) * 1.8;
+
+      if (d.mesh.position.z > 50) {
+        d.mesh.position.z = -60;
+        d.mesh.position.x = (Math.random() - 0.5) * 120;
+      }
+    });
+
+    // Tilt camera with pointer for visceral spatial depth
+    camera.position.x = mouseX * 30;
+    camera.position.y = 22 - mouseY * 25;
     camera.lookAt(0, 0, 0);
 
     renderer.render(scene, camera);
@@ -188,7 +212,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 3. Sketched Card Grid Rendering
+// 3. Sketched Card Grid Rendering with Arctic Theme
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -262,23 +286,23 @@ function renderListings(items) {
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
-          <!-- Real-world photo thumbnail banner -->
-          <div class="w-full h-32 border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative mb-4">
+          <!-- Lab thumbnail banner -->
+          <div class="w-full h-32 border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative mb-4">
             <img 
               src="${photoUrl}" 
               alt="Lab thumbnail" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             >
             <div class="absolute top-2 left-2 flex items-center gap-1.5">
-              <span class="px-2 py-0.5 bg-[#141414] text-[#FAF6EE] font-mono font-bold text-[10px] rounded">
+              <span class="px-2 py-0.5 bg-[#0F2E3A] text-[#E8FFF7] font-mono font-bold text-[10px] rounded">
                 ${score}% Match
               </span>
-              ${item.is_new ? '<span class="px-2 py-0.5 bg-[#F5C744] text-[#141414] font-mono font-bold text-[10px] border border-[#141414] rounded">Verified</span>' : ''}
+              ${item.is_new ? '<span class="px-2 py-0.5 bg-[#B7F0F5] text-[#0F2E3A] font-mono font-bold text-[10px] border border-[#0F2E3A] rounded">Verified</span>' : ''}
             </div>
 
             <button 
               type="button" 
-              class="absolute top-2 right-2 p-1.5 bg-[#FAF6EE] border-2 border-[#141414] rounded text-[#141414] hover:bg-white transition"
+              class="absolute top-2 right-2 p-1.5 bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded text-[#0F2E3A] hover:bg-white transition"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
             >
               <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-sm font-bold"></i>
@@ -286,30 +310,30 @@ function renderListings(items) {
           </div>
 
           <!-- Role & Institution -->
-          <h3 class="font-serif text-xl font-bold text-[#141414] leading-snug group-hover:text-[#9C2A1E] transition-colors line-clamp-2">
+          <h3 class="font-serif text-xl font-bold text-[#0F2E3A] leading-snug group-hover:text-[#6FB0C8] transition-colors line-clamp-2">
             ${escapeHtml(item.role_title || 'Research Fellowship')}
           </h3>
           
-          <div class="font-sans text-xs text-[#2C2B29] mt-2 flex items-center gap-2 font-medium">
-            <span class="text-[#141414] font-bold">${escapeHtml(item.company_name || 'Institution')}</span>
+          <div class="font-sans text-xs text-[#0F2E3A]/85 mt-2 flex items-center gap-2 font-semibold">
+            <span class="text-[#0F2E3A] font-bold">${escapeHtml(item.company_name || 'Institution')}</span>
             <span>|</span>
             <span class="truncate">${escapeHtml(item.location || 'Location Not Listed')}</span>
           </div>
 
-          <!-- Skills Tags -->
+          <!-- Skills Badges -->
           <div class="flex flex-wrap gap-1.5 mt-4">
-            ${skills.map(skill => `<span class="px-2 py-0.5 font-mono text-[10px] bg-white text-[#141414] border border-[#141414] rounded">${escapeHtml(skill)}</span>`).join('')}
+            ${skills.map(skill => `<span class="px-2 py-0.5 font-mono text-[10px] bg-white text-[#0F2E3A] border border-[#0F2E3A] rounded font-bold">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
         <!-- Metric Footer -->
-        <div class="pt-4 mt-5 border-t-2 border-[#141414] flex items-center justify-between">
+        <div class="pt-4 mt-5 border-t-2 border-[#0F2E3A] flex items-center justify-between">
           <div>
-            <div class="font-mono text-[9px] uppercase font-bold text-[#2C2B29]">Compensation</div>
-            <div class="font-mono font-bold text-[#141414] text-xs mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
+            <div class="font-mono text-[9px] uppercase font-bold text-[#0F2E3A]/70">Compensation</div>
+            <div class="font-mono font-bold text-[#0F2E3A] text-xs mt-0.5">${escapeHtml(item.stipend || 'Unspecified')}</div>
           </div>
           <div class="text-right">
-            <span class="px-2 py-1 bg-[#F5C744]/30 border border-[#141414] rounded font-mono font-bold text-[10px]">
+            <span class="px-2 py-1 bg-[#B7F0F5] border border-[#0F2E3A] rounded font-mono font-bold text-[10px] text-[#0F2E3A]">
               ${escapeHtml(item.source_platform || 'Portal')}
             </span>
           </div>
@@ -349,8 +373,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-white border border-[#141414] font-mono text-xs font-bold text-[#141414] rounded">${escapeHtml(s)}</span>`).join('')
-    : '<span class="font-serif text-xs text-[#2C2B29]">Standard qualification standards apply.</span>';
+    ? skills.map(s => `<span class="px-2.5 py-1 bg-white border border-[#0F2E3A] font-mono text-xs font-bold text-[#0F2E3A] rounded">${escapeHtml(s)}</span>`).join('')
+    : '<span class="font-serif text-xs text-[#0F2E3A]/80">Standard qualification specifications apply.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -412,12 +436,12 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-600 animate-pulse';
-      text.innerText = 'Scanning Portals';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+      text.innerText = 'Scanning Feeds';
       fetchLogs();
     } else {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-700';
-      text.innerText = 'Index Ready';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-600';
+      text.innerText = 'Index Active';
     }
   } catch (e) {}
 
@@ -443,7 +467,7 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'Verification Alert';
+      document.getElementById('action-title').innerText = data.alert.title || 'Verification Notice';
       document.getElementById('action-message').innerText = data.alert.message || 'Please check browser';
       banner.classList.remove('hidden');
     } else {

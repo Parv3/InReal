@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InReal | Technical Field Index</title>
+  <title>InReal | Research Index</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Resume Standards: Computer Modern / EB Garamond + Inter + Space Mono -->
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -24,10 +23,13 @@
             sketch: ['"Caveat"', 'cursive'],
           },
           colors: {
-            amberbg: '#F5C744',
-            cream: '#FAF6EE',
-            ink: '#141414',
-            graphite: '#2C2B29',
+            arctic: {
+              foam: '#E8FFF7',
+              mint: '#B7F0F5',
+              sky: '#A6D9F3',
+              deepsky: '#6FB0C8',
+              midnight: '#0F2E3A',
+            }
           }
         }
       }
@@ -36,130 +38,135 @@
 
   <style>
     :root {
-      --amber-bg: #F5C744;
-      --cream-paper: #FAF6EE;
-      --ink: #141414;
-      --graphite: #2C2B29;
+      --c-foam: #E8FFF7;
+      --c-mint: #B7F0F5;
+      --c-sky: #A6D9F3;
+      --c-deepsky: #6FB0C8;
+      --c-midnight: #0F2E3A;
     }
 
     body {
-      background-color: var(--amber-bg);
-      color: var(--ink);
+      background-color: #A6D9F3;
+      color: #0F2E3A;
       font-family: 'EB Garamond', Georgia, serif;
     }
 
-    /* Sketch / Hand-Drawn Wobbly Borders */
+    /* Hand-sketched organic borders with Arctic Glass & Chrome sheen */
     .sketch-card {
-      background: var(--cream-paper);
-      border: 2px solid var(--ink);
+      background: rgba(232, 255, 247, 0.90);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 2px solid #0F2E3A;
       border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      box-shadow: 4px 5px 0px rgba(20, 20, 20, 0.95);
+      box-shadow: 4px 5px 0px #0F2E3A;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
     .sketch-card:hover {
       transform: translate(-3px, -3px) rotate(-0.3deg);
-      box-shadow: 7px 8px 0px rgba(20, 20, 20, 1);
+      box-shadow: 7px 8px 0px #0F2E3A;
+      background: rgba(255, 255, 255, 0.95);
     }
 
     .sketch-btn {
-      background: var(--cream-paper);
-      border: 2px solid var(--ink);
+      background: #E8FFF7;
+      border: 2px solid #0F2E3A;
       border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
-      box-shadow: 3px 3px 0px rgba(20, 20, 20, 0.95);
+      box-shadow: 3px 3px 0px #0F2E3A;
       font-family: 'Space Mono', monospace;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      color: #0F2E3A;
       transition: all 0.12s ease;
     }
     .sketch-btn:hover {
       background: #FFFFFF;
       transform: translate(-2px, -2px);
-      box-shadow: 5px 5px 0px rgba(20, 20, 20, 1);
+      box-shadow: 5px 5px 0px #0F2E3A;
     }
     .sketch-btn:active {
       transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0px rgba(20, 20, 20, 1);
+      box-shadow: 1px 1px 0px #0F2E3A;
     }
 
     .sketch-pill {
-      background: var(--cream-paper);
-      border: 1.5px solid var(--ink);
+      background: #E8FFF7;
+      border: 1.5px solid #0F2E3A;
       border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      box-shadow: 2px 2px 0px rgba(20, 20, 20, 0.9);
+      box-shadow: 2px 2px 0px #0F2E3A;
       font-family: 'Space Mono', monospace;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       padding: 5px 12px;
+      color: #0F2E3A;
       cursor: pointer;
       transition: all 0.12s ease;
     }
     .sketch-pill:hover {
       background: #FFFFFF;
       transform: translate(-1px, -1px);
-      box-shadow: 3px 3px 0px rgba(20, 20, 20, 1);
+      box-shadow: 3px 3px 0px #0F2E3A;
     }
     .sketch-pill.active {
-      background: var(--ink);
-      color: var(--cream-paper) !important;
-      box-shadow: 2px 2px 0px rgba(20, 20, 20, 0.9);
+      background: #0F2E3A !important;
+      color: #E8FFF7 !important;
+      box-shadow: 2px 2px 0px #0F2E3A;
     }
 
-    /* Hand-drawn underline annotation */
     .hand-annotation {
       font-family: 'Caveat', cursive;
-      color: #9C2A1E;
+      color: #0F2E3A;
       font-size: 18px;
       line-height: 1;
     }
 
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #E5B837; border-left: 2px solid var(--ink); }
-    ::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: #A6D9F3; border-left: 2px solid #0F2E3A; }
+    ::-webkit-scrollbar-thumb { background: #0F2E3A; border-radius: 4px; }
   </style>
 </head>
 
-<body class="bg-[#F5C744] min-h-screen text-[#141414] flex flex-col relative antialiased selection:bg-[#141414] selection:text-[#F5C744] overflow-x-hidden">
+<body class="bg-[#A6D9F3] min-h-screen text-[#0F2E3A] flex flex-col relative antialiased selection:bg-[#0F2E3A] selection:text-[#E8FFF7] overflow-x-hidden">
 
-  <!-- Interactive 3D WebGL Liquid Ribbon Canvas -->
-  <canvas id="liquid-ribbon-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-90"></canvas>
+  <!-- Interactive 3D WebGL Liquid Mercury River Canvas -->
+  <canvas id="liquid-river-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-80"></canvas>
 
   <!-- Action Required Alert Banner -->
-  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-md w-full bg-[#FAF6EE] border-2 border-[#141414] p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[5px_5px_0px_#141414]">
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-md w-full bg-[#E8FFF7] border-2 border-[#0F2E3A] p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[5px_5px_0px_#0F2E3A]">
     <div class="flex items-start gap-3">
-      <div class="p-2 bg-[#141414] text-[#FAF6EE] rounded">
+      <div class="p-2 bg-[#0F2E3A] text-[#E8FFF7] rounded">
         <i class="ph ph-warning-circle text-xl"></i>
       </div>
       <div class="flex-1 font-sans">
-        <h4 id="action-title" class="font-bold text-xs uppercase tracking-wider text-[#141414]">Verification Alert</h4>
-        <p id="action-message" class="text-xs text-[#2C2B29] mt-0.5 font-serif">Please inspect the browser verification dialog.</p>
+        <h4 id="action-title" class="font-bold text-xs uppercase tracking-wider text-[#0F2E3A]">Verification Notice</h4>
+        <p id="action-message" class="text-xs text-[#0F2E3A]/80 mt-0.5 font-serif">Manual confirmation is required in the browser window.</p>
       </div>
-      <button id="action-dismiss-btn" class="sketch-btn px-3 py-1 bg-[#141414] text-[#FAF6EE] text-xs">
+      <button id="action-dismiss-btn" class="sketch-btn px-3 py-1 bg-[#0F2E3A] text-[#E8FFF7] text-xs">
         Dismiss
       </button>
     </div>
   </div>
 
   <!-- Hand-Sketched Header -->
-  <header class="sticky top-0 z-30 w-full bg-[#F5C744]/95 backdrop-blur-sm border-b-2 border-[#141414]">
+  <header class="sticky top-0 z-30 w-full bg-[#A6D9F3]/90 backdrop-blur-md border-b-2 border-[#0F2E3A]">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
       
-      <!-- Brand & Journal Header -->
+      <!-- Brand & Sketched Identity -->
       <div class="flex items-center gap-4">
-        <div class="w-11 h-11 bg-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#141414] flex items-center justify-center text-[#141414]">
-          <i class="ph ph-pen-nib-straight text-2xl"></i>
+        <div class="w-11 h-11 bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#0F2E3A] flex items-center justify-center text-[#0F2E3A]">
+          <i class="ph ph-compass text-2xl font-bold"></i>
         </div>
         <div>
           <div class="flex items-center gap-3">
-            <span class="font-serif text-3xl font-bold tracking-tight text-[#141414]">InReal</span>
-            <span class="font-mono text-[10px] tracking-widest px-2 py-0.5 border border-[#141414] bg-[#FAF6EE] font-bold rounded">DOC NO. 2026</span>
+            <span class="font-serif text-3xl font-bold tracking-tight text-[#0F2E3A]">InReal</span>
+            <span class="font-mono text-[10px] tracking-widest px-2 py-0.5 border-2 border-[#0F2E3A] bg-[#B7F0F5] font-bold rounded">ARCTIC CHROME // 01</span>
           </div>
           <div class="flex items-center gap-2 mt-0.5">
-            <span class="font-sans text-xs text-[#2C2B29] font-medium tracking-tight">Curated Fellowship & Engineering Registry</span>
-            <span class="hand-annotation hidden sm:inline">&mdash; verified records only</span>
+            <span class="font-sans text-xs text-[#0F2E3A]/85 font-semibold tracking-tight">AI & Research Fellowship Registry</span>
+            <span class="hand-annotation hidden sm:inline">&mdash; live stream index</span>
           </div>
         </div>
       </div>
@@ -167,19 +174,19 @@
       <!-- Controls & Status -->
       <div class="flex items-center gap-3">
         <!-- Status Indicator -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 bg-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#141414] font-mono text-xs font-bold">
-          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-700 border border-[#141414]"></span>
-          <span id="scraper-status-text" class="text-[11px] uppercase tracking-wider">Index Ready</span>
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#0F2E3A] font-mono text-xs font-bold">
+          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-600 border border-[#0F2E3A]"></span>
+          <span id="scraper-status-text" class="text-[11px] uppercase tracking-wider text-[#0F2E3A]">Index Active</span>
         </div>
 
         <!-- Telemetry Logs -->
-        <button id="open-logs-btn" class="sketch-btn px-3.5 py-1.5 text-[#141414] text-xs flex items-center gap-2">
+        <button id="open-logs-btn" class="sketch-btn px-3.5 py-1.5 text-xs flex items-center gap-2">
           <i class="ph ph-terminal text-base"></i>
           <span class="hidden md:inline">Logs</span>
         </button>
 
         <!-- Scrape Action Button -->
-        <button id="trigger-scrape-btn" class="sketch-btn px-4 py-2 bg-[#141414] text-[#FAF6EE] text-xs flex items-center gap-2 hover:bg-[#2C2B29]">
+        <button id="trigger-scrape-btn" class="sketch-btn px-4 py-2 bg-[#0F2E3A] text-[#E8FFF7] text-xs flex items-center gap-2 hover:bg-[#1A4252]">
           <i class="ph ph-arrows-clockwise text-sm"></i>
           <span>Scrape Now</span>
         </button>
@@ -196,52 +203,52 @@
       <!-- Primary Notebook Cover Box -->
       <div class="lg:col-span-8 sketch-card p-8 flex flex-col justify-between relative overflow-hidden">
         <div class="max-w-2xl">
-          <div class="flex items-center gap-3 pb-3 border-b-2 border-[#141414]">
-            <span class="font-mono text-xs uppercase tracking-widest font-bold text-[#141414]">Academic & Research Portfolio</span>
-            <span class="hand-annotation">updated continuously</span>
+          <div class="flex items-center gap-3 pb-3 border-b-2 border-[#0F2E3A]">
+            <span class="font-mono text-xs uppercase tracking-widest font-bold text-[#0F2E3A]">Technical Field Registry 2026</span>
+            <span class="hand-annotation">verified records</span>
           </div>
 
-          <h1 class="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-[#141414] mt-4 leading-[1.15]">
-            Engineering & AI Fellowships, curated with resume precision.
+          <h1 class="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-[#0F2E3A] mt-4 leading-[1.15]">
+            Machine Learning & Engineering Fellowships with resume rigor.
           </h1>
-          <p class="font-serif text-base text-[#2C2B29] mt-3 leading-relaxed">
-            Scraped across primary technical portals, academic research laboratories, and institutional announcements. Clean extraction of qualifications, competitive stipends, and direct submission endpoints.
+          <p class="font-serif text-base text-[#0F2E3A]/85 mt-3 leading-relaxed">
+            Continuous background telemetry monitoring university labs, international institutes, and frontier AI research divisions. Extracted with explicit compensation, skill stacks, and direct application routes.
           </p>
         </div>
 
-        <div class="grid grid-cols-3 gap-6 pt-6 mt-8 border-t-2 border-[#141414] bg-[#F5C744]/20 p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] border-2 border-[#141414]">
+        <div class="grid grid-cols-3 gap-6 pt-6 mt-8 border-t-2 border-[#0F2E3A] bg-[#B7F0F5]/50 p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] border-2 border-[#0F2E3A]">
           <div>
-            <div class="font-mono text-3xl font-bold text-[#141414]" id="stat-total-jobs">0</div>
-            <div class="font-sans text-xs text-[#2C2B29] font-medium mt-0.5">Archived Postings</div>
+            <div class="font-mono text-3xl font-bold text-[#0F2E3A]" id="stat-total-jobs">0</div>
+            <div class="font-sans text-xs text-[#0F2E3A] font-semibold mt-0.5">Monitored Positions</div>
           </div>
           <div>
-            <div class="font-mono text-3xl font-bold text-[#141414]" id="stat-paid-jobs">0</div>
-            <div class="font-sans text-xs text-[#2C2B29] font-medium mt-0.5">Funded Fellowships</div>
+            <div class="font-mono text-3xl font-bold text-[#0F2E3A]" id="stat-paid-jobs">0</div>
+            <div class="font-sans text-xs text-[#0F2E3A] font-semibold mt-0.5">Funded Fellowships</div>
           </div>
           <div>
-            <div class="font-mono text-3xl font-bold text-[#141414]" id="stat-sources">16+</div>
-            <div class="font-sans text-xs text-[#2C2B29] font-medium mt-0.5">Monitored Boards</div>
+            <div class="font-mono text-3xl font-bold text-[#0F2E3A]" id="stat-sources">16+</div>
+            <div class="font-sans text-xs text-[#0F2E3A] font-semibold mt-0.5">Active Portals</div>
           </div>
         </div>
       </div>
 
       <!-- Quick Curation Spotlight Card -->
-      <div class="lg:col-span-4 bg-[#141414] text-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[6px_6px_0px_#141414] p-7 flex flex-col justify-between relative">
+      <div class="lg:col-span-4 bg-[#0F2E3A] text-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[6px_6px_0px_#0F2E3A] p-7 flex flex-col justify-between relative">
         <div>
-          <div class="font-mono text-xs uppercase tracking-widest text-[#F5C744] font-bold border-b border-[#FAF6EE]/20 pb-2">
-            Standards & Selection
+          <div class="font-mono text-xs uppercase tracking-widest text-[#B7F0F5] font-bold border-b border-[#E8FFF7]/20 pb-2">
+            Selection Discipline
           </div>
           <h2 class="font-serif text-2xl font-bold mt-4 leading-snug">
-            Strict engineering criteria. No generic filler.
+            Zero noise. Concrete engineering specifications.
           </h2>
-          <p class="font-sans text-xs text-[#FAF6EE]/80 mt-3 leading-relaxed">
-            Every entry requires verifiable technical depth in PyTorch, distributed systems, or core AI/ML architectures.
+          <p class="font-sans text-xs text-[#E8FFF7]/85 mt-3 leading-relaxed">
+            Only verified roles in PyTorch, distributed computing, CUDA, LLM evaluation, and robotics are indexed.
           </p>
         </div>
 
-        <div class="pt-6 border-t border-[#FAF6EE]/20 mt-6 flex items-center justify-between text-xs">
-          <span class="font-mono uppercase font-bold text-[#FAF6EE]/70">Bookmarked Items:</span>
-          <span id="spotlight-saved-count" class="font-mono font-bold bg-[#F5C744] text-[#141414] px-2.5 py-1 border border-[#141414] rounded">0 Items</span>
+        <div class="pt-6 border-t border-[#E8FFF7]/20 mt-6 flex items-center justify-between text-xs">
+          <span class="font-mono uppercase font-bold text-[#E8FFF7]/70">Saved Opportunities:</span>
+          <span id="spotlight-saved-count" class="font-mono font-bold bg-[#B7F0F5] text-[#0F2E3A] px-2.5 py-1 border border-[#0F2E3A] rounded">0 Items</span>
         </div>
       </div>
     </section>
@@ -251,19 +258,19 @@
       <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <!-- Search Input -->
         <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#141414] text-lg font-bold"></i>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0F2E3A] text-lg font-bold"></i>
           <input 
             type="text" 
             id="search-input" 
             placeholder="Search role, institution (Anthropic, DeepMind), or skill (PyTorch, JAX, CUDA)..." 
-            class="w-full bg-[#FAF6EE] border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] pl-11 pr-20 py-2.5 font-sans text-xs text-[#141414] placeholder-[#2C2B29]/60 focus:outline-none focus:bg-white transition shadow-sm font-medium"
+            class="w-full bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] pl-11 pr-20 py-2.5 font-sans text-xs text-[#0F2E3A] placeholder-[#0F2E3A]/60 focus:outline-none focus:bg-white transition shadow-sm font-semibold"
           >
-          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#141414] bg-[#F5C744] px-2 py-0.5 border border-[#141414] font-bold rounded hidden sm:inline">Ctrl K</span>
+          <span class="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#0F2E3A] bg-[#B7F0F5] px-2 py-0.5 border border-[#0F2E3A] font-bold rounded hidden sm:inline">Ctrl K</span>
         </div>
 
         <!-- Controls -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          <select id="source-filter" class="bg-[#FAF6EE] border-2 border-[#141414] font-mono text-xs px-3 py-2.5 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] font-bold shadow-sm focus:outline-none uppercase">
+          <select id="source-filter" class="bg-[#E8FFF7] border-2 border-[#0F2E3A] font-mono text-xs px-3 py-2.5 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] font-bold shadow-sm focus:outline-none uppercase">
             <option value="all">All Sources</option>
           </select>
 
@@ -280,7 +287,7 @@
       </div>
 
       <!-- Segmented Region & Stipend Filters -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-[#141414]">
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-[#0F2E3A]">
         <!-- Region Tabs -->
         <div class="flex items-center gap-2" id="location-tabs">
           <button class="sketch-pill active" data-val="all">All Regions (<span id="count-all">0</span>)</button>
@@ -291,7 +298,7 @@
 
         <!-- Stipend Chips -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
-          <span class="font-mono text-[10px] uppercase font-bold text-[#141414]">Compensation:</span>
+          <span class="font-mono text-[10px] uppercase font-bold text-[#0F2E3A]">Compensation:</span>
           <button class="sketch-pill active" data-val="all">All</button>
           <button class="sketch-pill" data-val="paid">Funded Only</button>
           <button class="sketch-pill" data-val="20k">> INR 20k</button>
@@ -303,89 +310,89 @@
     <!-- Cards Grid -->
     <section class="w-full">
       <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Rendered via JavaScript -->
+        <!-- Injected via JavaScript -->
       </div>
 
       <!-- Empty State -->
       <div id="empty-state" class="hidden sketch-card p-12 text-center flex-col items-center justify-center">
-        <div class="w-14 h-14 bg-[#141414] text-[#FAF6EE] border-2 border-[#141414] rounded-full flex items-center justify-center text-2xl mb-4">
+        <div class="w-14 h-14 bg-[#0F2E3A] text-[#E8FFF7] border-2 border-[#0F2E3A] rounded-full flex items-center justify-center text-2xl mb-4">
           <i class="ph ph-magnifying-glass"></i>
         </div>
-        <h3 class="font-serif text-2xl font-bold text-[#141414]">No matching fellowship entries found</h3>
-        <p class="font-sans text-xs text-[#2C2B29] max-w-sm mt-2">Adjust your search parameters or run the scraper fleet to poll new listings.</p>
-        <button id="empty-reset-btn" class="mt-4 sketch-btn px-4 py-2 bg-[#141414] text-[#FAF6EE] text-xs">Reset Filters</button>
+        <h3 class="font-serif text-2xl font-bold text-[#0F2E3A]">No matching fellowship entries found</h3>
+        <p class="font-sans text-xs text-[#0F2E3A]/80 max-w-sm mt-2">Adjust your search parameters or run the scraper fleet to poll new listings.</p>
+        <button id="empty-reset-btn" class="mt-4 sketch-btn px-4 py-2 bg-[#0F2E3A] text-[#E8FFF7] text-xs">Reset Filters</button>
       </div>
     </section>
   </main>
 
   <!-- Slide-Over Inspection Drawer -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#141414]/50 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#FAF6EE] border-l-4 border-[#141414] p-8 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#0F2E3A]/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-[#E8FFF7] border-l-4 border-[#0F2E3A] p-8 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-5 border-b-2 border-[#141414]">
+      <div class="flex items-center justify-between pb-5 border-b-2 border-[#0F2E3A]">
         <div class="flex items-center gap-2">
-          <span id="drawer-match-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#141414] text-[#FAF6EE] border border-[#141414] rounded">98% Match</span>
-          <span id="drawer-org-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#F5C744] text-[#141414] border border-[#141414] rounded">Company</span>
+          <span id="drawer-match-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#0F2E3A] text-[#E8FFF7] border border-[#0F2E3A] rounded">98% Match</span>
+          <span id="drawer-org-badge" class="px-3 py-1 font-mono font-bold text-xs bg-[#B7F0F5] text-[#0F2E3A] border border-[#0F2E3A] rounded">Company</span>
         </div>
-        <button id="close-drawer-btn" class="p-1.5 border-2 border-[#141414] bg-[#FAF6EE] hover:bg-[#141414] hover:text-[#FAF6EE] rounded transition">
+        <button id="close-drawer-btn" class="p-1.5 border-2 border-[#0F2E3A] bg-[#E8FFF7] hover:bg-[#0F2E3A] hover:text-[#E8FFF7] rounded transition">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <div class="py-6 flex-1 flex flex-col gap-6">
         <!-- Photo banner in drawer -->
-        <div class="w-full h-44 border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative shadow-[3px_3px_0px_#141414]">
+        <div class="w-full h-44 border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] overflow-hidden relative shadow-[3px_3px_0px_#0F2E3A]">
           <img id="drawer-image" src="" alt="Research lab" class="w-full h-full object-cover">
-          <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-[#141414] text-[#FAF6EE] font-mono text-[10px] uppercase font-bold rounded">
+          <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-[#0F2E3A] text-[#E8FFF7] font-mono text-[10px] uppercase font-bold rounded">
             Documented Facility
           </div>
         </div>
 
         <div>
-          <h2 id="drawer-role-title" class="font-serif text-3xl font-bold text-[#141414] leading-tight">AI Safety Fellow</h2>
-          <div id="drawer-company-name" class="font-sans text-sm font-semibold text-[#2C2B29] mt-1">Anthropic</div>
-          <div class="flex items-center gap-4 font-sans text-xs text-[#2C2B29] mt-3 font-medium">
+          <h2 id="drawer-role-title" class="font-serif text-3xl font-bold text-[#0F2E3A] leading-tight">AI Safety Fellow</h2>
+          <div id="drawer-company-name" class="font-sans text-sm font-semibold text-[#0F2E3A]/80 mt-1">Anthropic</div>
+          <div class="flex items-center gap-4 font-sans text-xs text-[#0F2E3A]/80 mt-3 font-semibold">
             <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">San Francisco, CA</span></span>
             <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">6 Months</span></span>
           </div>
         </div>
 
-        <div class="p-4 bg-white border-2 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#141414] flex items-center justify-between">
+        <div class="p-4 bg-white border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[3px_3px_0px_#0F2E3A] flex items-center justify-between">
           <div>
-            <div class="font-mono text-[10px] text-[#2C2B29] uppercase font-bold">Compensation</div>
-            <div id="drawer-stipend" class="font-mono text-lg font-bold text-[#141414] mt-0.5">$9,000 / month</div>
+            <div class="font-mono text-[10px] text-[#0F2E3A]/70 uppercase font-bold">Compensation</div>
+            <div id="drawer-stipend" class="font-mono text-lg font-bold text-[#0F2E3A] mt-0.5">$9,000 / month</div>
           </div>
           <div class="text-right">
-            <div class="font-mono text-[10px] text-[#2C2B29] uppercase font-bold">Deadline</div>
-            <div id="drawer-deadline" class="font-mono text-xs font-bold text-[#141414] mt-0.5">2026-11-15</div>
+            <div class="font-mono text-[10px] text-[#0F2E3A]/70 uppercase font-bold">Deadline</div>
+            <div id="drawer-deadline" class="font-mono text-xs font-bold text-[#0F2E3A] mt-0.5">2026-11-15</div>
           </div>
         </div>
 
         <div>
-          <h4 class="font-mono text-xs uppercase tracking-wider text-[#141414] font-bold mb-2">Qualifications & Skills</h4>
+          <h4 class="font-mono text-xs uppercase tracking-wider text-[#0F2E3A] font-bold mb-2">Qualifications & Skills</h4>
           <div id="drawer-skills-list" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div>
-          <h4 class="font-mono text-xs uppercase tracking-wider text-[#141414] font-bold mb-2">Registry Record</h4>
+          <h4 class="font-mono text-xs uppercase tracking-wider text-[#0F2E3A] font-bold mb-2">Registry Record</h4>
           <div class="grid grid-cols-2 gap-3 text-xs font-sans font-medium">
-            <div class="p-3 bg-white border-2 border-[#141414] rounded">
-              <span class="text-[#2C2B29]">Source Portal:</span>
-              <div id="drawer-source" class="font-bold text-[#141414] mt-0.5">LinkedIn</div>
+            <div class="p-3 bg-white border-2 border-[#0F2E3A] rounded">
+              <span class="text-[#0F2E3A]/70">Source Portal:</span>
+              <div id="drawer-source" class="font-bold text-[#0F2E3A] mt-0.5">LinkedIn</div>
             </div>
-            <div class="p-3 bg-white border-2 border-[#141414] rounded">
-              <span class="text-[#2C2B29]">Recorded Date:</span>
-              <div id="drawer-date" class="font-bold text-[#141414] mt-0.5">2026-10-11</div>
+            <div class="p-3 bg-white border-2 border-[#0F2E3A] rounded">
+              <span class="text-[#0F2E3A]/70">Recorded Date:</span>
+              <div id="drawer-date" class="font-bold text-[#0F2E3A] mt-0.5">2026-10-11</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="pt-5 border-t-2 border-[#141414] flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-3 border-2 border-[#141414] bg-[#FAF6EE] text-[#141414] hover:bg-white transition rounded shadow-[2px_2px_0px_#141414]">
+      <div class="pt-5 border-t-2 border-[#0F2E3A] flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-3 border-2 border-[#0F2E3A] bg-[#E8FFF7] text-[#0F2E3A] hover:bg-white transition rounded shadow-[2px_2px_0px_#0F2E3A]">
           <i class="ph ph-bookmark text-lg"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 sketch-btn bg-[#141414] text-[#FAF6EE] text-xs font-bold tracking-wider text-center flex items-center justify-center gap-2">
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-3 px-4 sketch-btn bg-[#0F2E3A] text-[#E8FFF7] text-xs font-bold tracking-wider text-center flex items-center justify-center gap-2">
           <span>Apply Directly on Portal</span>
           <i class="ph ph-arrow-up-right"></i>
         </a>
@@ -394,54 +401,54 @@
   </div>
 
   <!-- Telemetry Slide Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#141414] border-t-4 border-l-4 border-[#141414] shadow-2xl z-40 hidden transition-all duration-300">
-    <div class="p-3 bg-[#141414] border-b border-[#FAF6EE]/20 flex items-center justify-between">
-      <div class="flex items-center gap-2 font-mono text-xs text-[#FAF6EE] font-bold">
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#0F2E3A] border-t-4 border-l-4 border-[#0F2E3A] shadow-2xl z-40 hidden transition-all duration-300">
+    <div class="p-3 bg-[#0F2E3A] border-b border-[#E8FFF7]/20 flex items-center justify-between">
+      <div class="flex items-center gap-2 font-mono text-xs text-[#E8FFF7] font-bold">
         <i class="ph ph-terminal text-sm"></i>
         <span>Telemetry Stream</span>
       </div>
-      <button id="close-logs-btn" class="p-1 text-[#FAF6EE] hover:bg-[#2C2B29] rounded">
+      <button id="close-logs-btn" class="p-1 text-[#E8FFF7] hover:bg-[#1A4252] rounded">
         <i class="ph ph-x"></i>
       </button>
     </div>
-    <div id="logs-content" class="p-4 font-mono text-[11px] text-[#FAF6EE] max-h-64 overflow-y-auto space-y-1 bg-[#141414]"></div>
+    <div id="logs-content" class="p-4 font-mono text-[11px] text-[#E8FFF7] max-h-64 overflow-y-auto space-y-1 bg-[#0F2E3A]"></div>
   </div>
 
   <!-- Scraper Configuration Modal -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#FAF6EE] border-4 border-[#141414] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[8px_8px_0px_#141414] max-w-lg w-full p-6">
-      <div class="flex items-center justify-between pb-4 border-b-2 border-[#141414]">
-        <h3 class="font-serif text-2xl font-bold text-[#141414] flex items-center gap-2">
+  <div id="scrape-config-modal" class="fixed inset-0 bg-[#0F2E3A]/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#E8FFF7] border-4 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[8px_8px_0px_#0F2E3A] max-w-lg w-full p-6">
+      <div class="flex items-center justify-between pb-4 border-b-2 border-[#0F2E3A]">
+        <h3 class="font-serif text-2xl font-bold text-[#0F2E3A] flex items-center gap-2">
           <span>Configure Scraping Fleet</span>
         </h3>
-        <button id="close-config-btn" class="text-[#141414] p-1 border-2 border-[#141414] rounded">
+        <button id="close-config-btn" class="text-[#0F2E3A] p-1 border-2 border-[#0F2E3A] rounded">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <form id="scrape-config-form" class="mt-4 space-y-4">
         <div>
-          <label class="font-mono text-[11px] uppercase font-bold text-[#141414] mb-2 block">Target Regions</label>
+          <label class="font-mono text-[11px] uppercase font-bold text-[#0F2E3A] mb-2 block">Target Regions</label>
           <div class="grid grid-cols-3 gap-2 font-mono text-xs font-bold">
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="usa" value="usa" checked> USA</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="usa" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
           </div>
         </div>
 
         <div>
-          <label class="font-mono text-[11px] uppercase font-bold text-[#141414] mb-2 block">Portals</label>
+          <label class="font-mono text-[11px] uppercase font-bold text-[#0F2E3A] mb-2 block">Portals</label>
           <div class="grid grid-cols-2 gap-2 font-mono text-xs font-bold">
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
-            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#141414] rounded cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 bg-white border-2 border-[#0F2E3A] rounded cursor-pointer"><input type="checkbox" name="bigtech" value="bigtech" checked> Big Tech</label>
           </div>
         </div>
 
-        <button type="submit" class="w-full py-3 sketch-btn bg-[#141414] text-[#FAF6EE] text-xs font-bold transition mt-3">
+        <button type="submit" class="w-full py-3 sketch-btn bg-[#0F2E3A] text-[#E8FFF7] text-xs font-bold transition mt-3">
           Launch Scraping Fleet
         </button>
       </form>
