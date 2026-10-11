@@ -89,3 +89,23 @@ def test_soft_flags_keep_listing():
     assert reason is None
     assert any("Posts a lot" in f for f in flags)
     assert "Stipend amount not stated" in flags
+
+
+def test_ai_ml_relevance_uses_title_or_two_real_ml_skills():
+    from filters import internship_rejection_reason as why
+    # real ML roles
+    assert why("Machine Learning", [], "internshala") is None
+    assert why("AI Robotics/ML Research Engineer", [], "internshala") is None
+    assert why("Founding AI Engineer", [], "internshala") is None
+    assert why("AI Research Intern", [], "internshala") is None
+    assert why("Robotics Data Engineer", ["OpenCV", "Python", "Machine Learning"], "internshala") is None
+    # roles that only carry a fluffy "AI" tag or title word (seen on the live site, Oct 2026)
+    assert why("Digital Marketing", ["SEO", "Artificial intelligence"], "internshala") == "Not an AI/ML role"
+    assert why("AI Video Editor", ["Generative AI Tools", "Video Editing"], "internshala") == "Not an AI/ML role"
+    assert why("AI Web Development", ["HTML", "CSS"], "internshala") == "Not an AI/ML role"
+    assert why("Marketing Research – AI/US Market", ["Market Analysis"], "internshala") == "Not an AI/ML role"
+    assert why("Python Development", ["Python", "Machine Learning", "Flask"], "internshala") == "Not an AI/ML role"
+    # one skill tag must not count twice ("Natural Language Processing (NLP)")
+    assert why("Data Analytics", ["Natural Language Processing (NLP)", "Excel"], "internshala") == "Not an AI/ML role"
+    # "Leadership" as a skill no longer knocks out a real listing
+    assert why("Machine Learning", ["Leadership"], "internshala") is None

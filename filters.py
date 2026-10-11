@@ -16,6 +16,21 @@ INCLUDE_KEYWORDS = [
     "hugging face", "langchain",
 ]
 
+# Skill tags that, on their own, point to real ML work. "Artificial intelligence"
+# and "Generative AI Tools" are left out on purpose: on Internshala, marketing,
+# video-editing and HR roles carry those tags too.
+CORE_ML_SKILLS = [
+    "machine learning", "deep learning", "neural network", "natural language processing",
+    "nlp", "computer vision", "data science", "reinforcement learning", "llm",
+    "pytorch", "tensorflow", "keras", "scikit-learn", "opencv", "hugging face", "langchain",
+]
+# A title with a bare "AI" counts only next to one of these words
+# ("AI Research Intern" yes; "AI Video Editor", "AI Web Development" no).
+AI_TECH_WORDS = [
+    "engineer", "engineering", "scientist",
+    "model", "models", "agent", "agents", "vision",
+]
+
 # Checked against the TITLE only. Skills like "Leadership" or
 # "Project Management" must not knock out a real internship.
 TITLE_EXCLUDE = [
@@ -62,10 +77,21 @@ def internship_rejection_reason(title: str, skills: list, source: str = ""):
         if past_year in title_lower and past_year != str(now.year):
             return f"Mentions old year {past_year}"
 
-    for inc in INCLUDE_KEYWORDS:
-        if inc in text_to_check:
-            return None
+    if is_ai_ml_title(title_lower):
+        return None
+    # No AI/ML in the title: the skills must show at least two real ML skills
+    core = [s for s in skills_lower if any(k in s for k in CORE_ML_SKILLS)]
+    if len(core) >= 2:
+        return None
     return "Not an AI/ML role"
+
+
+def is_ai_ml_title(title_lower: str) -> bool:
+    if any(inc in title_lower for inc in INCLUDE_KEYWORDS):
+        return True
+    if _has_word(title_lower, "ml"):
+        return True
+    return _has_word(title_lower, "ai") and any(_has_word(title_lower, w) for w in AI_TECH_WORDS)
 
 
 def is_valid_internship(title: str, skills: list, source: str = "") -> bool:

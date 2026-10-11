@@ -14,7 +14,7 @@ python scraper.py --source <name> --dry-run
 
 | # | Platform | `--source` | File | How it reads the site | Status |
 |---|---|---|---|---|---|
-| 1 | Internshala | `internshala` | `sites/internshala.py` | Playwright + HTML | 🟡 |
+| 1 | Internshala | `internshala` | `sites/internshala.py` | Playwright + HTML | ✅ |
 | 2 | Unstop | `unstop` | `sites/unstop.py` | Playwright + HTML | 🔴 |
 | 3 | Naukri | `naukri` | `sites/naukri.py` | Playwright + HTML | 🔴 |
 | 4 | LinkedIn (guest search) | `linkedin` | `sites/linkedin.py` | Playwright + HTML | 🔴 |
@@ -33,7 +33,7 @@ python scraper.py --source <name> --dry-run
 
 ---
 
-## 1. Internshala 🟡
+## 1. Internshala ✅
 
 URL: `https://internshala.com/internships/artificial-intelligence-ai,data-science,deep-learning,machine-learning,natural-language-processing-nlp-internship/` (pages: `page-2/`, `page-3/` …)
 Checked on the live site: 12 Oct 2026.
@@ -55,7 +55,12 @@ Checked on the live site: 12 Oct 2026.
 | Employer activity (detail page) | not read | `.activity_container .activity` (hiring since / posted / hired) | new, used by `genuine.py` |
 | Openings (detail page) | not read | `.section_heading` "Number of openings" → next element | new |
 
-Left to do: run it on the laptop and confirm the numbers.
+**Laptop test, 12 Oct 2026, 00:43:** 393 listings scraped from 10 pages, 146 of 147 detail pages read, 0 failures.
+With the tighter AI/ML rule (below) the same data gives **81 kept**. 264 were not AI/ML, 21 unpaid, 21 under ₹5,000, 4 had excluded title words and 2 were mass programmes (Reducate.ai: 21,755 people "hired" from 1,189 posts).
+
+What the first run taught us: about half of the 147 kept listings were not AI/ML at all (Digital Marketing, Graphic Design, HR, Video Editor) and got in only because Internshala tags them with the skill "Artificial intelligence". Now a listing needs AI/ML in the title, or at least two real ML skill tags (Machine Learning, Deep Learning, NLP, PyTorch, OpenCV …).
+
+No listing on Internshala mentioned a fee. That fits Internshala's rule against charging candidates, but it also means the fee check has not been proven on real data yet.
 
 ## 2. Unstop 🔴
 
@@ -197,6 +202,7 @@ Uses the `ddgs` package (falls back to `duckduckgo_search`). Check: the package 
 | `--source` crashed (`specific_source` was not a parameter) | `scraper.py` | ✅ fixed |
 | `--dry-run` only printed a count | `scraper.py` | ✅ now prints kept/dropped with reasons |
 | Skills like "Leadership" rejected real listings (word `lead`) | `filters.py` | ✅ exclusions now check the title only |
+| A single "Artificial intelligence" skill tag let marketing/HR roles in | `filters.py` | ✅ title match or 2 real ML skills |
 | "Competitive stipend" was treated as unpaid | `filters.py` | ✅ fixed |
 | `schedule` package missing from requirements | `requirements.txt` | ✅ added |
 | `wait_for_human` is defined twice | `scraper_utils.py` | 🔴 |
