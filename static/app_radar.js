@@ -62,11 +62,12 @@ function initFullFluidChromeShader() {
     }
   `;
 
-  // Fractal domain-warping fluid shader with metallic specular Fresnel bands
+  // Fractal domain-warping fluid shader with enlarged ribbons and direct cursor deformation
   const fragmentShader = `
     uniform float u_time;
     uniform vec2 u_resolution;
     uniform vec2 u_mouse;
+    uniform vec2 u_mouse_velocity;
     uniform vec3 u_colorFoam;
     uniform vec3 u_colorMint;
     uniform vec3 u_colorSky;
@@ -95,44 +96,71 @@ function initFullFluidChromeShader() {
 
     void main() {
       vec2 st = gl_FragCoord.xy / u_resolution.xy;
-      st.x *= u_resolution.x / u_resolution.y;
+      vec2 aspectSt = st;
+      aspectSt.x *= u_resolution.x / u_resolution.y;
 
-      vec2 mouseOffset = (u_mouse - 0.5) * 0.45;
-      vec2 p = st * 2.8 + mouseOffset;
-      float t = u_time * 0.22;
+      vec2 aspectMouse = u_mouse;
+      aspectMouse.x *= u_resolution.x / u_resolution.y;
 
-      // Domain warping (fluid distortion layers)
+      // Distance from interactive pointer for localized fluid displacement
+      float distToMouse = length(aspectSt - aspectMouse);
+      float mouseInfluence = exp(-distToMouse * 3.2); // Smooth radial Gaussian falloff
+
+      // Direct interactive cursor push & swirling vortex force
+      vec2 mousePush = (aspectSt - aspectMouse) * mouseInfluence * 1.8;
+      vec2 vortex = vec2(-aspectSt.y + aspectMouse.y, aspectSt.x - aspectMouse.x) * mouseInfluence * 2.2;
+
+      // Much LARGER fluid flow scale (reduced coordinate multiplier from 2.8 to 1.35)
+      vec2 p = aspectSt * 1.35 + mousePush + vortex;
+      float t = u_time * 0.28;
+
+      // Deep domain warping (massive sweeping ribbon folds)
       vec2 q = vec2(0.0);
-      q.x = noise(p + vec2(0.0, 0.0) + t * 0.35);
-      q.y = noise(p + vec2(5.2, 1.3) + t * 0.3);
+      q.x = noise(p + vec2(0.0, 0.0) + t * 0.38);
+      q.y = noise(p + vec2(5.2, 1.3) + t * 0.32);
 
       vec2 r = vec2(0.0);
-      r.x = noise(p + 4.0 * q + vec2(1.7, 9.2) + 0.15 * t);
-      r.y = noise(p + 4.0 * q + vec2(8.3, 2.8) + 0.126 * t);
+      r.x = noise(p + 3.2 * q + vec2(1.7, 9.2) + 0.18 * t + (u_mouse - 0.5) * 0.8);
+      r.y = noise(p + 3.2 * q + vec2(8.3, 2.8) + 0.15 * t + (u_mouse - 0.5) * 0.8);
 
-      float f = noise(p + 4.2 * r + t * 0.2);
+      // Fluid height field with sweeping large ribbons
+      float f = noise(p + 3.6 * r + t * 0.22);
 
-      // Metallic specular highlight contour mapping
-      float chromeContour = sin(f * 9.0 + r.x * 6.0 + r.y * 5.0);
-      float specular = pow(clamp(chromeContour, 0.0, 1.0), 3.5);
-      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 2.2);
+      // Metallic specular contour mapping (sculpted chrome ridges)
+      float chromeContour = sin(f * 6.2 + r.x * 4.2 + r.y * 3.8);
+      float specular = pow(clamp(chromeContour, 0.0, 1.0), 3.0);
+      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 1.8);
 
-      // Blend palette: Midnight crevices -> Deep Sky -> Mint -> Bright Chrome Foam
-      vec3 col = mix(u_colorMidnight, u_colorDeepSky, clamp(f * f * 3.5, 0.0, 1.0));
-      col = mix(col, u_colorSky, clamp(length(q), 0.0, 1.0));
-      col = mix(col, u_colorMint, clamp(length(r.x), 0.0, 1.0));
+      // Deep, luminous color gradients across the arctic spectrum
+      vec3 col = mix(u_colorMidnight, u_colorDeepSky, clamp(f * f * 2.8, 0.0, 1.0));
+      col = mix(col, u_colorSky, clamp(length(q) * 1.2, 0.0, 1.0));
+      col = mix(col, u_colorMint, clamp(length(r.x) * 1.3, 0.0, 1.0));
       
-      // Intense liquid chrome reflections (matching white-hot specular bands in image)
-      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.92);
-      col = mix(col, u_colorMidnight * 0.5, darkCrevice * 0.75);
+      // Intense liquid chrome reflections (bright silver-white bands)
+      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.94);
+      col = mix(col, u_colorMidnight * 0.3, darkCrevice * 0.82);
 
-      // Fine metallic grain
-      float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.035;
+      // Add dynamic cursor glow highlights into the metallic surface
+      col += vec3(0.15, 0.25, 0.3) * mouseInfluence * 1.2;
+
+      // Fine physical metal sheen grain
+      float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.028;
       col += grain;
 
       gl_FragColor = vec4(col, 1.0);
     }
   `;
+
+  const uniforms = {
+    u_time: { value: 0.0 },
+    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
+    u_colorFoam: { value: new THREE.Color('#E8FFF7') },
+    u_colorMint: { value: new THREE.Color('#B7F0F5') },
+    u_colorSky: { value: new THREE.Color('#A6D9F3') },
+    u_colorDeepSky: { value: new THREE.Color('#6FB0C8') },
+    u_colorMidnight: { value: new THREE.Color('#0F2E3A') }
+  };
 
   const material = new THREE.ShaderMaterial({
     vertexShader,
@@ -143,7 +171,7 @@ function initFullFluidChromeShader() {
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
   scene.add(quad);
 
-  // Mouse interaction
+  // Responsive mouse tracking with velocity
   let mouseTargetX = 0.5, mouseTargetY = 0.5;
   let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
 
@@ -163,9 +191,9 @@ function initFullFluidChromeShader() {
     requestAnimationFrame(animate);
     const elapsed = clock.getElapsedTime();
 
-    // Smooth mouse lerp
-    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.05;
-    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.05;
+    // Responsive fluid mouse spring interpolation
+    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.08;
+    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.08;
 
     uniforms.u_time.value = elapsed;
     uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
