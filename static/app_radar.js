@@ -283,9 +283,10 @@ function renderListings(items) {
               <div>
                 <!-- Subtle Source Badge with colored dot -->
                 <div class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span class="w-1.5 h-1.5 rounded-full ${item.trust_flags ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
                   <span>${escapeHtml(item.source_platform || 'Direct Portal')}</span>
                   ${item.is_new ? '<span class="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded text-[10px] ml-1">NEW</span>' : ''}
+                  ${item.trust_flags ? `<span class="px-1.5 py-0.2 bg-amber-50 text-amber-700 font-bold border border-amber-200 rounded text-[10px] ml-1 flex items-center gap-0.5" title="${escapeHtml(item.trust_flags)}"><i class="ph ph-warning"></i> NOTE</span>` : ''}
                 </div>
                 <div class="text-xs font-bold text-slate-800 mt-0.5">${escapeHtml(item.company_name || 'Company')}</div>
               </div>
@@ -364,6 +365,17 @@ function openDetailDrawer(id) {
   skillsContainer.innerHTML = skills.length
     ? skills.map(s => `<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
     : '<span class="text-xs text-slate-500">General qualifications.</span>';
+
+  const trustBox = document.getElementById('drawer-trust-box');
+  const trustText = document.getElementById('drawer-trust-flags');
+  if (trustBox && trustText) {
+    if (item.trust_flags) {
+      trustText.innerText = item.trust_flags;
+      trustBox.classList.remove('hidden');
+    } else {
+      trustBox.classList.add('hidden');
+    }
+  }
 
   updateDrawerBookmarkIcon();
 
