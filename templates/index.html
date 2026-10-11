@@ -7,10 +7,11 @@
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- SideNote / Comic Neue / Patrick Hand / Plus Jakarta Sans font stack -->
-  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&family=Patrick+Hand&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- SideNote / Comic Neue & Patrick Hand for the handwritten / sketched art look -->
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&family=Patrick+Hand&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -18,16 +19,15 @@
         extend: {
           fontFamily: {
             sidenote: ['"Comic Neue"', '"Patrick Hand"', 'sans-serif'],
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sketch: ['"Caveat"', 'cursive'],
           },
           colors: {
-            brand: {
-              bg: '#FFFFFF',
-              ink: '#0F2E3A',
-              card: '#F4FAFC',
-              hover: '#E8F5F9',
-              border: '#0F2E3A',
-              accent: '#6FB0C8',
+            arctic: {
+              foam: '#E8FFF7',
+              mint: '#B7F0F5',
+              sky: '#A6D9F3',
+              deepsky: '#6FB0C8',
+              midnight: '#0F2E3A',
             }
           }
         }
@@ -37,108 +37,123 @@
 
   <style>
     body {
-      background-color: #FFFFFF;
+      background-color: #A6D9F3;
       color: #0F2E3A;
       font-family: 'Comic Neue', 'Patrick Hand', sans-serif;
     }
 
-    /* Clean handwritten product cards */
-    .note-card {
-      background: #FFFFFF;
-      border: 1.5px solid #0F2E3A;
-      border-radius: 12px;
-      box-shadow: 2px 2px 0px #0F2E3A;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    /* Soft, pleasant frosted sketched cards that prevent eye strain */
+    .sketch-card {
+      background: rgba(232, 255, 247, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid #0F2E3A;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      box-shadow: 4px 5px 0px #0F2E3A;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
-    .note-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 4px 4px 0px #0F2E3A;
+    .sketch-card:hover {
+      transform: translate(-2px, -2px) rotate(-0.25deg);
+      box-shadow: 6px 7px 0px #0F2E3A;
+      background: rgba(255, 255, 255, 0.94);
     }
 
-    .note-btn {
-      background: #FFFFFF;
-      border: 1.5px solid #0F2E3A;
-      border-radius: 8px;
-      box-shadow: 2px 2px 0px #0F2E3A;
+    .sketch-btn {
+      background: #E8FFF7;
+      border: 2px solid #0F2E3A;
+      border-radius: 255px 20px 225px 20px/20px 225px 20px 255px;
+      box-shadow: 3px 3px 0px #0F2E3A;
+      font-size: 13px;
       font-weight: 700;
+      color: #0F2E3A;
       transition: all 0.12s ease;
     }
-    .note-btn:hover {
-      background: #F4FAFC;
+    .sketch-btn:hover {
+      background: #FFFFFF;
       transform: translate(-1px, -1px);
-      box-shadow: 3px 3px 0px #0F2E3A;
+      box-shadow: 4px 4px 0px #0F2E3A;
     }
-    .note-btn:active {
-      transform: translate(1px, 1px);
+    .sketch-btn:active {
+      transform: translate(2px, 2px);
       box-shadow: 1px 1px 0px #0F2E3A;
     }
 
-    .filter-tab {
-      background: #FFFFFF;
+    .sketch-tab {
+      background: #E8FFF7;
       border: 1.5px solid #0F2E3A;
-      border-radius: 8px;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       box-shadow: 2px 2px 0px #0F2E3A;
-      padding: 6px 14px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
+      padding: 5px 14px;
+      color: #0F2E3A;
       cursor: pointer;
       transition: all 0.12s ease;
     }
-    .filter-tab:hover {
-      background: #F4FAFC;
+    .sketch-tab:hover {
+      background: #FFFFFF;
+      transform: translate(-1px, -1px);
     }
-    .filter-tab.active {
+    .sketch-tab.active {
       background: #0F2E3A !important;
-      color: #FFFFFF !important;
+      color: #E8FFF7 !important;
+      box-shadow: 2px 2px 0px #0F2E3A;
     }
 
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #FFFFFF; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #A6D9F3; border-left: 2px solid #0F2E3A; }
     ::-webkit-scrollbar-thumb { background: #0F2E3A; border-radius: 4px; }
   </style>
 </head>
 
-<body class="bg-white min-h-screen text-[#0F2E3A] flex flex-col font-sidenote selection:bg-[#0F2E3A] selection:text-white">
+<body class="bg-[#A6D9F3] min-h-screen text-[#0F2E3A] flex flex-col relative antialiased selection:bg-[#0F2E3A] selection:text-[#E8FFF7] overflow-x-hidden font-sidenote">
 
-  <!-- Verification Alert Modal -->
-  <div id="action-banner" class="hidden fixed top-4 right-4 z-50 max-w-sm w-full bg-white border-2 border-[#0F2E3A] p-4 rounded-xl shadow-[4px_4px_0px_#0F2E3A]">
+  <!-- Interactive 3D Liquid Mercury Shader Canvas (Tuned to be soft and easy on the eyes) -->
+  <canvas id="liquid-river-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-70"></canvas>
+
+  <!-- Action Alert Modal -->
+  <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-[#E8FFF7] border-2 border-[#0F2E3A] p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[4px_4px_0px_#0F2E3A]">
     <div class="flex items-start gap-3">
       <i class="ph ph-warning-circle text-xl text-[#0F2E3A] mt-0.5"></i>
       <div class="flex-1">
-        <h4 id="action-title" class="font-bold text-sm">Verification</h4>
+        <h4 id="action-title" class="font-bold text-sm">Notice</h4>
         <p id="action-message" class="text-xs text-[#0F2E3A]/80 mt-0.5">Please check the browser window.</p>
       </div>
-      <button id="action-dismiss-btn" class="note-btn px-3 py-1 text-xs">
+      <button id="action-dismiss-btn" class="sketch-btn px-3 py-1 text-xs">
         Dismiss
       </button>
     </div>
   </div>
 
-  <!-- Header -->
-  <header class="w-full bg-white border-b-2 border-[#0F2E3A] sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+  <!-- Sketched Header -->
+  <header class="sticky top-0 z-30 w-full bg-[#A6D9F3]/90 backdrop-blur-md border-b-2 border-[#0F2E3A]">
+    <div class="max-w-6xl mx-auto px-6 h-18 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand -->
       <div class="flex items-center gap-3">
-        <span class="text-2xl font-bold tracking-tight text-[#0F2E3A]">InReal</span>
-        <span class="text-xs text-[#0F2E3A]/60 hidden sm:inline">Internship search</span>
+        <div class="w-10 h-10 bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#0F2E3A] flex items-center justify-center text-[#0F2E3A]">
+          <i class="ph ph-compass text-2xl font-bold"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-bold tracking-tight text-[#0F2E3A]">InReal</span>
+          <span class="text-xs text-[#0F2E3A]/70 hidden sm:inline ml-2">Internships</span>
+        </div>
       </div>
 
       <!-- Controls -->
       <div class="flex items-center gap-3">
-        <!-- Status indicator -->
-        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1 bg-white border-1.5 border-[#0F2E3A] rounded-md text-xs font-bold shadow-[2px_2px_0px_#0F2E3A]">
-          <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-600"></span>
+        <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1 bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#0F2E3A] text-xs font-bold">
+          <span id="ping-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-600 border border-[#0F2E3A]"></span>
           <span id="scraper-status-text">Ready</span>
         </div>
 
-        <button id="open-logs-btn" class="note-btn px-3 py-1.5 text-xs flex items-center gap-1.5">
+        <button id="open-logs-btn" class="sketch-btn px-3.5 py-1.5 flex items-center gap-1.5">
           <i class="ph ph-terminal text-sm"></i>
-          <span>Logs</span>
+          <span class="hidden md:inline">Logs</span>
         </button>
 
-        <button id="trigger-scrape-btn" class="note-btn px-4 py-1.5 bg-[#0F2E3A] text-white hover:bg-[#1A4252] text-xs font-bold flex items-center gap-1.5">
+        <button id="trigger-scrape-btn" class="sketch-btn px-4 py-1.5 bg-[#0F2E3A] text-[#E8FFF7] hover:bg-[#1A4252] flex items-center gap-1.5">
           <i class="ph ph-arrows-clockwise text-sm"></i>
           <span>Scrape</span>
         </button>
@@ -147,105 +162,106 @@
   </header>
 
   <!-- Main Content -->
-  <main class="max-w-6xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
+  <main class="relative z-10 max-w-6xl mx-auto px-6 py-6 flex-1 w-full flex flex-col gap-6">
 
-    <!-- Search & Filters -->
-    <div class="note-card p-4 flex flex-col gap-4">
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    <!-- Search & Filters Container (Sketched Card) -->
+    <section class="sketch-card p-5 flex flex-col gap-4">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         
-        <!-- Search -->
+        <!-- Search Input -->
         <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0F2E3A] text-base"></i>
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0F2E3A] text-lg font-bold"></i>
           <input 
             type="text" 
             id="search-input" 
             placeholder="Search role, company, or skills..." 
-            class="w-full bg-white border-1.5 border-[#0F2E3A] rounded-lg pl-10 pr-4 py-2 text-sm text-[#0F2E3A] focus:outline-none focus:ring-1 focus:ring-[#0F2E3A] transition shadow-[2px_2px_0px_#0F2E3A]"
+            class="w-full bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] pl-10 pr-4 py-2 text-sm text-[#0F2E3A] placeholder-[#0F2E3A]/60 focus:outline-none focus:bg-white transition shadow-[2px_2px_0px_#0F2E3A] font-bold"
           >
         </div>
 
-        <!-- Secondary buttons -->
-        <div class="flex items-center gap-2">
-          <select id="source-filter" class="bg-white border-1.5 border-[#0F2E3A] text-xs font-bold rounded-lg px-3 py-2 focus:outline-none shadow-[2px_2px_0px_#0F2E3A]">
+        <!-- Controls -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+          <select id="source-filter" class="bg-[#E8FFF7] border-2 border-[#0F2E3A] text-xs font-bold px-3 py-2 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#0F2E3A] focus:outline-none">
             <option value="all">All Sources</option>
           </select>
 
-          <button id="filter-bookmarks-btn" class="note-btn px-3 py-2 text-xs flex items-center gap-1.5">
+          <button id="filter-bookmarks-btn" class="sketch-btn px-3 py-2 text-xs flex items-center gap-1.5">
             <i class="ph ph-bookmark text-sm"></i>
             <span>Saved (<span id="bookmark-count">0</span>)</span>
           </button>
 
-          <button id="reset-filters-btn" class="note-btn px-3 py-2 text-xs flex items-center gap-1">
+          <button id="reset-filters-btn" class="sketch-btn px-3 py-2 text-xs flex items-center gap-1">
             <i class="ph ph-arrow-counter-clockwise text-sm"></i>
             <span>Reset</span>
           </button>
         </div>
       </div>
 
-      <!-- Segmented Filters -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#0F2E3A]/20">
-        <!-- Location -->
+      <!-- Segmented Region & Stipend Filters -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-[#0F2E3A]/25">
+        <!-- Region Tabs -->
         <div class="flex items-center gap-2" id="location-tabs">
-          <button class="filter-tab active" data-val="all">All (<span id="count-all">0</span>)</button>
-          <button class="filter-tab" data-val="India">India (<span id="count-india">0</span>)</button>
-          <button class="filter-tab" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
-          <button class="filter-tab" data-val="International">Global (<span id="count-global">0</span>)</button>
+          <button class="sketch-tab active" data-val="all">All (<span id="count-all">0</span>)</button>
+          <button class="sketch-tab" data-val="India">India (<span id="count-india">0</span>)</button>
+          <button class="sketch-tab" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
+          <button class="sketch-tab" data-val="International">Global (<span id="count-global">0</span>)</button>
         </div>
 
-        <!-- Stipend -->
-        <div class="flex items-center gap-2" id="stipend-filters">
-          <button class="filter-tab active" data-val="all">Any Stipend</button>
-          <button class="filter-tab" data-val="paid">Paid Only</button>
-          <button class="filter-tab" data-val="20k">> ₹20,000</button>
-          <button class="filter-tab" data-val="50k">> ₹50,000</button>
+        <!-- Stipend Chips -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="stipend-filters">
+          <button class="sketch-tab active" data-val="all">Any Stipend</button>
+          <button class="sketch-tab" data-val="paid">Paid Only</button>
+          <button class="sketch-tab" data-val="20k">> ₹20k</button>
+          <button class="sketch-tab" data-val="50k">> ₹50k</button>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Cards Grid -->
-    <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Injected by JavaScript -->
-    </div>
+    <section class="w-full">
+      <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered by JavaScript -->
+      </div>
 
-    <!-- Empty State -->
-    <div id="empty-state" class="hidden note-card p-10 text-center flex-col items-center justify-center">
-      <i class="ph ph-magnifying-glass text-3xl mb-2 text-[#0F2E3A]"></i>
-      <h3 class="text-lg font-bold">No results found</h3>
-      <p class="text-xs text-[#0F2E3A]/70 mt-1">Try adjusting your filters or search terms.</p>
-      <button id="empty-reset-btn" class="mt-4 note-btn px-4 py-1.5 text-xs">Reset filters</button>
-    </div>
-
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden sketch-card p-10 text-center flex-col items-center justify-center">
+        <i class="ph ph-magnifying-glass text-3xl mb-2 text-[#0F2E3A]"></i>
+        <h3 class="text-lg font-bold text-[#0F2E3A]">No matches found</h3>
+        <p class="text-xs text-[#0F2E3A]/70 mt-1">Try broadening your search criteria.</p>
+        <button id="empty-reset-btn" class="mt-4 sketch-btn px-4 py-1.5 text-xs">Reset filters</button>
+      </div>
+    </section>
   </main>
 
-  <!-- Detail Drawer -->
-  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#0F2E3A]/30 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
-    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white border-l-2 border-[#0F2E3A] p-6 shadow-xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
+  <!-- Slide-Over Inspection Drawer -->
+  <div id="detail-drawer-overlay" class="fixed inset-0 bg-[#0F2E3A]/40 backdrop-blur-xs z-50 hidden transition-opacity duration-200">
+    <div id="detail-drawer" class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#E8FFF7] border-l-3 border-[#0F2E3A] p-6 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-200 ease-out overflow-y-auto">
       
-      <div class="flex items-center justify-between pb-4 border-b border-[#0F2E3A]/20">
-        <span id="drawer-org-badge" class="px-2.5 py-0.5 border border-[#0F2E3A] rounded text-xs font-bold">Company</span>
-        <button id="close-drawer-btn" class="p-1 rounded hover:bg-[#F4FAFC] transition">
+      <div class="flex items-center justify-between pb-4 border-b-2 border-[#0F2E3A]/20">
+        <span id="drawer-org-badge" class="px-2.5 py-0.5 border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] text-xs font-bold bg-white">Company</span>
+        <button id="close-drawer-btn" class="p-1 rounded hover:bg-white transition border border-[#0F2E3A]">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
       <div class="py-5 flex-1 flex flex-col gap-5">
         <div>
-          <h2 id="drawer-role-title" class="text-2xl font-bold leading-tight">Role Title</h2>
-          <div id="drawer-company-name" class="text-base font-semibold text-[#0F2E3A]/80 mt-1">Company</div>
-          <div class="flex items-center gap-3 text-xs text-[#0F2E3A]/70 mt-2 font-medium">
+          <h2 id="drawer-role-title" class="text-2xl font-bold leading-tight text-[#0F2E3A]">Role Title</h2>
+          <div id="drawer-company-name" class="text-base font-bold text-[#0F2E3A]/80 mt-1">Company</div>
+          <div class="flex items-center gap-3 text-xs text-[#0F2E3A]/70 mt-2 font-bold">
             <span class="flex items-center gap-1"><i class="ph ph-map-pin"></i> <span id="drawer-location">Location</span></span>
             <span class="flex items-center gap-1"><i class="ph ph-clock"></i> <span id="drawer-duration">Duration</span></span>
           </div>
         </div>
 
-        <div class="p-3.5 bg-[#F4FAFC] border border-[#0F2E3A] rounded-lg flex items-center justify-between">
+        <div class="p-4 bg-white border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[2px_2px_0px_#0F2E3A] flex items-center justify-between">
           <div>
             <div class="text-[11px] text-[#0F2E3A]/70 uppercase font-bold">Stipend</div>
-            <div id="drawer-stipend" class="text-base font-bold mt-0.5">-</div>
+            <div id="drawer-stipend" class="text-base font-bold mt-0.5 text-[#0F2E3A]">-</div>
           </div>
           <div class="text-right">
             <div class="text-[11px] text-[#0F2E3A]/70 uppercase font-bold">Deadline</div>
-            <div id="drawer-deadline" class="text-xs font-semibold mt-0.5">Rolling</div>
+            <div id="drawer-deadline" class="text-xs font-bold mt-0.5 text-[#0F2E3A]">Rolling</div>
           </div>
         </div>
 
@@ -254,17 +270,17 @@
           <div id="drawer-skills-list" class="flex flex-wrap gap-1.5"></div>
         </div>
 
-        <div class="text-xs text-[#0F2E3A]/70 border-t border-[#0F2E3A]/20 pt-4 space-y-1">
-          <div>Source: <span id="drawer-source" class="font-bold text-[#0F2E3A]">Portal</span></div>
-          <div>Scraped: <span id="drawer-date" class="font-bold text-[#0F2E3A]">-</span></div>
+        <div class="text-xs text-[#0F2E3A]/70 border-t-2 border-[#0F2E3A]/20 pt-4 space-y-1 font-bold">
+          <div>Source: <span id="drawer-source" class="text-[#0F2E3A]">Portal</span></div>
+          <div>Scraped: <span id="drawer-date" class="text-[#0F2E3A]">-</span></div>
         </div>
       </div>
 
-      <div class="pt-4 border-t border-[#0F2E3A]/20 flex items-center gap-3">
-        <button id="drawer-bookmark-btn" class="p-2.5 note-btn">
+      <div class="pt-4 border-t-2 border-[#0F2E3A]/20 flex items-center gap-3">
+        <button id="drawer-bookmark-btn" class="p-2.5 sketch-btn">
           <i class="ph ph-bookmark text-base"></i>
         </button>
-        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 note-btn bg-[#0F2E3A] text-white hover:bg-[#1A4252] text-center text-xs font-bold flex items-center justify-center gap-1.5">
+        <a id="drawer-apply-link" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 sketch-btn bg-[#0F2E3A] text-[#E8FFF7] hover:bg-[#1A4252] text-center text-xs font-bold flex items-center justify-center gap-1.5">
           <span>Apply</span>
           <i class="ph ph-arrow-up-right text-xs"></i>
         </a>
@@ -272,23 +288,23 @@
     </div>
   </div>
 
-  <!-- Telemetry Logs Drawer -->
-  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-white border-t-2 border-l-2 border-[#0F2E3A] rounded-tl-xl shadow-xl z-40 hidden transition-all duration-200">
-    <div class="p-3 bg-[#F4FAFC] border-b border-[#0F2E3A] flex items-center justify-between">
-      <span class="text-xs font-bold">Scraper Output</span>
-      <button id="close-logs-btn" class="p-1 hover:bg-white rounded">
+  <!-- Telemetry Slide Drawer -->
+  <div id="logs-panel" class="fixed bottom-0 right-0 max-w-lg w-full bg-[#E8FFF7] border-t-2 border-l-2 border-[#0F2E3A] rounded-tl-xl shadow-2xl z-40 hidden transition-all duration-200">
+    <div class="p-3 bg-[#B7F0F5] border-b border-[#0F2E3A] flex items-center justify-between">
+      <span class="text-xs font-bold">Scraper Logs</span>
+      <button id="close-logs-btn" class="p-1 hover:bg-[#E8FFF7] rounded border border-[#0F2E3A]">
         <i class="ph ph-x"></i>
       </button>
     </div>
     <div id="logs-content" class="p-3 text-xs text-[#0F2E3A] max-h-60 overflow-y-auto font-mono bg-white space-y-1"></div>
   </div>
 
-  <!-- Config Modal -->
+  <!-- Scraper Configuration Modal -->
   <div id="scrape-config-modal" class="fixed inset-0 bg-[#0F2E3A]/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border-2 border-[#0F2E3A] rounded-xl shadow-xl max-w-md w-full p-5">
-      <div class="flex items-center justify-between pb-3 border-b border-[#0F2E3A]/20">
-        <h3 class="text-base font-bold">Configure Scraper</h3>
-        <button id="close-config-btn" class="p-1 rounded hover:bg-[#F4FAFC]">
+    <div class="bg-[#E8FFF7] border-2 border-[#0F2E3A] rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[5px_5px_0px_#0F2E3A] max-w-md w-full p-5">
+      <div class="flex items-center justify-between pb-3 border-b-2 border-[#0F2E3A]/20">
+        <h3 class="text-base font-bold text-[#0F2E3A]">Scraper Settings</h3>
+        <button id="close-config-btn" class="p-1 rounded hover:bg-white border border-[#0F2E3A]">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
@@ -296,18 +312,18 @@
       <form id="scrape-config-form" class="mt-4 space-y-4">
         <div>
           <label class="text-xs font-bold block mb-1.5">Regions</label>
-          <div class="grid grid-cols-3 gap-2 text-xs">
+          <div class="grid grid-cols-3 gap-2 text-xs font-bold">
             <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="india" checked> India</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="usa" checked> USA</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="worldwide" checked> Global</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
           </div>
         </div>
 
         <div>
           <label class="text-xs font-bold block mb-1.5">Sources</label>
-          <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="grid grid-cols-2 gap-2 text-xs font-bold">
             <label class="flex items-center gap-1.5"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" name="internshala" value="internshala" checked> Internshala</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" name="unstop" value="unstop" checked> Unstop</label>
@@ -315,7 +331,7 @@
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2 note-btn bg-[#0F2E3A] text-white hover:bg-[#1A4252] text-xs font-bold transition mt-2">
+        <button type="submit" class="w-full py-2 sketch-btn bg-[#0F2E3A] text-[#E8FFF7] hover:bg-[#1A4252] text-xs font-bold transition mt-2">
           Run Scraper
         </button>
       </form>

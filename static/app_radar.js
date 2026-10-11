@@ -1,7 +1,8 @@
 /**
  * InReal Dashboard
- * Clean SideNote typography + High-performance lightweight utility
- * Free of decorative background clutter and vibe-coded filler text.
+ * Handwritten / Sketched Art Style + SideNote Font Stack
+ * Interactive Liquid Mercury Background (smooth, eye-strain-friendly flow with cursor interaction)
+ * No unnecessary vibe-coded text filler.
  */
 
 let allInternships = [];
@@ -13,6 +14,7 @@ let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+  initLiquidMercuryFlow();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -21,7 +23,166 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. Data Fetching & Processing
+// 1. 3D Web Experience: Interactive Liquid Mercury Flow (Eye-Strain Free)
+// ==========================================
+function initLiquidMercuryFlow() {
+  const canvas = document.getElementById('liquid-river-canvas');
+  if (!canvas || typeof THREE === 'undefined') return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  const renderer = new THREE.WebGLRenderer({ 
+    canvas, 
+    alpha: true, 
+    antialias: true, 
+    powerPreference: 'high-performance' 
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+  const uniforms = {
+    u_time: { value: 0.0 },
+    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
+    u_colorFoam: { value: new THREE.Color('#E8FFF7') },
+    u_colorMint: { value: new THREE.Color('#B7F0F5') },
+    u_colorSky: { value: new THREE.Color('#A6D9F3') },
+    u_colorDeepSky: { value: new THREE.Color('#6FB0C8') },
+    u_colorMidnight: { value: new THREE.Color('#0F2E3A') }
+  };
+
+  const vertexShader = `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position, 1.0);
+    }
+  `;
+
+  // Soft, organic liquid mercury shader that flows with cursor movements without blinding glare
+  const fragmentShader = `
+    uniform float u_time;
+    uniform vec2 u_resolution;
+    uniform vec2 u_mouse;
+    uniform vec3 u_colorFoam;
+    uniform vec3 u_colorMint;
+    uniform vec3 u_colorSky;
+    uniform vec3 u_colorDeepSky;
+    uniform vec3 u_colorMidnight;
+    varying vec2 vUv;
+
+    vec2 hash(vec2 p) {
+      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+    }
+
+    float noise(vec2 p) {
+      const float K1 = 0.366025404;
+      const float K2 = 0.211324865;
+      vec2 i = floor(p + (p.x + p.y) * K1);
+      vec2 a = p - i + (i.x + i.y) * K2;
+      vec2 o = (a.x > a.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec2 b = a - o + K2;
+      vec2 c = a - 1.0 + 2.0 * K2;
+      vec3 h = max(0.5 - vec3(dot(a, a), dot(b, b), dot(c, c)), 0.0);
+      vec3 n = h * h * h * h * vec3(dot(a, hash(i)), dot(b, hash(i + o)), dot(c, hash(i + 1.0)));
+      return dot(n, vec3(70.0));
+    }
+
+    void main() {
+      vec2 st = gl_FragCoord.xy / u_resolution.xy;
+      vec2 aspectSt = st;
+      aspectSt.x *= u_resolution.x / u_resolution.y;
+
+      vec2 aspectMouse = u_mouse;
+      aspectMouse.x *= u_resolution.x / u_resolution.y;
+
+      // Cursor fluid interaction
+      float distToMouse = length(aspectSt - aspectMouse);
+      float mouseInfluence = exp(-distToMouse * 3.5);
+
+      vec2 mousePush = (aspectSt - aspectMouse) * mouseInfluence * 1.5;
+      vec2 vortex = vec2(-aspectSt.y + aspectMouse.y, aspectSt.x - aspectMouse.x) * mouseInfluence * 1.8;
+
+      // Large organic flow scale
+      vec2 p = aspectSt * 1.45 + mousePush + vortex;
+      float t = u_time * 0.24;
+
+      // Domain warping (flowing liquid waves)
+      vec2 q = vec2(0.0);
+      q.x = noise(p + vec2(0.0, 0.0) + t * 0.32);
+      q.y = noise(p + vec2(5.2, 1.3) + t * 0.28);
+
+      vec2 r = vec2(0.0);
+      r.x = noise(p + 3.0 * q + vec2(1.7, 9.2) + 0.14 * t + (u_mouse - 0.5) * 0.6);
+      r.y = noise(p + 3.0 * q + vec2(8.3, 2.8) + 0.12 * t + (u_mouse - 0.5) * 0.6);
+
+      float f = noise(p + 3.4 * r + t * 0.18);
+
+      // Smooth mercury specular reflection
+      float chromeContour = sin(f * 5.8 + r.x * 3.8 + r.y * 3.4);
+      float specular = pow(clamp(chromeContour, 0.0, 1.0), 2.8);
+      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 1.6);
+
+      // Harmonious palette: Deep Sky -> Mint -> Foam (gentle contrast to prevent eye strain)
+      vec3 col = mix(u_colorDeepSky, u_colorSky, clamp(f * f * 2.5, 0.0, 1.0));
+      col = mix(col, u_colorMint, clamp(length(q) * 1.1, 0.0, 1.0));
+      col = mix(col, u_colorFoam, clamp(length(r.x) * 1.2, 0.0, 1.0));
+      
+      // Soft liquid chrome sheen
+      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.72);
+      col = mix(col, u_colorMidnight * 0.6, darkCrevice * 0.55);
+
+      // Very subtle grain
+      float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.02;
+      col += grain;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms
+  });
+
+  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+  scene.add(quad);
+
+  let mouseTargetX = 0.5, mouseTargetY = 0.5;
+  let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
+
+  window.addEventListener('mousemove', (e) => {
+    mouseTargetX = e.clientX / window.innerWidth;
+    mouseTargetY = 1.0 - (e.clientY / window.innerHeight);
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+  });
+
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const elapsed = clock.getElapsedTime();
+
+    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.07;
+    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.07;
+
+    uniforms.u_time.value = elapsed;
+    uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
+// ==========================================
+// 2. Data Fetching & Processing
 // ==========================================
 async function loadData() {
   try {
@@ -59,7 +220,7 @@ function renderOverviewStats() {
 }
 
 // ==========================================
-// 2. Card Grid Rendering
+// 3. Card Grid Rendering
 // ==========================================
 function applyFiltersAndRender() {
   const searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -118,7 +279,7 @@ function renderListings(items) {
 
     return `
       <article 
-        class="note-card p-4 flex flex-col justify-between cursor-pointer"
+        class="sketch-card p-4 flex flex-col justify-between cursor-pointer"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
@@ -130,7 +291,7 @@ function renderListings(items) {
 
             <button 
               type="button" 
-              class="p-1 rounded text-[#0F2E3A] hover:bg-[#F4FAFC] transition"
+              class="p-1 rounded text-[#0F2E3A] hover:bg-white transition"
               onclick="event.stopPropagation(); toggleBookmark('${escapeHtml(item.id)}')"
             >
               <i class="ph ${isBookmarked ? 'ph-fill ph-bookmark' : 'ph-bookmark'} text-base"></i>
@@ -142,25 +303,25 @@ function renderListings(items) {
             ${escapeHtml(item.role_title || 'Internship')}
           </h3>
           
-          <div class="text-xs text-[#0F2E3A]/80 mt-1 flex items-center gap-1.5 font-medium">
-            <span class="font-bold text-[#0F2E3A]">${escapeHtml(item.company_name || 'Organization')}</span>
+          <div class="text-xs text-[#0F2E3A]/85 mt-1 flex items-center gap-1.5 font-bold">
+            <span class="text-[#0F2E3A]">${escapeHtml(item.company_name || 'Organization')}</span>
             <span>&bull;</span>
             <span class="truncate">${escapeHtml(item.location || 'Location Not Specified')}</span>
           </div>
 
           <!-- Skills tags -->
           <div class="flex flex-wrap gap-1 mt-3">
-            ${skills.map(skill => `<span class="px-2 py-0.5 text-xs bg-[#F4FAFC] border border-[#0F2E3A]/30 rounded font-medium">${escapeHtml(skill)}</span>`).join('')}
+            ${skills.map(skill => `<span class="px-2 py-0.5 text-xs bg-white border border-[#0F2E3A]/40 rounded font-bold">${escapeHtml(skill)}</span>`).join('')}
           </div>
         </div>
 
         <!-- Footer -->
-        <div class="pt-3 mt-4 border-t border-[#0F2E3A]/15 flex items-center justify-between text-xs font-bold">
+        <div class="pt-3 mt-4 border-t-2 border-[#0F2E3A]/20 flex items-center justify-between text-xs font-bold">
           <div>
-            <span class="text-[#0F2E3A]">${escapeHtml(item.stipend || 'Unspecified')}</span>
+            <span class="text-[#0F2E3A] font-bold">${escapeHtml(item.stipend || 'Unspecified')}</span>
           </div>
           <div>
-            <span class="text-xs font-semibold text-[#0F2E3A]/60">View details &rarr;</span>
+            <span class="text-xs font-bold text-[#0F2E3A]/70">Details &rarr;</span>
           </div>
         </div>
       </article>
@@ -169,7 +330,7 @@ function renderListings(items) {
 }
 
 // ==========================================
-// 3. Slide-Over Detail Drawer
+// 4. Slide-Over Detail Drawer
 // ==========================================
 function openDetailDrawer(id) {
   const item = allInternships.find(i => i.id === id);
@@ -192,8 +353,8 @@ function openDetailDrawer(id) {
   const skillsContainer = document.getElementById('drawer-skills-list');
   const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
   skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-[#F4FAFC] border border-[#0F2E3A]/30 text-xs font-medium rounded">${escapeHtml(s)}</span>`).join('')
-    : '<span class="text-xs text-[#0F2E3A]/60">Standard qualifications.</span>';
+    ? skills.map(s => `<span class="px-2.5 py-1 bg-white border border-[#0F2E3A] text-xs font-bold rounded">${escapeHtml(s)}</span>`).join('')
+    : '<span class="text-xs text-[#0F2E3A]/70">Standard qualifications.</span>';
 
   updateDrawerBookmarkIcon();
 
@@ -218,7 +379,7 @@ function updateDrawerBookmarkIcon() {
 }
 
 // ==========================================
-// 4. Bookmarks & Local Storage
+// 5. Bookmarks & Local Storage
 // ==========================================
 function toggleBookmark(id) {
   if (bookmarks.includes(id)) {
@@ -241,7 +402,7 @@ function updateBookmarkCounter() {
 }
 
 // ==========================================
-// 5. Scraper Status & Telemetry
+// 6. Scraper Status & Telemetry
 // ==========================================
 async function pollScraperStatus() {
   try {
@@ -253,11 +414,11 @@ async function pollScraperStatus() {
     const text = document.getElementById('scraper-status-text');
 
     if (isRunning) {
-      dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
       text.innerText = 'Scraping';
       fetchLogs();
     } else {
-      dot.className = 'w-2 h-2 rounded-full bg-emerald-600';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-600';
       text.innerText = 'Ready';
     }
   } catch (e) {}
@@ -284,7 +445,7 @@ async function pollAlerts() {
     const banner = document.getElementById('action-banner');
 
     if (data.alert) {
-      document.getElementById('action-title').innerText = data.alert.title || 'Verification';
+      document.getElementById('action-title').innerText = data.alert.title || 'Notice';
       document.getElementById('action-message').innerText = data.alert.message || 'Please check browser';
       banner.classList.remove('hidden');
     } else {
@@ -295,23 +456,23 @@ async function pollAlerts() {
 }
 
 // ==========================================
-// 6. Event Handlers
+// 7. Event Handlers
 // ==========================================
 function bindEventHandlers() {
   document.getElementById('search-input')?.addEventListener('input', applyFiltersAndRender);
 
-  document.querySelectorAll('#location-tabs .filter-tab').forEach(btn => {
+  document.querySelectorAll('#location-tabs .sketch-tab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#location-tabs .filter-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#location-tabs .sketch-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeLocation = btn.getAttribute('data-val');
       applyFiltersAndRender();
     });
   });
 
-  document.querySelectorAll('#stipend-filters .filter-tab').forEach(btn => {
+  document.querySelectorAll('#stipend-filters .sketch-tab').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#stipend-filters .filter-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#stipend-filters .sketch-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeStipend = btn.getAttribute('data-val');
       applyFiltersAndRender();
