@@ -1,8 +1,7 @@
 /**
  * InReal Dashboard
- * Colorful Hand-Sketched Art Design + SideNote Font Stack
- * Interactive Holographic Liquid Mercury Canvas (Gentle on the eyes, dynamic pointer interaction)
- * No unnecessary vibe-coded filler text.
+ * Interactive Sketchbook Background Canvas:
+ * Users can sketch directly on the background! Marks look like ink sketch pens and fade smoothly after 10 seconds.
  */
 
 let allInternships = [];
@@ -13,7 +12,7 @@ let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
 
-// Palette for cards: cheerful pastel tints that pop on paper
+// Cheerful card pastel palette
 const cardBgPalette = [
   '#FEF08A', // pastel yellow
   '#BAE6FD', // pastel sky
@@ -24,7 +23,7 @@ const cardBgPalette = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-  initHolographicLiquidMercury();
+  initSketchbookCanvas();
   bindEventHandlers();
   loadData();
   pollScraperStatus();
@@ -33,157 +32,119 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 1. 3D Web Experience: Holographic Liquid Chrome / Mercury Shader
-// Soft, prismatic, flowing with cursor, comfortable on eyes
+// 1. Interactive Sketchbook Background Canvas
+// Draws ink sketch pen strokes that smoothly fade over 10 seconds
 // ==========================================
-function initHolographicLiquidMercury() {
-  const canvas = document.getElementById('liquid-river-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
+function initSketchbookCanvas() {
+  const canvas = document.getElementById('sketchbook-canvas');
+  if (!canvas) return;
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-  const renderer = new THREE.WebGLRenderer({ 
-    canvas, 
-    alpha: true, 
-    antialias: true, 
-    powerPreference: 'high-performance' 
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-  const uniforms = {
-    u_time: { value: 0.0 },
-    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-    u_mouse: { value: new THREE.Vector2(0.5, 0.5) }
-  };
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = vec4(position, 1.0);
-    }
-  `;
-
-  // Soft holographic pearl/mercury liquid flow shader
-  const fragmentShader = `
-    uniform float u_time;
-    uniform vec2 u_resolution;
-    uniform vec2 u_mouse;
-    varying vec2 vUv;
-
-    vec2 hash(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
-    }
-
-    float noise(vec2 p) {
-      const float K1 = 0.366025404;
-      const float K2 = 0.211324865;
-      vec2 i = floor(p + (p.x + p.y) * K1);
-      vec2 a = p - i + (i.x + i.y) * K2;
-      vec2 o = (a.x > a.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-      vec2 b = a - o + K2;
-      vec2 c = a - 1.0 + 2.0 * K2;
-      vec3 h = max(0.5 - vec3(dot(a, a), dot(b, b), dot(c, c)), 0.0);
-      vec3 n = h * h * h * h * vec3(dot(a, hash(i)), dot(b, hash(i + o)), dot(c, hash(i + 1.0)));
-      return dot(n, vec3(70.0));
-    }
-
-    void main() {
-      vec2 st = gl_FragCoord.xy / u_resolution.xy;
-      vec2 aspectSt = st;
-      aspectSt.x *= u_resolution.x / u_resolution.y;
-
-      vec2 aspectMouse = u_mouse;
-      aspectMouse.x *= u_resolution.x / u_resolution.y;
-
-      // Cursor fluid push
-      float distToMouse = length(aspectSt - aspectMouse);
-      float mouseInfluence = exp(-distToMouse * 3.2);
-
-      vec2 mousePush = (aspectSt - aspectMouse) * mouseInfluence * 1.6;
-      vec2 vortex = vec2(-aspectSt.y + aspectMouse.y, aspectSt.x - aspectMouse.x) * mouseInfluence * 2.0;
-
-      // Fluid domain coordinates
-      vec2 p = aspectSt * 1.5 + mousePush + vortex;
-      float t = u_time * 0.22;
-
-      // Layered domain warping
-      vec2 q = vec2(
-        noise(p + vec2(0.0, 0.0) + t * 0.3),
-        noise(p + vec2(5.2, 1.3) + t * 0.28)
-      );
-
-      vec2 r = vec2(
-        noise(p + 3.2 * q + vec2(1.7, 9.2) + 0.15 * t + (u_mouse - 0.5) * 0.6),
-        noise(p + 3.2 * q + vec2(8.3, 2.8) + 0.12 * t + (u_mouse - 0.5) * 0.6)
-      );
-
-      float f = noise(p + 3.5 * r + t * 0.18);
-
-      // Liquid specular highlight
-      float chromeContour = sin(f * 6.0 + r.x * 4.0 + r.y * 3.5);
-      float specular = pow(clamp(chromeContour, 0.0, 1.0), 3.0);
-      float darkCrevice = pow(clamp(-chromeContour, 0.0, 1.0), 1.8);
-
-      // Cheerful holographic pastel palette: Warm Gold -> Soft Mint -> Sky Blue -> Pearl
-      vec3 colGold = vec3(0.99, 0.88, 0.54);
-      vec3 colMint = vec3(0.65, 0.95, 0.82);
-      vec3 colSky  = vec3(0.73, 0.90, 0.99);
-      vec3 colPaper = vec3(0.98, 0.96, 0.93);
-      vec3 colInk = vec3(0.12, 0.11, 0.09);
-
-      vec3 col = mix(colPaper, colSky, clamp(f * f * 2.2, 0.0, 1.0));
-      col = mix(col, colMint, clamp(length(q) * 1.1, 0.0, 1.0));
-      col = mix(col, colGold, clamp(length(r.x) * 1.2, 0.0, 1.0));
-      
-      // Chrome highlight
-      col = mix(col, vec3(1.0, 1.0, 1.0), specular * 0.85);
-      col = mix(col, colInk * 0.6, darkCrevice * 0.35);
-
-      gl_FragColor = vec4(col, 1.0);
-    }
-  `;
-
-  const material = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms
-  });
-
-  const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-  scene.add(quad);
-
-  let mouseTargetX = 0.5, mouseTargetY = 0.5;
-  let mouseCurrentX = 0.5, mouseCurrentY = 0.5;
-
-  window.addEventListener('mousemove', (e) => {
-    mouseTargetX = e.clientX / window.innerWidth;
-    mouseTargetY = 1.0 - (e.clientY / window.innerHeight);
-  }, { passive: true });
+  const ctx = canvas.getContext('2d');
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
 
   window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
   });
 
-  const clock = new THREE.Clock();
+  // Array of active drawing strokes
+  // Each stroke point has { x, y, prevX, prevY, timestamp, color, width }
+  const strokes = [];
+  const STROKE_LIFETIME_MS = 10000; // 10 seconds fade duration
 
-  function animate() {
-    requestAnimationFrame(animate);
-    const elapsed = clock.getElapsedTime();
+  // Vibrant sketch pen ink colors
+  const penColors = [
+    '#1E1B18', // classic ink black
+    '#2563EB', // ballpoint blue
+    '#DC2626', // red sketch pen
+    '#059669', // green marker
+    '#7C3AED'  // violet marker
+  ];
+  let currentPenColorIndex = 0;
 
-    mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.07;
-    mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.07;
+  let lastX = null;
+  let lastY = null;
+  let lastMoveTime = 0;
 
-    uniforms.u_time.value = elapsed;
-    uniforms.u_mouse.value.set(mouseCurrentX, mouseCurrentY);
+  window.addEventListener('mousemove', (e) => {
+    const x = e.clientX;
+    const y = e.clientY;
+    const now = Date.now();
 
-    renderer.render(scene, camera);
+    // Check if moving
+    if (lastX !== null && lastY !== null) {
+      const dist = Math.hypot(x - lastX, y - lastY);
+      // Create sketch pen segment if moved sufficiently
+      if (dist > 2) {
+        // Vary width slightly like a real pressure-sensitive felt tip pen
+        const speed = Math.min(dist / Math.max(now - lastMoveTime, 1), 5);
+        const strokeWidth = Math.max(1.8, 4.2 - speed * 0.4);
+
+        strokes.push({
+          x,
+          y,
+          prevX: lastX,
+          prevY: lastY,
+          time: now,
+          color: penColors[currentPenColorIndex],
+          width: strokeWidth
+        });
+      }
+    }
+
+    lastX = x;
+    lastY = y;
+    lastMoveTime = now;
+  }, { passive: true });
+
+  // Optional: Click cycles the sketch pen ink color for user fun!
+  window.addEventListener('click', (e) => {
+    // Only if clicking on the open background
+    if (e.target.tagName === 'BODY' || e.target.id === 'sketchbook-canvas') {
+      currentPenColorIndex = (currentPenColorIndex + 1) % penColors.length;
+    }
+  });
+
+  // Continuous render loop: draws lines & fades them based on their exact 10s age
+  function render() {
+    requestAnimationFrame(render);
+    ctx.clearRect(0, 0, width, height);
+
+    const now = Date.now();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const stroke = strokes[i];
+      const age = now - stroke.time;
+
+      if (age >= STROKE_LIFETIME_MS) {
+        strokes.splice(i, 1);
+        continue;
+      }
+
+      // Smooth cubic fade-out over 10 seconds
+      // Stays strong for the first 3 seconds, then fades smoothly to 0 by 10s
+      const progress = age / STROKE_LIFETIME_MS;
+      let alpha = 1.0;
+      if (progress > 0.3) {
+        alpha = Math.max(0, 1.0 - ((progress - 0.3) / 0.7));
+      }
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.width;
+
+      ctx.beginPath();
+      ctx.moveTo(stroke.prevX, stroke.prevY);
+      ctx.lineTo(stroke.x, stroke.y);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
-  animate();
+  render();
 }
 
 // ==========================================

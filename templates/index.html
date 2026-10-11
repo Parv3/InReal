@@ -11,7 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400&family=Patrick+Hand&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -39,10 +38,17 @@
   </script>
 
   <style>
+    /* Sketchbook Grid/Texture Background */
     body {
       background-color: #FAF6EE;
       color: #1E1B18;
       font-family: 'Comic Neue', 'Patrick Hand', sans-serif;
+      /* Subtle sketchbook subtle dot/grid paper texture */
+      background-image: 
+        radial-gradient(#1E1B18 0.75px, transparent 0.75px),
+        radial-gradient(#1E1B18 0.75px, #FAF6EE 0.75px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
     }
 
     /* Hand-sketched colorful card system with wobbly borders */
@@ -97,13 +103,6 @@
       box-shadow: 2px 2px 0px #1E1B18;
     }
 
-    /* Sticker sticker tape accent */
-    .washi-tape {
-      background: rgba(253, 224, 71, 0.85);
-      border: 1px dashed #1E1B18;
-      transform: rotate(-2deg);
-    }
-
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #FAF6EE; border-left: 2px solid #1E1B18; }
@@ -113,8 +112,8 @@
 
 <body class="bg-[#FAF6EE] min-h-screen text-[#1E1B18] flex flex-col relative antialiased selection:bg-[#FDE047] selection:text-[#1E1B18] overflow-x-hidden font-sidenote">
 
-  <!-- Interactive 3D Holographic Liquid Chrome / Prismatic Mercury Canvas -->
-  <canvas id="liquid-river-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+  <!-- Interactive Sketchbook Background Canvas (Draw with cursor, strokes fade over 10s) -->
+  <canvas id="sketchbook-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
   <!-- Notification Banner -->
   <div id="action-banner" class="hidden fixed top-6 right-6 z-50 max-w-sm w-full bg-[#FEF08A] border-2.5 border-[#1E1B18] p-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[5px_5px_0px_#1E1B18]">
@@ -365,7 +364,7 @@
           <label class="text-xs font-bold block mb-1.5">Regions</label>
           <div class="grid grid-cols-3 gap-2 text-xs font-bold">
             <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-1.5"><input type="checkbox" name="regions" value="usa" checked> USA</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" name="usa" value="usa" checked> USA</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" name="europe" value="europe" checked> Europe</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" name="remote" value="remote" checked> Remote</label>
             <label class="flex items-center gap-1.5"><input type="checkbox" name="worldwide" value="worldwide" checked> Global</label>
