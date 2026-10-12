@@ -34,6 +34,22 @@ function getCompanyLogoSvg(companyName) {
   return companyLogos.default;
 }
 
+function renderModerationBadge(item) {
+  const status = item.moderation_status || "";
+  if (!status) return "";
+  const risk = item.scam_risk ? Number(item.scam_risk).toFixed(2) : "";
+  const views = {
+    approved: { cls: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: "ph-shield-check", text: `Verified Safe` },
+    review: { cls: "bg-amber-50 text-amber-700 border-amber-200", icon: "ph-eye", text: `Manual Review` },
+    blocked: { cls: "bg-rose-50 text-rose-700 border-rose-200", icon: "ph-prohibit", text: `High Risk (${risk})` },
+    expired: { cls: "bg-slate-100 text-slate-600 border-slate-300", icon: "ph-link-break", text: `Expired Link` }
+  };
+  const v = views[status];
+  if (!v) return "";
+  const tooltip = escapeHtml(item.moderation_reasons || v.text);
+  return `<span class="px-1.5 py-0.2 ${v.cls} font-bold border rounded text-[10px] ml-1 inline-flex items-center gap-0.5" title="${tooltip}"><i class="ph ${v.icon}"></i> ${v.text}</span>`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initGlassTranslucentBackground();
   bindEventHandlers();
@@ -287,6 +303,7 @@ function renderListings(items) {
                   <span>${escapeHtml(item.source_platform || 'Direct Portal')}</span>
                   ${item.is_new ? '<span class="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded text-[10px] ml-1">NEW</span>' : ''}
                   ${item.trust_flags ? `<span class="px-1.5 py-0.2 bg-amber-50 text-amber-700 font-bold border border-amber-200 rounded text-[10px] ml-1 flex items-center gap-0.5" title="${escapeHtml(item.trust_flags)}"><i class="ph ph-warning"></i> NOTE</span>` : ''}
+                  ${renderModerationBadge(item)}
                 </div>
                 <div class="text-xs font-bold text-slate-800 mt-0.5">${escapeHtml(item.company_name || 'Company')}</div>
               </div>
@@ -369,8 +386,13 @@ function openDetailDrawer(id) {
   const trustBox = document.getElementById('drawer-trust-box');
   const trustText = document.getElementById('drawer-trust-flags');
   if (trustBox && trustText) {
-    if (item.trust_flags) {
-      trustText.innerText = item.trust_flags;
+    let notices = [];
+    if (item.trust_flags) notices.push(`Rule Check: ${item.trust_flags}`);
+    if (item.moderation_status) {
+      notices.push(`AI Scam Moderation: ${item.moderation_status.toUpperCase()} (Risk Score: ${item.scam_risk || 'N/A'})${item.moderation_reasons ? ' — ' + item.moderation_reasons : ''}`);
+    }
+    if (notices.length > 0) {
+      trustText.innerText = notices.join("\n\n");
       trustBox.classList.remove('hidden');
     } else {
       trustBox.classList.add('hidden');

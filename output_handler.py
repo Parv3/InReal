@@ -1,15 +1,8 @@
 import json
 import csv
-<<<<<<< HEAD
-import pandas as pd
-=======
->>>>>>> origin/main
 import threading
 from datetime import datetime
 from pathlib import Path
-
-# Thread lock to synchronize file writes across worker threads
-_FILE_LOCK = threading.Lock()
 
 # Paths relative to this file
 DATA_DIR = Path(__file__).parent
