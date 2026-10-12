@@ -9,7 +9,7 @@ let activeStipend = 'all';
 let activeSource = 'all';
 let activeRoleType = 'all';
 let activeExperience = 'all';        // 'all', '0', '1-2', '3+'
-let activeModeration = 'verified';   // n8n scam check: show only listings it passed
+let activeModeration = 'hide_blocked'; // Default: show all valid postings (hide known scams) so pending/new scrapes are immediately visible!
 let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
@@ -668,9 +668,9 @@ function bindEventHandlers() {
 
     const sourceSelect = document.getElementById('source-filter');
     if (sourceSelect) sourceSelect.value = 'all';
-    activeModeration = 'verified';
+    activeModeration = 'hide_blocked';
     const modSelect = document.getElementById('mod-filter');
-    if (modSelect) modSelect.value = 'verified';
+    if (modSelect) modSelect.value = 'hide_blocked';
     
     const bookmarkBtn = document.getElementById('filter-bookmarks-btn');
     if (bookmarkBtn) bookmarkBtn.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200');
