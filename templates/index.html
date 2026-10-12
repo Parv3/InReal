@@ -236,19 +236,59 @@
           <span>Browse Openings</span>
         </a>
 
-        <!-- User Authentication & Profile Pill -->
-        <div id="auth-nav-container" class="flex items-center gap-2">
+        <!-- User Authentication & Google-style Profile Avatar Dropdown -->
+        <div id="auth-nav-container" class="relative">
           <button id="open-login-btn" class="glass-btn px-3.5 py-2 flex items-center gap-1.5 text-slate-700 hover:text-slate-900">
             <i class="ph ph-user-circle text-base text-slate-500"></i>
             <span>Log In</span>
           </button>
-          <div id="user-profile-pill" class="hidden items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 shadow-xs">
-            <span class="w-6 h-6 rounded-full bg-slate-900 text-orange-400 flex items-center justify-center font-bold text-[11px]" id="user-avatar-initial">U</span>
-            <span id="user-display-name" class="font-bold text-slate-900">User</span>
-            <span id="user-experience-badge" class="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded text-[10px] font-bold">0 Exp</span>
-            <button id="logout-btn" class="ml-1 text-slate-400 hover:text-rose-500 text-sm" title="Log out">
-              <i class="ph ph-sign-out"></i>
+          
+          <!-- Google-style Circular Profile Button -->
+          <div id="user-profile-pill" class="hidden relative">
+            <button 
+              id="user-avatar-btn" 
+              type="button" 
+              class="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-900 to-slate-700 text-orange-400 font-bold text-xs flex items-center justify-center shadow-md border-2 border-orange-400/40 hover:ring-2 hover:ring-orange-400/50 hover:scale-105 transition-all focus:outline-none"
+              title="Google-style Account Profile"
+            >
+              <span id="user-avatar-initial">U</span>
             </button>
+
+            <!-- Google-style Account Floating Popover Menu -->
+            <div 
+              id="user-profile-menu" 
+              class="hidden absolute right-0 mt-2.5 w-64 glass-panel rounded-2xl shadow-2xl border border-slate-200/90 py-3 px-4 z-50 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150"
+            >
+              <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                <div class="w-10 h-10 rounded-full bg-slate-900 text-orange-400 flex items-center justify-center font-extrabold text-sm shadow-inner" id="menu-avatar-initial">
+                  U
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-bold text-slate-900 truncate" id="user-display-name">User</div>
+                  <div class="text-[11px] text-slate-500 truncate" id="user-display-email">user@inreal.com</div>
+                </div>
+              </div>
+
+              <!-- Experience Badge Status -->
+              <div class="py-2.5 flex items-center justify-between text-xs">
+                <span class="text-slate-500 font-medium">Experience Level</span>
+                <span id="user-experience-badge" class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-md font-bold text-[10px]">
+                  0 Exp
+                </span>
+              </div>
+
+              <!-- Logout Button -->
+              <div class="pt-2 border-t border-slate-100">
+                <button 
+                  id="logout-btn" 
+                  type="button" 
+                  class="w-full py-2 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  <i class="ph ph-sign-out text-base"></i>
+                  <span>Sign out of InReal</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -363,7 +403,149 @@
       </div>
     </section>
 
-    <!-- Translucent Overview Metric Cards -->
+    <!-- Professional Corporate Filter Bar Directly Above Job Cards -->
+    <section class="glass-panel p-5 flex flex-col gap-4">
+      
+      <!-- Top Row: Search Input + Single Unified Filter Dropdown + Bookmarks + Reset -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search by role, company (Anthropic, DeepMind, MPI), or tech stack (PyTorch, ROS, CUDA)..." 
+            class="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20 transition font-medium shadow-2xs"
+          >
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-semibold hidden sm:inline">⌘K</span>
+        </div>
+
+        <!-- Clean Action Bar: Single Unified Filter Dropdown + Saved + Reset -->
+        <div class="flex items-center gap-2">
+          
+          <!-- Single Filter Popover Toggle -->
+          <div class="relative">
+            <button 
+              id="unified-filter-btn" 
+              type="button" 
+              class="glass-btn px-3.5 py-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-200 bg-white"
+            >
+              <i class="ph ph-funnel text-base text-orange-500"></i>
+              <span>Filters</span>
+              <span id="active-filters-count" class="hidden px-1.5 py-0.2 bg-orange-100 text-orange-700 text-[10px] rounded-full font-bold">0</span>
+              <i class="ph ph-caret-down text-xs text-slate-400"></i>
+            </button>
+
+            <!-- Single Unified Filter Popover Menu -->
+            <div 
+              id="unified-filter-menu" 
+              class="hidden absolute right-0 mt-2 w-72 glass-panel rounded-2xl shadow-2xl border border-slate-200/90 p-4 z-40 text-slate-800"
+            >
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <span class="text-xs font-bold text-slate-900">Filter Opportunities</span>
+                <button id="clear-popover-filters" class="text-[11px] font-semibold text-orange-600 hover:text-orange-700">Reset</button>
+              </div>
+
+              <div class="flex flex-col gap-3">
+                <!-- Field 1: Role Type -->
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Role Type</label>
+                  <select id="role-type-filter" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium">
+                    <option value="all">All Types</option>
+                    <option value="research">Research</option>
+                    <option value="applied">Applied / Engineering</option>
+                    <option value="fellow">Fellowship</option>
+                  </select>
+                </div>
+
+                <!-- Field 2: Location -->
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Location</label>
+                  <select id="location-select-filter" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium">
+                    <option value="all">All Locations</option>
+                    <option value="India">India</option>
+                    <option value="Remote">Remote</option>
+                    <option value="International">International</option>
+                  </select>
+                </div>
+
+                <!-- Field 3: Source Platform -->
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Source Platform</label>
+                  <select id="source-filter" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium">
+                    <option value="all">All Sources</option>
+                  </select>
+                </div>
+
+                <!-- Field 4: Minimum Stipend -->
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Min. Stipend</label>
+                  <select id="stipend-select-filter" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium">
+                    <option value="all">Any Stipend</option>
+                    <option value="paid">Paid Only</option>
+                    <option value="20k">&gt; ₹20,000 / mo</option>
+                    <option value="50k">&gt; ₹50,000 / mo</option>
+                    <option value="100k">&gt; ₹1,00,000 / mo</option>
+                  </select>
+                </div>
+
+                <!-- Field 5: Scam Verification -->
+                <div>
+                  <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Verification Status</label>
+                  <select id="mod-filter" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 font-semibold text-emerald-800">
+                    <option value="verified" selected>Verified only (Strict)</option>
+                    <option value="verified_review">Verified + Needs review</option>
+                    <option value="hide_blocked">All valid (hide scams)</option>
+                    <option value="blocked">Flagged / Scams</option>
+                    <option value="all">Everything</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Saved Bookmarks Button -->
+          <button id="filter-bookmarks-btn" class="glass-btn px-3 py-2.5 flex items-center gap-1.5 text-xs text-slate-700 bg-white">
+            <i class="ph ph-bookmark-simple text-base text-rose-500"></i>
+            <span>Saved (<span id="bookmark-count">0</span>)</span>
+          </button>
+
+          <!-- Reset Filter Button -->
+          <button id="reset-filters-btn" class="glass-btn px-3 py-2.5 flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 bg-white" title="Reset all filters">
+            <i class="ph ph-arrow-counter-clockwise text-sm"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Segmented Shortcuts -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
+        <!-- Region Switches -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Region:</span>
+          <div class="pill-segmented-group" id="location-tabs">
+            <button class="pill-segmented-item active" data-val="all">All (<span id="count-all">0</span>)</button>
+            <button class="pill-segmented-item" data-val="India">India (<span id="count-india">0</span>)</button>
+            <button class="pill-segmented-item" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
+            <button class="pill-segmented-item" data-val="International">Global (<span id="count-global">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- Stipend Threshold Rockers -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Stipend:</span>
+          <div class="pill-segmented-group" id="stipend-filters">
+            <button class="pill-segmented-item active" data-val="all">Any</button>
+            <button class="pill-segmented-item" data-val="paid">Paid Only</button>
+            <button class="pill-segmented-item" data-val="20k">&gt; ₹20k</button>
+            <button class="pill-segmented-item" data-val="50k">&gt; ₹50k</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Translucent Overview Metric Cards (Moved Down Below Filters) -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="glass-card p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between mb-2">
@@ -407,106 +589,6 @@
         </div>
         <div class="text-3xl font-extrabold text-slate-900 tracking-tight">16+</div>
         <div class="text-xs text-slate-500 mt-1 font-medium">Global AI & robotics portals</div>
-      </div>
-    </section>
-
-    <!-- Professional Corporate Filter Bar Directly Above Job Cards -->
-    <section class="glass-panel p-5 flex flex-col gap-4">
-      
-      <!-- Top Row: Search Input + Clean Dropdowns -->
-      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-        
-        <!-- Search Input -->
-        <div class="relative flex-1">
-          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Search by role, company (Anthropic, DeepMind, MPI), or tech stack (PyTorch, ROS, CUDA)..." 
-            class="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-14 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20 transition font-medium"
-          >
-          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-semibold hidden sm:inline">⌘K</span>
-        </div>
-
-        <!-- Corporate Filter Dropdowns: Role Type, Location, Min. Stipend, Source -->
-        <div class="flex flex-wrap items-center gap-2">
-          
-          <!-- Dropdown 1: Role Type -->
-          <select id="role-type-filter" class="filter-select">
-            <option value="all">Role: All Types</option>
-            <option value="research">Research</option>
-            <option value="applied">Applied / Eng</option>
-            <option value="fellow">Fellowship</option>
-          </select>
-
-          <!-- Dropdown 2: Location / Remote -->
-          <select id="location-select-filter" class="filter-select">
-            <option value="all">Location: All</option>
-            <option value="India">India</option>
-            <option value="Remote">Remote</option>
-            <option value="International">International</option>
-          </select>
-
-          <!-- Dropdown 3: Min. Stipend -->
-          <select id="stipend-select-filter" class="filter-select">
-            <option value="all">Min. Stipend: Any</option>
-            <option value="paid">Paid Only</option>
-            <option value="20k">&gt; ₹20,000 / mo</option>
-            <option value="50k">&gt; ₹50,000 / mo</option>
-            <option value="100k">&gt; ₹1,00,000 / mo</option>
-          </select>
-
-          <!-- Dropdown 4: Source Platform -->
-          <select id="source-filter" class="filter-select">
-            <option value="all">Source: All</option>
-          </select>
-
-          <!-- Dropdown 5: AI Verification / Scam Status -->
-          <select id="mod-filter" class="filter-select font-semibold text-slate-800 bg-white border-slate-200">
-            <option value="verified" selected>Verified only (Strict)</option>
-            <option value="verified_review">Verified + Needs review</option>
-            <option value="hide_blocked">All valid (hide scams)</option>
-            <option value="blocked">Flagged / Scams</option>
-            <option value="all">Everything</option>
-          </select>
-
-          <!-- Saved Bookmarks Button -->
-          <button id="filter-bookmarks-btn" class="glass-btn px-3 py-2 flex items-center gap-1.5 text-slate-700">
-            <i class="ph ph-bookmark-simple text-base text-rose-500"></i>
-            <span>Saved (<span id="bookmark-count">0</span>)</span>
-          </button>
-
-          <!-- Reset Filter Button -->
-          <button id="reset-filters-btn" class="glass-btn px-3 py-2 flex items-center gap-1 text-slate-600 hover:text-slate-900" title="Reset all filters">
-            <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-            <span>Reset</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Quick Segmented Shortcuts -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
-        <!-- Region Switches -->
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Region:</span>
-          <div class="pill-segmented-group" id="location-tabs">
-            <button class="pill-segmented-item active" data-val="all">All (<span id="count-all">0</span>)</button>
-            <button class="pill-segmented-item" data-val="India">India (<span id="count-india">0</span>)</button>
-            <button class="pill-segmented-item" data-val="Remote">Remote (<span id="count-remote">0</span>)</button>
-            <button class="pill-segmented-item" data-val="International">Global (<span id="count-global">0</span>)</button>
-          </div>
-        </div>
-
-        <!-- Stipend Threshold Rockers -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <span class="text-xs font-bold text-slate-500 uppercase tracking-wide mr-1">Stipend:</span>
-          <div class="pill-segmented-group" id="stipend-filters">
-            <button class="pill-segmented-item active" data-val="all">Any</button>
-            <button class="pill-segmented-item" data-val="paid">Paid Only</button>
-            <button class="pill-segmented-item" data-val="20k">&gt; ₹20k</button>
-            <button class="pill-segmented-item" data-val="50k">&gt; ₹50k</button>
-          </div>
-        </div>
       </div>
     </section>
 

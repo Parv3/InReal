@@ -1028,7 +1028,9 @@ function setUserLoggedIn(user) {
   const loginBtn = document.getElementById('open-login-btn');
   const profilePill = document.getElementById('user-profile-pill');
   const displayName = document.getElementById('user-display-name');
+  const displayEmail = document.getElementById('user-display-email');
   const avatarInitial = document.getElementById('user-avatar-initial');
+  const menuAvatarInitial = document.getElementById('menu-avatar-initial');
   const expBadge = document.getElementById('user-experience-badge');
 
   if (loginBtn) loginBtn.classList.add('hidden');
@@ -1036,8 +1038,12 @@ function setUserLoggedIn(user) {
     profilePill.classList.remove('hidden');
     profilePill.classList.add('flex');
   }
+  const initial = (user.username || 'U').charAt(0).toUpperCase();
   if (displayName) displayName.innerText = user.username || 'User';
-  if (avatarInitial) avatarInitial.innerText = (user.username || 'U').charAt(0).toUpperCase();
+  if (displayEmail) displayEmail.innerText = user.email || `${user.username || 'user'}@inreal.com`;
+  if (avatarInitial) avatarInitial.innerText = initial;
+  if (menuAvatarInitial) menuAvatarInitial.innerText = initial;
+
   if (expBadge) {
     const expVal = user.experience || '0';
     const expLabels = { '0': '0 Exp', '1-2': '1-2 Yrs', '3+': '3+ Yrs' };
@@ -1055,12 +1061,16 @@ function setUserLoggedOut() {
   currentUser = null;
   const loginBtn = document.getElementById('open-login-btn');
   const profilePill = document.getElementById('user-profile-pill');
+  const profileMenu = document.getElementById('user-profile-menu');
 
   if (loginBtn) loginBtn.classList.remove('hidden');
   if (profilePill) {
     profilePill.classList.add('hidden');
     profilePill.classList.remove('flex');
   }
+  if (profileMenu) profileMenu.classList.add('hidden');
+
+  // Re-render listings: lock all cards after the first one
 
   // Re-render listings: lock all cards after the first one
   applyFiltersAndRender();
@@ -1219,6 +1229,41 @@ function bindAuthHandlers() {
         submitBtn.disabled = false;
         submitBtn.innerHTML = `<i class="ph ph-sparkle text-base text-orange-400"></i><span>Create Account & Unlock All</span>`;
       }
+    }
+  });
+
+  // Google-style Profile Avatar Toggle
+  const avatarBtn = document.getElementById('user-avatar-btn');
+  const profileMenu = document.getElementById('user-profile-menu');
+  if (avatarBtn && profileMenu) {
+    avatarBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Unified Filter Popover Toggle
+  const unifiedFilterBtn = document.getElementById('unified-filter-btn');
+  const unifiedFilterMenu = document.getElementById('unified-filter-menu');
+  if (unifiedFilterBtn && unifiedFilterMenu) {
+    unifiedFilterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      unifiedFilterMenu.classList.toggle('hidden');
+    });
+  }
+
+  document.getElementById('clear-popover-filters')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('reset-filters-btn')?.click();
+  });
+
+  // Global outside-click dismiss for both popovers
+  document.addEventListener('click', (e) => {
+    if (profileMenu && !profileMenu.contains(e.target) && e.target !== avatarBtn) {
+      profileMenu.classList.add('hidden');
+    }
+    if (unifiedFilterMenu && !unifiedFilterMenu.contains(e.target) && !unifiedFilterBtn.contains(e.target)) {
+      unifiedFilterMenu.classList.add('hidden');
     }
   });
 
