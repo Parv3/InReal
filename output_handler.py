@@ -231,7 +231,7 @@ def save_verdict(listing_id: str, status: str, scam_risk, reasons) -> bool:
             return False
         row.update({"moderation_status": status, "scam_risk": f"{risk:.2f}",
                     "moderation_reasons": str(reasons or "")[:1500],
-                    "moderated_at": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                    "moderated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
         _write_rows(rows)
     return True
 

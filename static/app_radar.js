@@ -139,35 +139,14 @@ function initGlassTranslucentBackground() {
   animate();
 }
 
-let verifiedOrder = []; // Stable display order: newly verified cards append to the end
-
+// ==========================================
+// 2. Data Fetching & Overview Metrics
+// ==========================================
 async function loadData() {
   try {
     const res = await fetch('/api/internships');
     const data = await res.json();
-    const rawList = data || [];
-
-    // Maintain stable append-order: previously seen verified items retain their position;
-    // newly verified items are appended to the end of verifiedOrder.
-    const currentVerifiedIds = new Set(
-      rawList.filter(i => (i.moderation_status || '').toLowerCase() === 'approved').map(i => i.id)
-    );
-
-    // Keep existing order for items still verified
-    const nextOrder = verifiedOrder.filter(id => currentVerifiedIds.has(id));
-    // Append any newly verified items that are not in nextOrder yet
-    for (const item of rawList) {
-      if (currentVerifiedIds.has(item.id) && !nextOrder.includes(item.id)) {
-        nextOrder.push(item.id);
-      }
-    }
-    verifiedOrder = nextOrder;
-
-    // Map all internships sorted by verifiedOrder for stable append behavior
-    const idToItem = new Map(rawList.map(i => [i.id, i]));
-    const orderedVerified = verifiedOrder.map(id => idToItem.get(id)).filter(Boolean);
-    const others = rawList.filter(i => !verifiedOrder.includes(i.id));
-    allInternships = [...orderedVerified, ...others];
+    allInternships = data || [];
 
     populateSourceFilter(allInternships);
     applyFiltersAndRender();
@@ -298,7 +277,18 @@ function applyFiltersAndRender() {
 
   // Every number on the page follows the filters (the location tabs count everything else that matches)
   const base = allInternships.filter(item => matches(item, true));
-  const filtered = base.filter(item => matches(item, false));
+  let filtered = base.filter(item => matches(item, false));
+
+  // Fix card scramble: Keep stable order and append newly verified items at the end
+  filtered.sort((a, b) => {
+    const timeA = a.moderated_at || '';
+    const timeB = b.moderated_at || '';
+    if (timeA && timeB && timeA !== timeB) {
+      return timeA.localeCompare(timeB); // Older verified first, new batch appends to the end
+    }
+    return (a.id || '').localeCompare(b.id || '');
+  });
+
   renderOverviewStats(filtered, base);
   renderListings(filtered);
 }
@@ -757,7 +747,6 @@ function bindEventHandlers() {
     }
 
     visibleCount = 5;
-    verifiedOrder = [];
     applyFiltersAndRender();
   };
 
