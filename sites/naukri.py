@@ -36,8 +36,9 @@ URL = "https://www.naukri.com/ai-ml-internship-jobs-in-india?" + "&".join(f"qcst
 MAX_PAGES = 10
 # Naukri blocks headless browsers (tested 12 Oct 2026: no cards within 20 s).
 # A visible Chrome window passes; if a check still appears, solve it in the window.
-HEADLESS = False
-WAIT_FOR_HUMAN_S = 60
+import os
+HEADLESS = os.environ.get("HEADLESS", "true").lower() == "true"
+WAIT_FOR_HUMAN_S = 15
 
 SEL = {
     "card": ".srp-jobtuple-wrapper",

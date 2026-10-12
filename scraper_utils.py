@@ -85,7 +85,7 @@ def block_unneeded_resources(page):
         pass
 
 def get_playwright_stealth_args():
-    """Returns heavily evasive Chrome launch arguments."""
+    """Returns heavily evasive and ultra-low-memory Chrome launch arguments."""
     return [
         '--disable-blink-features=AutomationControlled',
         '--disable-infobars',
@@ -93,8 +93,13 @@ def get_playwright_stealth_args():
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process',
-        '--window-size=1920,1080',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--no-zygote',
+        '--single-process',
+        '--js-flags=--max-old-space-size=128',
+        '--window-size=1280,720',
         '--blink-settings=imagesEnabled=false'
     ]
 

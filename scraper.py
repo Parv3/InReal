@@ -220,9 +220,11 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
             logger.exception(f"Failed {source_name}: {e}")
             return source_name, 0, e
 
-    # Concurrently execute scrapers across a thread pool
-    max_workers = min(len(scrapers_to_run), 6)
-    logger.info(f"⚡ Running {len(scrapers_to_run)} scrapers concurrently using {max_workers} worker threads...")
+    # Concurrently execute scrapers across a conservative worker pool (2 workers max)
+    # This prevents running too many concurrent headless browser instances which exceed 512MB RAM on free tiers
+    import gc
+    max_workers = min(len(scrapers_to_run), 2)
+    logger.info(f"⚡ Running {len(scrapers_to_run)} scrapers safely using {max_workers} worker threads...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_source = {
@@ -240,6 +242,8 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
             except Exception as e:
                 logger.exception(f"Worker exception for {src_name}: {e}")
                 failed_sources.append(src_name)
+            # Reclaim memory immediately after each scraper finishes
+            gc.collect()
             
     if not dry_run:
         update_run_history(total_added, failed_sources)
