@@ -412,6 +412,7 @@ function renderListings(items) {
     return `
       <article 
         class="glass-card p-5 sm:p-6 flex flex-col justify-between cursor-pointer group"
+        data-job-id="${escapeHtml(item.id)}"
         onclick="openDetailDrawer('${escapeHtml(item.id)}')"
       >
         <div>
@@ -472,10 +473,10 @@ function renderListings(items) {
           </div>
           <div>
             <!-- Consistent Sleek Dark Slate Button Across All Cards -->
-            <span class="px-3 py-1.5 bg-slate-900 text-white font-semibold rounded-lg group-hover:bg-orange-600 transition flex items-center gap-1 text-xs">
+            <button type="button" class="px-3 py-1.5 bg-slate-900 text-white font-semibold rounded-lg group-hover:bg-orange-600 transition flex items-center gap-1 text-xs">
               <span>View Details</span>
               <i class="ph ph-arrow-right text-xs"></i>
-            </span>
+            </button>
           </div>
         </div>
       </article>
@@ -487,61 +488,86 @@ function renderListings(items) {
 // 4. Slide-Over Detail Drawer
 // ==========================================
 function openDetailDrawer(id) {
-  const item = allInternships.find(i => i.id === id);
-  if (!item) return;
-
-  activeDrawerJob = item;
-  document.getElementById('drawer-role-title').innerText = item.role_title || 'Opportunity';
-  document.getElementById('drawer-company-name').innerText = item.company_name || '';
-  document.getElementById('drawer-location').innerText = item.location || 'Remote';
-  document.getElementById('drawer-duration').innerText = item.duration || 'Flexible';
-  document.getElementById('drawer-stipend').innerText = item.stipend || 'Unspecified';
-  document.getElementById('drawer-deadline').innerText = item.application_deadline || 'Rolling';
-  document.getElementById('drawer-source').innerText = item.source_platform || 'Portal';
-  document.getElementById('drawer-date').innerText = item.date_scraped || 'Recent';
-  document.getElementById('drawer-org-badge').innerText = item.org_type || 'Company';
-
-  const applyLink = document.getElementById('drawer-apply-link');
-  applyLink.href = safeUrl(item.apply_link);
-
-  // n8n verdict with its reasons
-  const modBox = document.getElementById('drawer-mod-box');
-  const view = MOD_VIEWS[item.moderation_status || ''] || MOD_VIEWS[''];
-  modBox.className = `p-3 rounded-lg border text-xs ${view.box}`;
-  const risk = item.scam_risk !== '' && item.scam_risk != null ? ` · risk ${Number(item.scam_risk).toFixed(2)}` : '';
-  document.getElementById('drawer-mod-title').innerText = `${view.label}${risk}`;
-  const reasons = String(item.moderation_reasons || '').split(' | ').map(r => r.trim()).filter(Boolean);
-  document.getElementById('drawer-mod-reasons').innerHTML = reasons.map(r => `<li>${escapeHtml(r)}</li>`).join('');
-
-  const desc = String(item.description || '').trim();
-  document.getElementById('drawer-desc-box').classList.toggle('hidden', !desc);
-  document.getElementById('drawer-description').innerText = desc;
-
-  const skillsContainer = document.getElementById('drawer-skills-list');
-  const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
-  skillsContainer.innerHTML = skills.length
-    ? skills.map(s => `<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
-    : '<span class="text-xs text-slate-500">General qualifications.</span>';
-
-  const trustBox = document.getElementById('drawer-trust-box');
-  const trustText = document.getElementById('drawer-trust-flags');
-  if (trustBox && trustText) {
-    if (item.trust_flags) {
-      trustText.innerHTML = String(item.trust_flags).split(';').map(f => f.trim()).filter(Boolean)
-        .map(f => `<li>${escapeHtml(f)}</li>`).join('');
-      trustBox.classList.remove('hidden');
-    } else {
-      trustBox.classList.add('hidden');
+  try {
+    const item = allInternships.find(i => String(i.id) === String(id));
+    if (!item) {
+      console.warn('Listing not found for id:', id);
+      return;
     }
+
+    activeDrawerJob = item;
+    const setElemText = (elId, text) => {
+      const el = document.getElementById(elId);
+      if (el) el.innerText = text;
+    };
+
+    setElemText('drawer-role-title', item.role_title || 'Opportunity');
+    setElemText('drawer-company-name', item.company_name || '');
+    setElemText('drawer-location', item.location || 'Remote');
+    setElemText('drawer-duration', item.duration || 'Flexible');
+    setElemText('drawer-stipend', item.stipend || 'Unspecified');
+    setElemText('drawer-deadline', item.application_deadline || 'Rolling');
+    setElemText('drawer-source', item.source_platform || 'Portal');
+    setElemText('drawer-date', item.date_scraped || 'Recent');
+    setElemText('drawer-org-badge', item.org_type || 'Company');
+
+    const applyLink = document.getElementById('drawer-apply-link');
+    if (applyLink) applyLink.href = safeUrl(item.apply_link);
+
+    // n8n verdict with its reasons
+    const modBox = document.getElementById('drawer-mod-box');
+    if (modBox) {
+      const view = MOD_VIEWS[item.moderation_status || ''] || MOD_VIEWS[''];
+      modBox.className = `p-3 rounded-lg border text-xs ${view.box}`;
+      const risk = item.scam_risk !== '' && item.scam_risk != null ? ` · risk ${Number(item.scam_risk).toFixed(2)}` : '';
+      setElemText('drawer-mod-title', `${view.label}${risk}`);
+      const reasons = String(item.moderation_reasons || '').split(' | ').map(r => r.trim()).filter(Boolean);
+      const modReasonsEl = document.getElementById('drawer-mod-reasons');
+      if (modReasonsEl) {
+        modReasonsEl.innerHTML = reasons.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+      }
+    }
+
+    const desc = String(item.description || '').trim();
+    const descBox = document.getElementById('drawer-desc-box');
+    if (descBox) descBox.classList.toggle('hidden', !desc);
+    setElemText('drawer-description', desc);
+
+    const skillsContainer = document.getElementById('drawer-skills-list');
+    if (skillsContainer) {
+      const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean);
+      skillsContainer.innerHTML = skills.length
+        ? skills.map(s => `<span class="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-xs font-semibold">${escapeHtml(s)}</span>`).join('')
+        : '<span class="text-xs text-slate-500">General qualifications.</span>';
+    }
+
+    const trustBox = document.getElementById('drawer-trust-box');
+    const trustText = document.getElementById('drawer-trust-flags');
+    if (trustBox && trustText) {
+      if (item.trust_flags) {
+        trustText.innerHTML = String(item.trust_flags).split(';').map(f => f.trim()).filter(Boolean)
+          .map(f => `<li>${escapeHtml(f)}</li>`).join('');
+        trustBox.classList.remove('hidden');
+      } else {
+        trustBox.classList.add('hidden');
+      }
+    }
+
+    updateDrawerBookmarkIcon();
+
+    const overlay = document.getElementById('detail-drawer-overlay');
+    const drawer = document.getElementById('detail-drawer');
+    if (overlay && drawer) {
+      overlay.classList.remove('hidden');
+      setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+    }
+  } catch (err) {
+    console.error('Error opening detail drawer:', err);
   }
-
-  updateDrawerBookmarkIcon();
-
-  const overlay = document.getElementById('detail-drawer-overlay');
-  const drawer = document.getElementById('detail-drawer');
-  overlay.classList.remove('hidden');
-  setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
 }
+
+window.openDetailDrawer = openDetailDrawer;
+window.closeDetailDrawer = closeDetailDrawer;
 
 function closeDetailDrawer() {
   const overlay = document.getElementById('detail-drawer-overlay');
@@ -777,6 +803,17 @@ function bindEventHandlers() {
   document.getElementById('empty-reset-btn')?.addEventListener('click', resetAll);
 
   // Detail Drawer Interactions
+  document.getElementById('listings-container')?.addEventListener('click', (e) => {
+    // If user clicked inside a bookmark button or auth unlock button, let their handlers handle it
+    if (e.target.closest('button[onclick*="toggleBookmark"]') || e.target.closest('button[onclick*="openAuthModal"]')) {
+      return;
+    }
+    const card = e.target.closest('article[data-job-id]');
+    if (card && card.dataset.jobId) {
+      openDetailDrawer(card.dataset.jobId);
+    }
+  });
+
   document.getElementById('close-drawer-btn')?.addEventListener('click', closeDetailDrawer);
   document.getElementById('detail-drawer-overlay')?.addEventListener('click', (e) => {
     if (e.target === document.getElementById('detail-drawer-overlay')) {
