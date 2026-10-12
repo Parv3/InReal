@@ -32,8 +32,20 @@ from filters import calculate_match_score, internship_rejection_reason, stipend_
 from scraper_utils import action_required, action_resolved, human_delay, launch_browser, save_debug
 
 PAID_RANGES = ["0To10", "10To20", "20To30", "30To40", "40To50"]
-URL = "https://www.naukri.com/ai-ml-internship-jobs-in-india?" + "&".join(f"qcstipend={r}" for r in PAID_RANGES)
-MAX_PAGES = 10
+SLUGS = [
+    "ai-ml-internship-jobs-in-india",
+    "machine-learning-internship-jobs",
+    "data-science-internship-jobs",
+    "artificial-intelligence-internship-jobs",
+]
+# Only the FIRST page of a Naukri search is reliable. Later pages are fetched by the
+# page through Naukri's job API, which now wants a reCAPTCHA token: on 12 Oct the
+# laptop runs failed at page 3 (06:49, 06:51), then at page 2 (06:57), and in the
+# browser neither "Next" nor the "2" link changed the list; loading ".../-2?…"
+# directly bounces back to page 1. So instead of paging we open the first page of
+# several narrower searches: 4 keywords × 5 pay ranges, 20 cards each.
+URLS = [f"https://www.naukri.com/{slug}?qcstipend={r}" for slug in SLUGS for r in PAID_RANGES]
+URL = URLS[0]
 # Naukri blocks headless browsers (tested 12 Oct 2026: no cards within 20 s).
 # A visible Chrome window passes; if a check still appears, solve it in the window.
 import os
@@ -79,9 +91,12 @@ def parse_list_page(html: str):
             role_title = _text(title_el)
             if not role_title:
                 continue
-            min_exp = re.match(r"\s*(\d+)", _text(card.select_one(SEL["experience"])))
-            if min_exp and int(min_exp.group(1)) >= 3:
-                continue  # job card that needs 3+ years
+            link = title_el.get("href", "") if title_el else ""
+            # Experience: job cards print it; internship cards only have it in the link
+            # (".../job-listings-ai-intern-acme-pune-0-to-1-years-091026035225")
+            min_exp = (re.match(r"\s*(\d+)", _text(card.select_one(SEL["experience"])))
+                       or re.search(r"-(\d+)-to-\d+-years?-\d+$", link))
+            duration = _text(card.select_one(SEL["duration"]))
             location = _text(card.select_one(SEL["location"])) or "India"
             stipend = _text(card.select_one(SEL["stipend"]))
             stipend_numeric = parse_stipend(stipend)
@@ -93,13 +108,17 @@ def parse_list_page(html: str):
                 "role_title": role_title,
                 "location": location,
                 "location_type": "Remote" if re.search(r"remote|work from home|wfh", location, re.I) else "India",
-                "duration": _text(card.select_one(SEL["duration"])),
+                "duration": duration,
                 "stipend": stipend,
                 "stipend_numeric": stipend_numeric,
                 "stipend_currency": "INR",
                 "required_skills": ", ".join(skills),
                 "application_deadline": "",
-                "apply_link": title_el.get("href", "") if title_el else "",
+                "apply_link": link,
+                # Naukri prints "3 months duration" only on posts it files as internships.
+                # "No fixed duration" is not enough: jobs like "Placement Coordinator, 1-3 years" carry it.
+                "labelled_internship": bool(re.search(r"\d+\s*months?\s+duration", duration, re.I)),
+                "min_experience": int(min_exp.group(1)) if min_exp else None,
                 "source_platform": "Naukri",
                 "date_scraped": datetime.now().strftime("%Y-%m-%d"),
                 "org_type": "Company",
@@ -149,7 +168,8 @@ def parse_detail_page(html: str) -> dict:
 
 def _wanted(rec: dict) -> bool:
     skills = [s.strip() for s in rec["required_skills"].split(",") if s.strip()]
-    return (internship_rejection_reason(rec["role_title"], skills, "naukri") is None
+    return (internship_rejection_reason(rec["role_title"], skills, "naukri", rec["labelled_internship"]) is None
+            and (rec["min_experience"] or 0) < 3
             and stipend_rejection_reason(rec["stipend"], rec["stipend_numeric"], True) is None)
 
 
@@ -164,47 +184,43 @@ def scrape_naukri():
         page = context.new_page()
         Stealth().apply_stealth_sync(page)
 
-        logger.info(f"Scraping Naukri (paid internships only): {URL}")
-        page.goto(URL, timeout=45000, wait_until="domcontentloaded")
-        try:
-            page.wait_for_selector(SEL["card"], timeout=20000)
-        except Exception:
-            save_debug(page, "naukri_blocked")
-            if HEADLESS:
-                browser.close()
-                raise RuntimeError("Naukri: no job cards (blocked). Set HEADLESS = False in sites/naukri.py")
-            action_required("Naukri", f"No job cards yet. If the Chrome window shows a check, "
-                                      f"solve it there within {WAIT_FOR_HUMAN_S} seconds.", "captcha")
+        for idx, url in enumerate(URLS):
+            logger.info(f"Scraping Naukri: {url}")
+            page.goto(url, timeout=45000, wait_until="domcontentloaded")
             try:
-                page.wait_for_selector(SEL["card"], timeout=WAIT_FOR_HUMAN_S * 1000)
-                action_resolved("Naukri")
-            except Exception as e:
+                page.wait_for_selector(SEL["card"], timeout=12000 if all_internships else 20000)
+            except Exception:
+                if all_internships:   # we got in before, so this search is just empty
+                    logger.info(f"Naukri: no cards for {url.split('/')[-1]}, moving on")
+                    continue
                 save_debug(page, "naukri_blocked")
-                browser.close()
-                raise RuntimeError(f"Naukri: still no job cards after {WAIT_FOR_HUMAN_S} s "
-                                   f"(see test_output/naukri_blocked.png): {e}")
+                if HEADLESS:
+                    browser.close()
+                    raise RuntimeError("Naukri: no job cards (blocked). Set HEADLESS = False in sites/naukri.py")
+                action_required("Naukri", f"No job cards yet. If the Chrome window shows a check, "
+                                          f"solve it there within {WAIT_FOR_HUMAN_S} seconds.", "captcha")
+                try:
+                    page.wait_for_selector(SEL["card"], timeout=WAIT_FOR_HUMAN_S * 1000)
+                    action_resolved("Naukri")
+                except Exception as e:
+                    if idx < len(URLS) - 1:
+                        logger.warning(f"Naukri: nothing for {url.split('/')[-1]} after waiting, trying the next search")
+                        continue
+                    save_debug(page, "naukri_blocked")
+                    browser.close()
+                    raise RuntimeError(f"Naukri: still no job cards after {WAIT_FOR_HUMAN_S} s "
+                                       f"(see test_output/naukri_blocked.png): {e}")
 
-        for page_num in range(1, MAX_PAGES + 1):
             human_delay(1.5, 2.5)
             records = parse_list_page(page.content())
             new = [r for r in records if r["id"] not in seen]
             seen.update(r["id"] for r in new)
             all_internships.extend(new)
-            logger.info(f"Naukri page {page_num}: {len(records)} cards, {len(new)} new")
+            logger.info(f"Naukri {url.split('/')[-1]}: {len(records)} cards, {len(new)} new")
 
-            nxt = page.locator(SEL["next"])
-            if nxt.count() == 0 or nxt.first.get_attribute("disabled") is not None or not new:
-                break
-            first_id = page.locator(SEL["card"]).first.get_attribute("data-job-id")
-            nxt.first.click()
-            try:  # wait until the list really changed
-                page.wait_for_function(
-                    "id => { const c = document.querySelector('.srp-jobtuple-wrapper');"
-                    " return c && c.getAttribute('data-job-id') !== id; }",
-                    arg=first_id, timeout=20000)
-            except Exception:
-                logger.warning(f"Naukri: page {page_num + 1} did not load, stopping")
-                break
+        if not all_internships:
+            browser.close()
+            raise RuntimeError("Naukri: no job cards in any search")
 
         wanted = [r for r in all_internships if _wanted(r)]
         logger.info(f"Naukri: opening {len(wanted)} detail pages for the genuineness checks")

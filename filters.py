@@ -10,7 +10,7 @@ INCLUDE_KEYWORDS = [
     "mlops", "ai research", "ai engineer", "ml engineer", "ai/ml", "ai ml",
     "ai agent", "agentic", "ai developer", "ai development",
     "transformer", "diffusion model", "multimodal", "robotics ai",
-    "speech recognition", "recommendation system", "ai intern",
+    "speech recognition", "recommendation system", "ai intern", "aiml",
     # Skill tags that only show up on real ML work
     "pytorch", "tensorflow", "keras", "scikit-learn", "opencv",
     "hugging face", "langchain",
@@ -48,21 +48,40 @@ def _has_word(text: str, word: str) -> bool:
     return re.search(r"(?<![a-z])" + re.escape(word) + r"(?![a-z])", text) is not None
 
 
-def internship_rejection_reason(title: str, skills: list, source: str = ""):
+def _clean_title(title: str) -> str:
+    """'AI-Intern', 'Intern - AI/ML', 'Principal_AI' -> plain words, so 'AI-Intern' reads like 'AI Intern'."""
+    return " ".join(re.sub(r"[-_/,|]+", " ", title.lower()).split())
+
+
+def internship_rejection_reason(title: str, skills: list, source: str = "", labelled_internship: bool = False):
     """
     Returns None if the listing is an AI/ML internship we want,
     otherwise a short reason it was rejected.
+    labelled_internship: the portal itself marks this post as an internship
+    (e.g. a Naukri card with a fixed "3 months duration"), so the title needn't say "intern".
     """
-    title_lower = title.lower()
+    title_lower = _clean_title(title)
     skills_lower = [s.lower() for s in skills]
     text_to_check = title_lower + " " + " ".join(skills_lower)
 
     # Must contain 'intern' unless the platform only lists internships
-    is_internship_platform = source in ["internshala", "unstop"]
-    if "intern" not in title_lower and not is_internship_platform:
+    # Portals that only list internships (the AICTE government portal too), so titles needn't say "intern"
+    is_internship_platform = source in ["internshala", "unstop", "government"]
+    # French/German internship words (LinkedIn Europe, Oct 2026): these posts are written for
+    # French/German speakers, so say why they're dropped instead of "not an internship"
+    foreign = re.search(r"\b(stage|stagiaire|praktikum|praktikant\w*|werkstudent\w*|abschlussarbeit|alternance)\b", title_lower)
+    if foreign:
+        return f"Posted in French/German ('{foreign.group(1)}')"
+    # "Co-op" is the North American word for a paid internship
+    is_coop = re.search(r"\bco ?op\b", title_lower) is not None
+    if "intern" not in title_lower and not is_coop and not is_internship_platform and not labelled_internship:
         return "Not labelled as an internship"
 
+    # "AI/ML Engineering Intern Internship to Full-Time" (Shine, Oct 2026) is an internship with a job offer at the end
+    converts = re.search(r"\b(to|into|then|leading to)\s+full time\b", title_lower)
     for exc in TITLE_EXCLUDE:
+        if converts and exc in ("full time", "full-time"):
+            continue
         if _has_word(title_lower, exc):
             return f"Title has '{exc}'"
     for lang in LANGUAGE_EXCLUDE:
@@ -86,12 +105,29 @@ def internship_rejection_reason(title: str, skills: list, source: str = ""):
     return "Not an AI/ML role"
 
 
+# Words that only say "AI" in a general way. On their own they are not enough when the
+# title also names non-ML work: "Creative design & AI intern" (Naukri), "AI Internship Film &
+# Creative Industry" (Foundit), "Artificial Intelligence Sales Intern" (Apna), all Oct 2026.
+GENERIC_AI_TERMS = {"artificial intelligence", "generative ai", "gen ai", "genai", "ai intern",
+                    "ai developer", "ai development", "agentic", "ai agent"}
+NON_ML_WORK = [
+    "sales", "marketing", "communications", "creative", "film", "filmmaking",
+    "video", "editor", "editing", "content", "graphic", "brand", "branding", "hr", "recruitment",
+    "business development", "social media", "seo", "trainer", "teacher", "tutor", "writer", "writing",
+    "annotation", "labelling", "labeling", "data entry", "telecaller", "customer support",
+]
+
+
 def is_ai_ml_title(title_lower: str) -> bool:
-    if any(inc in title_lower for inc in INCLUDE_KEYWORDS):
-        return True
     if _has_word(title_lower, "ml"):
         return True
-    return _has_word(title_lower, "ai") and any(_has_word(title_lower, w) for w in AI_TECH_WORDS)
+    if _has_word(title_lower, "ai") and any(_has_word(title_lower, w) for w in AI_TECH_WORDS):
+        return True
+    found = [inc for inc in INCLUDE_KEYWORDS if inc in title_lower]
+    if any(inc not in GENERIC_AI_TERMS for inc in found):
+        return True
+    # only a general "AI" word: fine for "AI Intern", not for "AI Sales Intern"
+    return bool(found) and not any(_has_word(title_lower, w) for w in NON_ML_WORK)
 
 
 def is_valid_internship(title: str, skills: list, source: str = "") -> bool:

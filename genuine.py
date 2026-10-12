@@ -38,6 +38,24 @@ COMMISSION_RE = (
     r"|\bno\s+fixed\s+(stipend|salary|pay)\b"
 )
 
+# Training institutes selling a "programme" as an internship (seen on Shine and LinkedIn, Oct 2026)
+TRAINING_RE = (
+    r"\bjob placement\b|\bplacement\s+(assistance|support|guarantee|guaranteed)\b|\b100\s*%\s*placement\b"
+    r"|\bjob guarantee\b|\bcareer[- ]oriented program(me)?\b|\bcertification program(me)?\b"
+    r"|\btraining program(me)?\s+(with|and)\b|\bcourse fee\b"
+    r"|\btraining\s*(&|and|\+|cum|with)\s*internship\b|\binternship\s*(&|and|\+|cum)\s*training\b"
+    r"|\bguaranteed\s+certificat\w*"
+    # "1 Year Fully Online Remote Internship with Employment Opportunity (Based on Successful Completion)" (AICTE, Oct 2026)
+    r"|\b(job|employment|placement)\s+opportunit\w*\s*\(?\s*(based\s+on|after|on|upon)\s+(the\s+)?(successful\s+)?completion"
+)
+# Titles that read like a course, not a job (AICTE portal, Oct 2026: "Machine Learning with Python",
+# "Master Artificial Intelligence", "Data Science with Python Including Ai")
+TRAINING_TITLE_RE = r"^\s*(master|learn|become)\b|\bwith python\b|\bcourse\b|\bbootcamp\b|\bcertification\b"
+# Employers whose name says they sell courses (Naukri, Oct 2026: "Fireblaze AI School" posting an "AI Intern")
+TRAINING_COMPANY_RE = r"\b(school|academy|coaching|classes|bootcamp|edu?\s?tech|skill development|training)\b"
+MANY_TOWNS = 6
+MASS_OPENINGS = 50   # e.g. "Fullstack Developer Training and Internship", 70 openings (AICTE, Oct 2026)
+
 # A selective internship does not "hire" this many people.
 MASS_HIRE_TOTAL = 10_000
 MASS_HIRE_PER_POST = 20
@@ -63,6 +81,14 @@ def _months(duration: str):
     return {"month": n, "week": n / 4.33, "day": n / 30}[m.group(2)]
 
 
+def _num(v):
+    """Numbers can arrive as '' or '191' when a listing is re-read from CSV."""
+    try:
+        return None if v in (None, "") else int(float(v))
+    except (TypeError, ValueError):
+        return None
+
+
 def check_listing(item: dict):
     text = " ".join(str(item.get(k, "")) for k in ("role_title", "description", "stipend"))
 
@@ -72,8 +98,8 @@ def check_listing(item: dict):
     if re.search(TASK_RE, text, re.I):
         return "Task-for-money pattern (like/review tasks)", []
 
-    hired = item.get("employer_hired")
-    posted = item.get("employer_posted")
+    hired = _num(item.get("employer_hired"))
+    posted = _num(item.get("employer_posted"))
     if hired is not None and (
         hired >= MASS_HIRE_TOTAL or (posted and hired / posted >= MASS_HIRE_PER_POST)
     ):
@@ -97,13 +123,46 @@ def check_listing(item: dict):
     if posted and posted >= 200 and (hired or 0) / posted < 0.05:
         flags.append(f"Posts a lot, hires few ({posted} posts, {hired or 0} hired)")
 
-    if item.get("stipend_numeric") in (None, 0) and "unpaid" not in str(item.get("stipend", "")).lower():
+    if item.get("stipend_hidden_by_site"):
+        pass  # e.g. LinkedIn never shows pay on its cards; not the employer's fault
+    elif item.get("stipend_numeric") in (None, 0) and "unpaid" not in str(item.get("stipend", "")).lower():
         flags.append("Stipend amount not stated")
 
+    towns = [t for t in str(item.get("location", "")).split(",") if t.strip()]
+    if len(towns) >= MANY_TOWNS:
+        flags.append(f"One post listed for {len(towns)} towns")
+
+    if re.search(TRAINING_RE, text, re.I) or re.search(TRAINING_TITLE_RE, str(item.get("role_title", "")), re.I):
+        flags.append("Sounds like a training programme sold as an internship")
+    elif (item.get("org_type") not in ("Government", "Institution")
+          and re.search(TRAINING_COMPANY_RE, str(item.get("company_name", "")), re.I)):
+        flags.append("Employer's name sounds like a training institute, so make sure it isn't selling a course")
+
+    min_exp = _num(item.get("min_experience"))
+    if min_exp:
+        flags.append(f"Asks for {min_exp}+ year{'s' if min_exp > 1 else ''} of experience, unusual for an internship")
+
+    if item.get("portal_verified") is False:
+        flags.append("Employer not verified by the portal")
+
+    openings = _num(item.get("openings"))
+    if openings and openings >= MASS_OPENINGS:
+        flags.append(f"{openings} openings for one internship")
+
+    if re.search(r"\bwww\.|https?://|\b(?!asp\b|vb\b)[a-z0-9-]{3,}\.(com|in|org|co|io)\b", str(item.get("role_title", "")), re.I):
+        flags.append("Advertises another website in the title")
+
+    if item.get("third_party"):
+        flags.append("Posted by a recruiter or consultant, not the company itself")
+
+    if item.get("repeat_note"):  # set by scraper.mark_repeated_posts
+        flags.append(item["repeat_note"])
+
     if item.get("aggregated"):
-        flags.append("Copied by the portal from another site; check the company's own page")
+        flags.append("Copied by the portal from another site, so confirm on the company's own page")
 
     if re.search(COMMISSION_RE, text, re.I):
         flags.append("Pay depends on commission or performance")
 
-    return None, flags
+    # trust_flags is stored as one ";"-separated string, so a ";" inside a flag splits it in two
+    return None, [f.replace(";", ",") for f in flags]

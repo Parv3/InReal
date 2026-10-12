@@ -1,29 +1,34 @@
 """
-LinkedIn Jobs Scraper (Public Page — No Login Required)
-────────────────────────────────────────────────────────
-Scrapes LinkedIn's GUEST jobs search pages using Playwright.
-LinkedIn shows job listings on their public /jobs/search/ pages
-without requiring login. Browser runs visible (headless=False) so
-the user can close any sign-in/cookie popups.
+LinkedIn internship scraper (no login).
 
-Verified selectors (Feb 2026):
-  - Card:     div.base-card  (or .base-search-card)
-  - Title:    h3.base-search-card__title
-  - Company:  h4.base-search-card__subtitle  or  a.hidden-nested-link
-  - Location: span.job-search-card__location
-  - Link:     a.base-card__full-link
+Checked against the live site on 12 Oct 2026. What changed since the old version:
+  - The public search page https://www.linkedin.com/jobs/search/?keywords=...
+    now redirects a logged-out visitor to the sign-up wall (/authwall), so the
+    old scraper found 0 cards.
+  - LinkedIn's guest pages still load their results from
+        /jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=..&location=..&f_JT=I&f_E=1&start=N
+    which answers with the same job cards (10 per call). The card selectors
+    (div.base-card, h3.base-search-card__title, h4.base-search-card__subtitle,
+    span.job-search-card__location, a.base-card__full-link) still work there.
+  - Each job's details come from /jobs-guest/jobs/api/jobPosting/<id>:
+    description, employment type, industry, applicants, and a line like
+    "This job is provided by Shine.com" when LinkedIn copied the post.
+  - The old code wrote a made-up stipend (5000 INR / 1500 USD, "Check Listing")
+    so every LinkedIn post passed the stipend rule. LinkedIn cards don't show
+    pay, so we now leave the stipend empty and say so.
 """
-
 import hashlib
-import random
+import re
+import urllib.parse
 from datetime import datetime
+
 from bs4 import BeautifulSoup
+from loguru import logger
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
-from loguru import logger
 
-from filters import calculate_match_score
-from scraper_utils import human_delay, get_playwright_stealth_args
+from filters import calculate_match_score, internship_rejection_reason
+from scraper_utils import get_playwright_stealth_args, human_delay
 
 # ── Every major location × every major AI/ML keyword ─────────────────────────
 # LinkedIn's f_JT=I = Internship job type, f_E=1 = Entry level
@@ -118,240 +123,239 @@ SEARCH_CONFIGS = [
     ("data science intern",                       "Remote",         "Remote · DS"),
 ]
 
+SEARCH_API = ("https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+              "?keywords={kw}&location={loc}&f_JT=I&f_E=1&start={start}")
+DETAIL_API = "https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{job_id}"
+PAGES_PER_SEARCH = 2      # 10 cards per page
+MAX_DETAILS = 60          # detail pages per run, to stay under LinkedIn's rate limit
 
-BASE_URL = "https://www.linkedin.com/jobs/search/?keywords={kw}&location={loc}&f_JT=I&f_E=1"
+SEL = {
+    "card": "div.base-card",
+    "title": "h3.base-search-card__title",
+    "company": "h4.base-search-card__subtitle",
+    "location": "span.job-search-card__location",
+    "link": "a.base-card__full-link",
+    "date": "time[datetime]",
+    "salary": ".job-search-card__salary-info",
+    # detail
+    "d_desc": ".show-more-less-html__markup, .description__text",
+    "d_criteria": ".description__job-criteria-item",
+    "d_criteria_key": ".description__job-criteria-subheader",
+    "d_criteria_val": ".description__job-criteria-text",
+    "d_applicants": ".num-applicants__caption",
+    "d_posted": ".posted-time-ago__text",
+}
+PROVIDED_BY_RE = r"This job is provided by\s+(.{2,60}?)\.?(?:\s+Show more|\s*$)"
+INDIA_WORDS = ["india", "bengaluru", "bangalore", "mumbai", "delhi", "hyderabad", "pune", "chennai", "gurgaon", "noida"]
 
 
-def _close_popups(page):
-    """Dismiss LinkedIn's sign-in modal and cookie banners if they appear."""
-    try:
-        # Cookie accept
-        page.locator("button[action-type='ACCEPT']").click(timeout=3000)
-    except Exception:
-        pass
-    try:
-        # Sign-in modal close
-        page.locator("button.modal__dismiss").click(timeout=3000)
-    except Exception:
-        pass
-    try:
-        page.locator("button[aria-label='Dismiss']").click(timeout=3000)
-    except Exception:
-        pass
+def _text(el) -> str:
+    return re.sub(r"\s+", " ", el.get_text(" ", strip=True)).strip() if el else ""
+
+
+def query_wanted(kw: str, loc: str, req_regions, req_topics) -> bool:
+    """Same region/topic rules as the old scraper, so the dashboard checkboxes still work."""
+    kw_l, loc_l = kw.lower(), loc.lower()
+    is_india = "india" in loc_l
+    is_remote = "remote" in loc_l or "anywhere" in loc_l
+    is_worldwide = "worldwide" in loc_l
+    is_europe = any(w in loc_l for w in ["europe", "kingdom", "germany", "france", "netherlands", "switzerland",
+                                          "sweden", "denmark", "finland", "spain", "italy", "belgium", "austria"])
+    is_usa = any(w in loc_l for w in ["united states", "bay area", "seattle", "boston", "york"])
+    region = (("india" in req_regions and is_india) or ("usa" in req_regions and is_usa)
+              or ("europe" in req_regions and is_europe) or ("remote" in req_regions and is_remote)
+              or ("worldwide" in req_regions and (is_worldwide or not (is_india or is_usa or is_europe or is_remote))))
+    if not region:
+        return False
+    if not req_topics:
+        return True
+    t = req_topics
+    return any([
+        "ai" in t and ("artificial intelligence" in kw_l or re.search(r"\bai\b", kw_l) or "robotics" in kw_l),
+        "ml" in t and ("machine learning" in kw_l or "reinforcement" in kw_l),
+        "ds" in t and "data science" in kw_l,
+        "cv" in t and "computer vision" in kw_l,
+        "nlp" in t and ("natural language" in kw_l or "nlp" in kw_l),
+        "research" in t and "research" in kw_l,
+        "llm/genai" in t and ("generative" in kw_l or "large language" in kw_l),
+        "dl" in t and "deep learning" in kw_l,
+    ])
+
+
+def parse_search_html(html: str, label: str):
+    soup = BeautifulSoup(html, "lxml")
+    records = []
+    for card in soup.select(SEL["card"]):
+        try:
+            title = _text(card.select_one(SEL["title"]))
+            if not title:
+                continue
+            urn = card.get("data-entity-urn", "")
+            job_id = urn.rsplit(":", 1)[-1] if urn else ""
+            link_el = card.select_one(SEL["link"])
+            link = (link_el.get("href", "") if link_el else "").split("?")[0]
+            if not job_id:
+                m = re.search(r"-(\d{6,})$", link)
+                job_id = m.group(1) if m else ""
+            location = _text(card.select_one(SEL["location"]))
+            loc_l = location.lower()
+            location_type = ("Remote" if "remote" in loc_l
+                             else "India" if any(w in loc_l for w in INDIA_WORDS) else "International")
+            salary = _text(card.select_one(SEL["salary"]))
+            date_el = card.select_one(SEL["date"])
+            records.append({
+                "id": hashlib.md5(f"linkedin-{job_id or title + location}".encode()).hexdigest(),
+                "job_id": job_id,
+                "company_name": _text(card.select_one(SEL["company"])) or "Unknown",
+                "role_title": title,
+                "location": location,
+                "location_type": location_type,
+                "duration": "",
+                "stipend": salary,
+                "stipend_numeric": 0.0,
+                "stipend_currency": "INR" if location_type == "India" else "USD",
+                "stipend_hidden_by_site": not salary,
+                "required_skills": "",
+                "application_deadline": "",
+                "apply_link": link,
+                "source_platform": "LinkedIn",
+                "search_label": label,          # which of the 65 searches found it
+                "date_scraped": datetime.now().strftime("%Y-%m-%d"),
+                "org_type": "Company",
+                "role_type": "Research" if "research" in title.lower() else "Applied",
+                "match_score": calculate_match_score(title, [], "Company", 0.0),
+                "posted": date_el.get("datetime", "") if date_el else "",
+                "description": "",
+            })
+        except Exception as e:
+            logger.exception(f"LinkedIn: could not parse a card: {e}")
+    return records
+
+
+def parse_detail_html(html: str) -> dict:
+    soup = BeautifulSoup(html, "lxml")
+    out = {}
+    desc = _text(soup.select_one(SEL["d_desc"]))
+    if desc:
+        out["description"] = desc[:4000]
+        m = re.search(PROVIDED_BY_RE, desc)
+        if m:
+            out["aggregated"] = True
+            out["provided_by"] = m.group(1).strip()
+    for item in soup.select(SEL["d_criteria"]):
+        key = _text(item.select_one(SEL["d_criteria_key"])).lower()
+        val = _text(item.select_one(SEL["d_criteria_val"]))
+        if key and val:
+            out[key.replace(" ", "_")] = val   # seniority_level, employment_type, industries, job_function
+    out["applicants"] = _text(soup.select_one(SEL["d_applicants"]))
+    return out
+
+
+FETCH_JS = """async (url) => {
+    const r = await fetch(url, {credentials: 'omit'});
+    return {status: r.status, text: r.status === 200 ? await r.text() : ''};
+}"""
 
 
 def scrape_linkedin(config=None):
-    """
-    Scrapes LinkedIn public job search pages for AI/ML internships.
-    Runs fully headless. Filters internal query list based on given config.
-    """
-    if config is None:
-        config = {
-            "regions": ["india", "worldwide", "usa", "europe", "remote"],
-            "topics": ["ml", "ai", "nlp", "cv", "ds", "research", "llm/genai"]
-        }
-    
-    default_regions = ["india", "worldwide", "usa", "europe", "remote"]
-    default_topics = ["ml", "ai", "nlp", "cv", "ds", "research", "llm/genai"]
+    config = config or {}
+    req_regions = [r.lower() for r in (config.get("regions") or ["india", "worldwide", "usa", "europe", "remote"])]
+    req_topics = [t.lower() for t in (config.get("topics") or [])]
+    searches = [(kw, loc, label) for kw, loc, label in SEARCH_CONFIGS if query_wanted(kw, loc, req_regions, req_topics)]
+    logger.info(f"LinkedIn: {len(searches)} searches selected by the dashboard settings")
 
-    req_regions = [r.lower() for r in config.get("regions", default_regions)]
-    req_topics = [t.lower() for t in config.get("topics", default_topics)]
-    
-    if not req_regions:
-        logger.warning("LinkedIn: No regions specified, using defaults")
-        req_regions = [r.lower() for r in default_regions]
-
-    from scraper_utils import block_unneeded_resources
     all_internships = []
     seen = set()
+    rate_limited = False
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,  # Fully automated
-            args=get_playwright_stealth_args(),
-        )
-        context = browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            ),
-            viewport={"width": 1440, "height": 900},
-            locale="en-US",
-        )
+        browser = p.chromium.launch(headless=True, args=get_playwright_stealth_args())
+        context = browser.new_context(viewport={"width": 1440, "height": 900}, locale="en-US")
         page = context.new_page()
-        block_unneeded_resources(page)
         Stealth().apply_stealth_sync(page)
+        # Any linkedin.com page gives us the right origin for fetch(); the authwall is fine
+        in_page = True
+        try:
+            page.goto("https://www.linkedin.com/jobs", timeout=45000, wait_until="domcontentloaded")
+        except Exception as e:
+            logger.warning(f"LinkedIn page did not open ({e}); calling the API directly")
+            in_page = False
 
-        # Collect matching queries and cap to top 8 high-priority configs
-        matched_configs = []
-        for kw, loc, label in SEARCH_CONFIGS:
-            kw_lower = kw.lower()
-            loc_lower = loc.lower()
-            
-            # Check region map
-            is_india = "india" in loc_lower
-            is_remote = "remote" in loc_lower or "anywhere" in loc_lower
-            is_worldwide = "worldwide" in loc_lower
-            is_europe = any(k in loc_lower for k in ["europe", "kingdom", "germany", "france", "netherlands", "switzerland", "sweden", "finland"])
-            is_usa = any(k in loc_lower for k in ["united states", "bay area", "seattle", "boston", "york"])
-            
-            region_match = False
-            if "india" in req_regions and is_india: region_match = True
-            if "usa" in req_regions and is_usa: region_match = True
-            if "europe" in req_regions and is_europe: region_match = True
-            if "remote" in req_regions and is_remote: region_match = True
-            if "worldwide" in req_regions and (is_worldwide or (not is_india and not is_usa and not is_europe and not is_remote)): region_match = True
-            
-            if not region_match:
-                continue
-                
-            topic_match = False
-            if "ai" in req_topics and ("artificial intelligence" in kw_lower or "ai " in kw_lower or " ai" in kw_lower or kw_lower.startswith("ai") or "robotics" in kw_lower): topic_match = True
-            if "ml" in req_topics and ("machine learning" in kw_lower or "reinforcement" in kw_lower or "rl " in kw_lower): topic_match = True
-            if "dl" in req_topics and "deep learning" in kw_lower: topic_match = True
-            if "ds" in req_topics and "data science" in kw_lower: topic_match = True
-            if "cv" in req_topics and "computer vision" in kw_lower: topic_match = True
-            if "nlp" in req_topics and "natural language" in kw_lower: topic_match = True
-            if "research" in req_topics and "research" in kw_lower: topic_match = True
-            if "llm/genai" in req_topics and ("generative" in kw_lower or "large language" in kw_lower): topic_match = True
-            
-            if req_topics and not topic_match:
-                continue
-                
-            matched_configs.append((kw, loc, label))
-
-        active_configs = matched_configs[:8]
-        logger.info(f"LinkedIn: Running {len(active_configs)} prioritized queries for fast execution.")
-
-        for kw, loc, label in active_configs:
+        def fetch(url):
+            if in_page:
+                try:
+                    return page.evaluate(FETCH_JS, url)
+                except Exception as e:
+                    logger.warning(f"LinkedIn in-page fetch failed ({e}); calling the API directly")
             try:
-                import urllib.parse
-                url = BASE_URL.format(
-                    kw=urllib.parse.quote_plus(kw),
-                    loc=urllib.parse.quote_plus(loc),
-                )
-                logger.info(f"LinkedIn: Scraping [{label}] — {url}")
-                page.goto(url, timeout=30000, wait_until="domcontentloaded")
-
-                # Automatically close popups without waiting for the user
-                _close_popups(page)
-
-                # Fast scroll to trigger card load
-                for _ in range(2):
-                    page.mouse.wheel(0, 1000)
-                    human_delay(0.2, 0.5)
-
-                html = page.content()
-                soup = BeautifulSoup(html, "lxml")
-
-                # LinkedIn guest page uses these card selectors
-                cards = soup.find_all("div", class_=lambda c: c and "base-card" in c)
-                if not cards:
-                    cards = soup.find_all("li", class_=lambda c: c and "jobs-search__results-list" in (c or ""))
-                logger.info(f"LinkedIn [{label}]: Found {len(cards)} cards")
-
-                for card in cards:
-                    try:
-                        # Title
-                        title_elem = (
-                            card.find("h3", class_=lambda c: c and "base-search-card__title" in c)
-                            or card.find("h3")
-                        )
-                        if not title_elem:
-                            continue
-                        role_title = title_elem.get_text(strip=True)
-
-                        # Company
-                        comp_elem = (
-                            card.find("h4", class_=lambda c: c and "base-search-card__subtitle" in c)
-                            or card.find("a", class_=lambda c: c and "hidden-nested-link" in (c or ""))
-                            or card.find("h4")
-                        )
-                        company_name = (
-                            comp_elem.get_text(strip=True) if comp_elem else "Unknown"
-                        )
-
-                        # Location
-                        loc_elem = card.find(
-                            "span",
-                            class_=lambda c: c and "job-search-card__location" in c,
-                        )
-                        location = (
-                            loc_elem.get_text(strip=True) if loc_elem else loc
-                        )
-                        loc_lower = location.lower()
-                        if "remote" in loc_lower:
-                            location_type = "Remote"
-                        elif any(
-                            x in loc_lower
-                            for x in ["india", "bangalore", "mumbai", "delhi", "hyderabad", "pune", "chennai"]
-                        ):
-                            location_type = "India"
-                        else:
-                            location_type = "International"
-
-                        # Apply link
-                        link_elem = card.find(
-                            "a",
-                            class_=lambda c: c and "base-card__full-link" in (c or ""),
-                        ) or card.find("a", href=True)
-                        apply_link = link_elem["href"] if link_elem else ""
-                        if apply_link and "?" in apply_link:
-                            apply_link = apply_link.split("?")[0]  # clean tracking params
-
-                        # Deduplicate
-                        uid = hashlib.md5(
-                            f"{company_name}-{role_title}-LinkedIn".encode()
-                        ).hexdigest()
-                        if uid in seen:
-                            continue
-                        seen.add(uid)
-
-                        org_type = "Company"
-                        role_type = (
-                            "Research"
-                            if "research" in role_title.lower()
-                            else "Applied"
-                        )
-                        match_score = calculate_match_score(
-                            role_title, [], org_type, 0.0
-                        )
-                        currency = "INR" if location_type == "India" else "USD"
-                        stip_numeric = 5000.0 if location_type == "India" else 1500.0
-
-                        record = {
-                            "id": uid,
-                            "company_name": company_name,
-                            "role_title": role_title,
-                            "location": location,
-                            "location_type": location_type,
-                            "duration": "",
-                            "stipend": "Check Listing",
-                            "stipend_numeric": stip_numeric,
-                            "stipend_currency": currency,
-                            "required_skills": "",
-                            "application_deadline": "",
-                            "apply_link": apply_link,
-                            "source_platform": f"LinkedIn ({label})",
-                            "date_scraped": datetime.now().strftime("%Y-%m-%d"),
-                            "org_type": org_type,
-                            "role_type": role_type,
-                            "match_score": match_score,
-                        }
-                        all_internships.append(record)
-
-                    except Exception as e:
-                        logger.error(f"LinkedIn: Error parsing card: {e}")
-
+                resp = context.request.get(url, timeout=30000)
+                return {"status": resp.status, "text": resp.text() if resp.status == 200 else ""}
             except Exception as e:
-                logger.error(f"LinkedIn: Failed to load [{label}]: {e}")
-                # Continue rather than raise, to preserve already scraped data
-                continue
+                # Wi-Fi drop / DNS failure (laptop web run 12 Oct 10:18: "getaddrinfo ENOTFOUND
+                # www.linkedin.com" crashed the whole LinkedIn run and lost every card read so far)
+                logger.warning(f"LinkedIn: network error ({str(e).splitlines()[0][:120]})")
+                return {"status": 0, "text": ""}
 
-            human_delay(4.0, 8.0)  # Respectful delay between searches
+        network_failures = 0
+
+        def get(url):
+            nonlocal rate_limited, network_failures
+            for attempt in range(2):
+                res = fetch(url)
+                if res["status"] == 200:
+                    network_failures = 0
+                    return res["text"]
+                if res["status"] == 0:
+                    network_failures += 1
+                    if network_failures >= 4:
+                        rate_limited = True   # stop asking; keep what we have
+                        return None
+                    human_delay(5, 8)
+                    continue
+                if res["status"] in (429, 999) and attempt == 0:  # 999 = LinkedIn's "looks like a bot"
+                    logger.warning(f"LinkedIn: HTTP {res['status']} (rate limit), waiting 20 s")
+                    human_delay(20, 25)
+                    continue
+                if res["status"] in (429, 999):
+                    rate_limited = True
+                logger.warning(f"LinkedIn: HTTP {res['status']} for {url[:120]}")
+                return None
+            return None
+
+        for kw, loc, label in searches:
+            if rate_limited:
+                break
+            for page_no in range(PAGES_PER_SEARCH):
+                url = SEARCH_API.format(kw=urllib.parse.quote(kw), loc=urllib.parse.quote(loc), start=page_no * 10)
+                html = get(url)
+                if not html:
+                    break
+                records = parse_search_html(html, label)
+                new = [r for r in records if r["id"] not in seen]
+                seen.update(r["id"] for r in new)
+                all_internships.extend(new)
+                logger.info(f"LinkedIn [{label}] page {page_no + 1}: {len(records)} cards, {len(new)} new")
+                human_delay(1.0, 2.0)
+                if len(records) < 10:
+                    break
+
+        wanted = [r for r in all_internships if internship_rejection_reason(r["role_title"], [], "linkedin") is None]
+        wanted = wanted[:MAX_DETAILS]
+        logger.info(f"LinkedIn: reading {len(wanted)} job details for the genuineness checks")
+        for i, rec in enumerate(wanted, 1):
+            if rate_limited or not rec["job_id"]:
+                continue
+            html = get(DETAIL_API.format(job_id=rec["job_id"]))
+            if html:
+                rec.update(parse_detail_html(html))
+                rec["detail_checked"] = True
+            if i % 10 == 0:
+                logger.info(f"  ...{i}/{len(wanted)} details read")
+            human_delay(0.8, 1.6)
 
         browser.close()
 
-    logger.info(f"LinkedIn: Scraped {len(all_internships)} unique internships.")
+    if rate_limited:
+        logger.warning(f"LinkedIn stopped early (rate limit or no network); keeping {len(all_internships)} cards")
+    logger.info(f"LinkedIn: {len(all_internships)} unique cards")
     return all_internships

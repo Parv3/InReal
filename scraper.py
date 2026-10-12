@@ -1,9 +1,10 @@
 import argparse
 import csv
+import re
 from pathlib import Path
 
 from loguru import logger
-from output_handler import append_to_csv, update_run_history
+from output_handler import sync_listings, update_run_history
 from filters import internship_rejection_reason, stipend_rejection_reason
 from genuine import check_listing
 
@@ -12,7 +13,10 @@ from sites.internshala import scrape_internshala
 from sites.unstop import scrape_unstop
 from sites.naukri import scrape_naukri
 from sites.government import scrape_government
-from sites.misc_india import scrape_shine, scrape_foundit, scrape_apna, scrape_cutshort
+from sites.misc_india import scrape_cutshort
+from sites.apna import scrape_apna
+from sites.foundit import scrape_foundit
+from sites.shine import scrape_shine
 from sites.international import scrape_international
 from sites.rss_feeds import scrape_linkedin as scrape_remotive, scrape_indeed as scrape_weworkremotely
 from sites.linkedin import scrape_linkedin  # NEW: direct LinkedIn Jobs page scraper
@@ -20,6 +24,9 @@ from sites.bigtech import scrape_bigtech
 from sites.niche import scrape_niche_boards, scrape_aggregators
 from sites.universities import scrape_universities
 from sites.search_engine import scrape_search_engine
+
+# Sites whose scrapers were rebuilt and checked against the live site (see SELECTOR_TRACKER.md)
+UPGRADED_SOURCES = ["internshala", "unstop", "naukri", "linkedin", "shine", "foundit", "apna", "government"]
 
 ALL_SCRAPERS = {
     "internshala": scrape_internshala,
@@ -45,38 +52,165 @@ logger.add("scraper_errors.log", rotation="1 MB", level="ERROR")
 # Human-readable logs for the UI
 logger.add("scraper_run.log", rotation="5 MB", level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {message}")
 
+# Pay hidden by the site but the post itself says it is unpaid (seen on Shine, Oct 2026)
+UNPAID_RE = r"\b(unpaid|non[- ]?paid|without (a )?stipend|no stipend)\b"
+
+
+def _region(location: str) -> str:
+    """'Amreli, Gujarat, India' -> 'gujarat'; 'San Francisco, CA' -> 'ca'."""
+    parts = [p.strip().lower() for p in str(location).split(",") if p.strip()]
+    if len(parts) >= 3:
+        return parts[-2]
+    return parts[-1] if parts else ""
+
+
+def mark_repeated_posts(raw_listings: list):
+    """
+    Same company + same title posted in 3+ places. Big companies do this across
+    major cities (DoorDash: SF, Sunnyvale, NYC, Seattle), so it is only flagged when
+    the places are all in one state (Sparks To Ideas: 4 small towns in Gujarat, while
+    the work is in Ahmedabad) or a copy of the post is known to be aggregated or
+    from a staffing firm.
+    """
+    groups = {}
+    for item in raw_listings:
+        key = (str(item.get("company_name", "")).strip().lower(), str(item.get("role_title", "")).strip().lower())
+        groups.setdefault(key, []).append(item)
+    for items in groups.values():
+        places = {str(i.get("location", "")).strip().lower() for i in items}
+        if len(places) < 3:
+            continue
+        regions = {_region(pl) for pl in places}
+        evidence = any(i.get("aggregated") or "staffing" in str(i.get("industries", "")).lower() for i in items)
+        if len(regions) == 1 or evidence:
+            where = f"towns of {_region(next(iter(places))).title()}" if len(regions) == 1 else "locations"
+            for i in items:
+                i["repeat_note"] = f"Same post repeated in {len(places)} {where}"
+
+
+# An "internship" that needs this many years of experience is a job (Naukri, Oct 2026: "4-to-9 years")
+MAX_MIN_EXPERIENCE = 3
+
+
 def evaluate(source_name: str, raw_listings: list):
     """
     Runs every filter on every listing.
     Returns a list of (item, kept: bool, reason: str).
     """
+    mark_repeated_posts(raw_listings)
+
     results = []
     for item in raw_listings:
         skills = item.get("required_skills", "")
         skill_list = [s.strip() for s in skills.split(",") if s.strip()]
 
-        reason = internship_rejection_reason(item["role_title"], skill_list, source_name)
+        reason = internship_rejection_reason(item["role_title"], skill_list, source_name,
+                                             bool(item.get("labelled_internship")))
+        min_exp = item.get("min_experience")
+        if reason is None and isinstance(min_exp, (int, float)) and min_exp >= MAX_MIN_EXPERIENCE:
+            reason = f"Asks for {int(min_exp)}+ years of experience"
         if reason is None:
             is_india = item.get("stipend_currency") == "INR" or item.get("location_type") == "India"
             reason = stipend_rejection_reason(item["stipend"], item["stipend_numeric"], is_india)
         if reason is None:
+            said = re.search(UNPAID_RE, f"{item.get('role_title', '')} {item.get('description', '')}", re.I)
+            if said and not re.search(r"\bnot\s+(an?\s+)?$", f"{item.get('role_title', '')} {item.get('description', '')}"[:said.start()][-12:], re.I):
+                reason = f"Unpaid (the post says \"{said.group(0)}\")"
+        if reason is None:
             reason, flags = check_listing(item)
+            if HIDDEN_COMPANY_RE.match(str(item.get("company_name", "")).strip()):
+                flags.append("Company name hidden")
             item["trust_flags"] = "; ".join(flags)
         results.append((item, reason is None, reason or ""))
+    flag_other_posts_of_training_sellers(results)
+    return collapse_copies(results)
+
+
+TRAINING_FLAG = "Sounds like a training programme sold as an internship"
+
+
+def flag_other_posts_of_training_sellers(results):
+    """
+    A firm that sells a course in one post is not trustworthy in its next post either
+    (AICTE, 12 Oct 2026: Metataaraka's "1 Year Fully Online Remote Internship with
+    Employment Opportunity" was flagged, its plain "Ai & Machine Learning Engineer
+    Intern" was not; same for Kitech Vista's "Machine Learning with Python").
+    """
+    sellers = {_company_key(i.get("company_name", "")) for i, kept, _ in results
+               if kept and TRAINING_FLAG in str(i.get("trust_flags", ""))}
+    sellers.discard("")
+    for item, kept, _ in results:
+        flags = str(item.get("trust_flags", ""))
+        if kept and TRAINING_FLAG not in flags and _company_key(item.get("company_name", "")) in sellers:
+            item["trust_flags"] = "; ".join(f for f in [flags, "Another post by this employer sounds like a training programme"] if f)
+
+
+# Company names portals print when the employer hides it ("**********", "Confidential")
+HIDDEN_COMPANY_RE = re.compile(r"^(\*+|confidential|hidden|undisclosed|not disclosed)$", re.I)
+COPY_LIMIT = 3      # 3+ copies are shown once
+COPY_WARNING = 6    # 6+ copies also get a warning
+_TITLE_NOISE = {"internship", "internships", "intern", "interns", "at", "an", "in", "the", "for", "and", "of", "with"}
+
+
+def _company_key(name: str) -> str:
+    n = re.sub(r"[^a-z0-9 ]", " ", str(name).lower())
+    n = re.sub(r"\b(private|pvt|limited|ltd|llp|inc|technologies|technology|solutions)\b", " ", n)
+    return " ".join(n.split())
+
+
+def _title_key(title: str) -> str:
+    """First two meaningful words: 'DATA SCIENCE -ML INTERNSHIP AT PUNE' -> 'data science'."""
+    words = [w for w in re.findall(r"[a-z]+", str(title).lower()) if w not in _TITLE_NOISE]
+    return " ".join(words[:2])
+
+
+def collapse_copies(results):
+    """
+    One company posting the same internship many times (Foundit, 12 Oct 2026: Maxgen
+    posted "DATA SCIENCE INTERNSHIP AT PUNE/AHMEDABAD" about 40 times with different
+    town lists) floods the list. Keep the first copy, drop the rest, and give the kept
+    one every warning found on any copy plus a count.
+    """
+    groups = {}
+    for idx, (item, kept, _) in enumerate(results):
+        if kept:
+            key = (_company_key(item.get("company_name", "")), _title_key(item.get("role_title", "")))
+            groups.setdefault(key, []).append(idx)
+    for idxs in groups.values():
+        if len(idxs) < COPY_LIMIT:
+            continue
+        first = results[idxs[0]][0]
+        flags = []
+        for i in idxs:
+            for f in str(results[i][0].get("trust_flags", "")).split(";"):
+                if f.strip() and f.strip() not in flags:
+                    flags.append(f.strip())
+        if len(idxs) >= COPY_WARNING:   # big firms post one role in a few cities; dozens is a flood
+            flags.append(f"Same company posted {len(idxs)} copies of this internship")
+        first["trust_flags"] = "; ".join(flags)
+        first["location"] = f"{first.get('location', '')} (+{len(idxs) - 1} more)"
+        for i in idxs[1:]:
+            item = results[i][0]
+            results[i] = (item, False, f"Copy of another post by the same company ({len(idxs)} copies)")
     return results
 
 
 def process_and_save(source_name: str, raw_listings: list):
     results = evaluate(source_name, raw_listings)
     valid_listings = [item for item, kept, _ in results if kept]
+    dropped_ids = [item["id"] for item, kept, _ in results if not kept and item.get("id")]
 
+    res = sync_listings(valid_listings, dropped_ids)
     if not valid_listings:
         logger.info(f"[{source_name}] Searched through {len(raw_listings)} listings, but none matched our criteria.")
-        return 0
-
-    added = append_to_csv(valid_listings)
-    logger.info(f"[{source_name}] Analyzed {len(raw_listings)} listings, found {len(valid_listings)} matches, and saved {added} brand new ones!")
-    return added
+    extra = []
+    if res["updated"]:
+        extra.append(f"refreshed {res['updated']} already saved")
+    if res["removed"]:
+        extra.append(f"removed {res['removed']} that no longer pass the checks")
+    logger.info(f"[{source_name}] Analyzed {len(raw_listings)} listings, found {len(valid_listings)} matches, "
+                f"and saved {res['added']} brand new ones!" + (f" ({', '.join(extra)})" if extra else ""))
+    return res["added"]
 
 
 TEST_COLUMNS = ["status", "reason", "trust_flags", "role_title", "company_name", "stipend",
@@ -134,7 +268,7 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
             "regions": ["india", "worldwide", "usa", "europe", "remote"],
             "topics": ["ml", "ai", "nlp", "cv", "ds", "research", "llm/genai"],
             "paid_only": False,
-            "sources": ["linkedin", "internshala", "unstop", "naukri", "bigtech", "remotive", "universities", "government"]
+            "sources": UPGRADED_SOURCES
         }
     
     logger.info(f"🚀 Starting selective scraper with config: {config}")
@@ -152,41 +286,19 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
     req_sources = set([s.lower() for s in config.get("sources", [])])
     
     scrapers_to_run = {}
-    
-    # Map scrapers to explicit UI checkboxes
-    if "internshala" in req_sources: 
-        scrapers_to_run["internshala"] = scrape_internshala
-        
-    if "naukri" in req_sources: 
-        scrapers_to_run.update({
-            "naukri": scrape_naukri, "shine": scrape_shine, 
-            "foundit": scrape_foundit, "apna": scrape_apna, "cutshort": scrape_cutshort
-        })
-        
-    if "unstop" in req_sources: 
-        scrapers_to_run["unstop"] = scrape_unstop
-        
-    if "linkedin" in req_sources: 
-        scrapers_to_run["linkedin"] = scrape_linkedin
-        
-    if "bigtech" in req_sources: 
-        scrapers_to_run["bigtech"] = scrape_bigtech
-        
-    if "remotive" in req_sources: 
-        scrapers_to_run.update({
-            "remotive": scrape_remotive, 
-            "weworkremotely": scrape_weworkremotely, 
-            "international": scrape_international, 
-            "niche": scrape_niche_boards, 
-            "aggregators": scrape_aggregators, 
-            "search": scrape_search_engine
-        })
-        
-    if "government" in req_sources: 
-        scrapers_to_run["government"] = scrape_government
-        
-    if "universities" in req_sources:
-        scrapers_to_run["universities"] = scrape_universities
+
+    # Each dashboard checkbox is now one site (its --source name). The old group
+    # names still work so old saved settings don't break, but "naukri" means only
+    # Naukri now; it used to also start Shine, Foundit, Apna and Cutshort.
+    legacy_groups = {
+        "remotive": ["remotive", "weworkremotely", "international", "niche", "aggregators", "search"],
+    }
+    for name in [s.lower() for s in config.get("sources", [])]:
+        for source in legacy_groups.get(name, [name]):
+            if source in ALL_SCRAPERS:
+                scrapers_to_run[source] = ALL_SCRAPERS[source]
+            else:
+                logger.warning(f"Unknown source in dashboard settings: {source}")
 
     if specific_source:
         wanted = [x.strip().lower() for x in specific_source.split(",") if x.strip()]
