@@ -86,7 +86,8 @@ def block_unneeded_resources(page):
 
 def get_playwright_stealth_args():
     """Returns heavily evasive and ultra-low-memory Chrome launch arguments."""
-    return [
+    import sys
+    args = [
         '--disable-blink-features=AutomationControlled',
         '--disable-infobars',
         '--no-sandbox',
@@ -96,12 +97,15 @@ def get_playwright_stealth_args():
         '--disable-gpu',
         '--disable-software-rasterizer',
         '--disable-extensions',
-        '--no-zygote',
-        '--single-process',
         '--js-flags=--max-old-space-size=128',
         '--window-size=1280,720',
         '--blink-settings=imagesEnabled=false'
     ]
+    # On Linux/Render free-tier, single-process and no-zygote save memory.
+    # On Windows, Chromium crashes when combined with single-process and crashes target pages.
+    if not sys.platform.startswith("win"):
+        args.extend(['--no-zygote', '--single-process'])
+    return args
 
 # Retry decorator for raw requests
 def requests_retry_session(retries=3):
