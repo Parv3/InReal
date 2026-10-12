@@ -445,6 +445,15 @@
             <option value="all">Source: All</option>
           </select>
 
+          <!-- Dropdown 5: AI Verification / Scam Status -->
+          <select id="mod-filter" class="filter-select font-semibold text-emerald-800 bg-emerald-50/50 border-emerald-200">
+            <option value="verified">Verified only</option>
+            <option value="verified_review">Verified + Needs review</option>
+            <option value="hide_blocked">All valid (hide scams)</option>
+            <option value="blocked">Flagged / Scams</option>
+            <option value="all">Everything</option>
+          </select>
+
           <!-- Saved Bookmarks Button -->
           <button id="filter-bookmarks-btn" class="glass-btn px-3 py-2 flex items-center gap-1.5 text-slate-700">
             <i class="ph ph-bookmark-simple text-base text-rose-500"></i>
