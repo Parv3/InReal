@@ -139,14 +139,35 @@ function initGlassTranslucentBackground() {
   animate();
 }
 
-// ==========================================
-// 2. Data Fetching & Overview Metrics
-// ==========================================
+let verifiedOrder = []; // Stable display order: newly verified cards append to the end
+
 async function loadData() {
   try {
     const res = await fetch('/api/internships');
     const data = await res.json();
-    allInternships = data || [];
+    const rawList = data || [];
+
+    // Maintain stable append-order: previously seen verified items retain their position;
+    // newly verified items are appended to the end of verifiedOrder.
+    const currentVerifiedIds = new Set(
+      rawList.filter(i => (i.moderation_status || '').toLowerCase() === 'approved').map(i => i.id)
+    );
+
+    // Keep existing order for items still verified
+    const nextOrder = verifiedOrder.filter(id => currentVerifiedIds.has(id));
+    // Append any newly verified items that are not in nextOrder yet
+    for (const item of rawList) {
+      if (currentVerifiedIds.has(item.id) && !nextOrder.includes(item.id)) {
+        nextOrder.push(item.id);
+      }
+    }
+    verifiedOrder = nextOrder;
+
+    // Map all internships sorted by verifiedOrder for stable append behavior
+    const idToItem = new Map(rawList.map(i => [i.id, i]));
+    const orderedVerified = verifiedOrder.map(id => idToItem.get(id)).filter(Boolean);
+    const others = rawList.filter(i => !verifiedOrder.includes(i.id));
+    allInternships = [...orderedVerified, ...others];
 
     populateSourceFilter(allInternships);
     applyFiltersAndRender();
@@ -736,6 +757,7 @@ function bindEventHandlers() {
     }
 
     visibleCount = 5;
+    verifiedOrder = [];
     applyFiltersAndRender();
   };
 
