@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 import pandas as pd
 from pathlib import Path
 import threading
@@ -12,9 +12,11 @@ from scraper import run_scrapers
 from output_handler import moderation_counts, pending_moderation, save_verdict, read_all_rows
 from moderation.env import load_env
 from moderation.link_check import resolve as resolve_link
+import auth_db
 
 load_env()
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "inreal-secure-supersecret-session-key-2026")
 
 # ---- Who may change data ----
 # Visitors coming through a public tunnel (Cloudflare) or a host like Render can only READ.
@@ -50,6 +52,82 @@ def guard_writes():
 @app.route("/api/whoami")
 def whoami():
     return jsonify({"can_edit": is_local_request() or has_admin_token()})
+
+
+# ---- User Authentication Endpoints (SQLite-backed) ----
+
+@app.route("/api/auth/register", methods=["POST"])
+def auth_register():
+    data = request.get_json(silent=True) or {}
+    username = data.get("username", "")
+    email = data.get("email", "")
+    password = data.get("password", "")
+
+    ok, message = auth_db.register_user(username, email, password)
+    if not ok:
+        return jsonify({"status": "error", "message": message}), 400
+    
+    # Automatically log the user in upon successful registration
+    user, _ = auth_db.authenticate_user(username, password)
+    if user:
+        session["user_id"] = user["id"]
+        session["username"] = user["username"]
+        session["email"] = user["email"]
+
+    return jsonify({
+        "status": "success",
+        "message": "Account created successfully! Welcome to InReal.",
+        "user": user
+    })
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json(silent=True) or {}
+    identifier = data.get("username_or_email", "") or data.get("username", "") or data.get("email", "")
+    password = data.get("password", "")
+
+    user, error = auth_db.authenticate_user(identifier, password)
+    if not user:
+        return jsonify({"status": "error", "message": error or "Invalid username/password."}), 401
+
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    session["email"] = user["email"]
+
+    return jsonify({
+        "status": "success",
+        "message": f"Welcome back, {user['username']}!",
+        "user": user
+    })
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def auth_logout():
+    session.clear()
+    return jsonify({"status": "success", "message": "Logged out successfully."})
+
+
+@app.route("/api/auth/me")
+def auth_me():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"logged_in": False, "user": None})
+
+    user = auth_db.get_user_by_id(user_id)
+    if not user:
+        session.clear()
+        return jsonify({"logged_in": False, "user": None})
+
+    return jsonify({
+        "logged_in": True,
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "email": user["email"]
+        }
+    })
+
 DATA_FILE = Path(__file__).parent / "internships.csv"
 PATTERN_INDEX = Path(__file__).parent / "moderation" / "pattern_index.json"
 

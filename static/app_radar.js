@@ -8,10 +8,12 @@ let activeLocation = 'all';
 let activeStipend = 'all';
 let activeSource = 'all';
 let activeRoleType = 'all';
+let activeExperience = 'all';        // 'all', '0', '1-2', '3+'
 let activeModeration = 'verified';   // n8n scam check: show only listings it passed
 let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
+let currentUser = null;              // Logged-in user state from SQLite backend
 
 // Genuine SVGs for company/organization logos
 const companyLogos = {
@@ -38,6 +40,8 @@ function getCompanyLogoSvg(companyName) {
 document.addEventListener('DOMContentLoaded', () => {
   initGlassTranslucentBackground();
   bindEventHandlers();
+  bindAuthHandlers();
+  checkAuthSession();
   loadData();
   pollScraperStatus();
   pollAlerts();
@@ -244,6 +248,22 @@ function applyFiltersAndRender() {
       if (Number(item.stipend_numeric || 0) < 100000) return false;
     }
 
+    // Experience Level filter
+    if (activeExperience !== 'all') {
+      const expText = `${item.experience_required || ''} ${item.description || ''} ${item.role_title || ''} ${item.eligibility || ''}`.toLowerCase();
+      if (activeExperience === '0') {
+        // Looking for freshers, 0 years, student, entry level, or no strict multi-year requirement
+        const isSenior = /([2-9]|\d{2})\+?\s*(years?|yrs?)/i.test(expText) || /senior|lead|principal|experienced/i.test(expText);
+        if (isSenior) return false;
+      } else if (activeExperience === '1-2') {
+        const matches12 = /1\s*[-–to]\s*2\s*(years?|yrs?)/i.test(expText) || /1\+?\s*(year|yr)/i.test(expText) || /2\+?\s*(years?|yrs?)/i.test(expText);
+        if (!matches12) return false;
+      } else if (activeExperience === '3+') {
+        const matches3 = /([3-9]|\d{2})\+?\s*(years?|yrs?)/i.test(expText) || /3\s*[-–to]\s*[456]\s*(years?|yrs?)/i.test(expText) || /senior/i.test(expText);
+        if (!matches3) return false;
+      }
+    }
+
     // Text search
     if (searchQuery) {
       const text = `${item.role_title || ''} ${item.company_name || ''} ${item.required_skills || ''} ${item.location || ''}`.toLowerCase();
@@ -279,10 +299,62 @@ function renderListings(items) {
     emptyState.classList.remove('flex');
   }
 
-  container.innerHTML = items.map((item) => {
+  container.innerHTML = items.map((item, index) => {
     const isBookmarked = bookmarks.includes(item.id);
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
     const logoSvg = getCompanyLogoSvg(item.company_name);
+
+    // Requirement: Only the first internship is visible before logging in; others are locked.
+    const isLocked = !currentUser && index > 0;
+
+    if (isLocked) {
+      return `
+        <article class="glass-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden border-dashed border-slate-300 select-none group">
+          <!-- Blurred preview underneath -->
+          <div class="filter blur-sm opacity-40 pointer-events-none transition">
+            <div class="flex items-start justify-between mb-3.5">
+              <div class="flex items-center gap-3">
+                <div class="company-logo-box">${logoSvg}</div>
+                <div>
+                  <div class="text-[11px] font-semibold text-slate-400">Locked Company • Verified</div>
+                  <div class="text-xs font-bold text-slate-700 mt-0.5">Top Tier Frontier AI Lab</div>
+                </div>
+              </div>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 leading-snug mt-2">
+              Research Engineer / Robotics Specialist
+            </h3>
+            <div class="text-xs text-slate-400 mt-1.5 font-medium">Remote • 6 Months • Verified Stipend</div>
+            <div class="flex flex-wrap gap-1.5 mt-4">
+              <span class="px-2.5 py-0.5 bg-slate-100 text-slate-400 rounded-md text-[11px] font-semibold">PyTorch</span>
+              <span class="px-2.5 py-0.5 bg-slate-100 text-slate-400 rounded-md text-[11px] font-semibold">Robotics</span>
+            </div>
+            <div class="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between text-xs">
+              <div class="text-sm font-extrabold text-slate-400">₹60,000 / mo</div>
+            </div>
+          </div>
+
+          <!-- Glassmorphism Lock Overlay -->
+          <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center text-white z-10 transition group-hover:bg-slate-900/65">
+            <div class="w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-orange-400 mb-3 shadow-lg group-hover:scale-105 transition-transform">
+              <i class="ph ph-lock-key text-2xl font-bold"></i>
+            </div>
+            <h4 class="text-sm font-extrabold tracking-tight text-white">Internship Opportunity Locked</h4>
+            <p class="text-[11px] text-slate-200 mt-1 max-w-[230px] font-medium leading-relaxed">
+              Sign in with your account to unlock full application details, contact endpoints, and direct apply links.
+            </p>
+            <button 
+              type="button" 
+              class="mt-3.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center gap-1.5 active:scale-95"
+              onclick="event.stopPropagation(); openAuthModal('login');"
+            >
+              <i class="ph ph-lock-open text-sm"></i>
+              <span>Log In to Unlock</span>
+            </button>
+          </div>
+        </article>
+      `;
+    }
 
     return `
       <article 
@@ -563,6 +635,24 @@ function bindEventHandlers() {
     });
   });
 
+  // Experience Level Radio Group (0 experience, 1-2 years, 3+ years)
+  document.querySelectorAll('input[name="experience_level"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      activeExperience = e.target.value;
+      // Update visual styles of radio labels
+      document.querySelectorAll('#experience-radio-group label').forEach(lbl => {
+        lbl.classList.remove('bg-white', 'shadow-xs', 'text-slate-900');
+        lbl.classList.add('text-slate-600');
+      });
+      const checkedLabel = e.target.closest('label');
+      if (checkedLabel) {
+        checkedLabel.classList.add('bg-white', 'shadow-xs', 'text-slate-900');
+        checkedLabel.classList.remove('text-slate-600');
+      }
+      applyFiltersAndRender();
+    });
+  });
+
   // Saved Bookmarks Button
   document.getElementById('filter-bookmarks-btn')?.addEventListener('click', () => {
     showBookmarkedOnly = !showBookmarkedOnly;
@@ -613,6 +703,19 @@ function bindEventHandlers() {
     if (allStipend) {
       document.querySelectorAll('#stipend-filters .pill-segmented-item').forEach(b => b.classList.remove('active'));
       allStipend.classList.add('active');
+    }
+
+    activeExperience = 'all';
+    const allExpRadio = document.querySelector('input[name="experience_level"][value="all"]');
+    if (allExpRadio) allExpRadio.checked = true;
+    document.querySelectorAll('#experience-radio-group label').forEach(lbl => {
+      lbl.classList.remove('bg-white', 'shadow-xs', 'text-slate-900');
+      lbl.classList.add('text-slate-600');
+    });
+    const defaultExpLabel = document.getElementById('exp-label-all');
+    if (defaultExpLabel) {
+      defaultExpLabel.classList.add('bg-white', 'shadow-xs', 'text-slate-900');
+      defaultExpLabel.classList.remove('text-slate-600');
     }
 
     applyFiltersAndRender();
@@ -794,3 +897,222 @@ function showToast(kind, title, message) {
   box.appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 7000);
 }
+
+// ==========================================
+// 10. SQLite-backed User Authentication System
+// ==========================================
+async function checkAuthSession() {
+  try {
+    const res = await fetch('/api/auth/me');
+    const data = await res.json();
+    if (data.logged_in && data.user) {
+      setUserLoggedIn(data.user);
+    } else {
+      setUserLoggedOut();
+    }
+  } catch (err) {
+    console.error('Session check failed:', err);
+    setUserLoggedOut();
+  }
+}
+
+function setUserLoggedIn(user) {
+  currentUser = user;
+  const loginBtn = document.getElementById('open-login-btn');
+  const profilePill = document.getElementById('user-profile-pill');
+  const displayName = document.getElementById('user-display-name');
+  const avatarInitial = document.getElementById('user-avatar-initial');
+
+  if (loginBtn) loginBtn.classList.add('hidden');
+  if (profilePill) {
+    profilePill.classList.remove('hidden');
+    profilePill.classList.add('flex');
+  }
+  if (displayName) displayName.innerText = user.username || 'User';
+  if (avatarInitial) avatarInitial.innerText = (user.username || 'U').charAt(0).toUpperCase();
+
+  // Re-render listings now that all cards are unlocked
+  applyFiltersAndRender();
+}
+
+function setUserLoggedOut() {
+  currentUser = null;
+  const loginBtn = document.getElementById('open-login-btn');
+  const profilePill = document.getElementById('user-profile-pill');
+
+  if (loginBtn) loginBtn.classList.remove('hidden');
+  if (profilePill) {
+    profilePill.classList.add('hidden');
+    profilePill.classList.remove('flex');
+  }
+
+  // Re-render listings: lock all cards after the first one
+  applyFiltersAndRender();
+}
+
+function openAuthModal(defaultTab = 'login') {
+  const modal = document.getElementById('auth-modal');
+  const alertBox = document.getElementById('auth-alert');
+  if (alertBox) alertBox.classList.add('hidden');
+  if (modal) modal.classList.remove('hidden');
+  switchAuthTab(defaultTab);
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('login-form');
+  const regForm = document.getElementById('register-form');
+  const tabLogin = document.getElementById('tab-login');
+  const tabReg = document.getElementById('tab-register');
+  const modalTitle = document.getElementById('auth-modal-title');
+  const modalSub = document.getElementById('auth-modal-subtitle');
+  const alertBox = document.getElementById('auth-alert');
+  if (alertBox) alertBox.classList.add('hidden');
+
+  if (tab === 'register') {
+    if (loginForm) loginForm.classList.add('hidden');
+    if (regForm) regForm.classList.remove('hidden');
+    if (tabReg) {
+      tabReg.classList.add('bg-white', 'shadow-xs', 'text-slate-900');
+      tabReg.classList.remove('text-slate-500');
+    }
+    if (tabLogin) {
+      tabLogin.classList.remove('bg-white', 'shadow-xs', 'text-slate-900');
+      tabLogin.classList.add('text-slate-500');
+    }
+    if (modalTitle) modalTitle.innerText = 'Create an Account';
+    if (modalSub) modalSub.innerText = 'Sign up to unlock and apply to all verified internships';
+  } else {
+    if (loginForm) loginForm.classList.remove('hidden');
+    if (regForm) regForm.classList.add('hidden');
+    if (tabLogin) {
+      tabLogin.classList.add('bg-white', 'shadow-xs', 'text-slate-900');
+      tabLogin.classList.remove('text-slate-500');
+    }
+    if (tabReg) {
+      tabReg.classList.remove('bg-white', 'shadow-xs', 'text-slate-900');
+      tabReg.classList.add('text-slate-500');
+    }
+    if (modalTitle) modalTitle.innerText = 'Sign in to InReal';
+    if (modalSub) modalSub.innerText = 'Unlock full access to all verified research & engineering internships';
+  }
+}
+
+function showAuthAlert(msg, isSuccess = false) {
+  const box = document.getElementById('auth-alert');
+  if (!box) return;
+  box.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+  if (isSuccess) {
+    box.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+  } else {
+    box.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+  }
+  box.innerText = msg;
+}
+
+function bindAuthHandlers() {
+  document.getElementById('open-login-btn')?.addEventListener('click', () => openAuthModal('login'));
+  document.getElementById('close-auth-modal-btn')?.addEventListener('click', closeAuthModal);
+  document.getElementById('tab-login')?.addEventListener('click', () => switchAuthTab('login'));
+  document.getElementById('tab-register')?.addEventListener('click', () => switchAuthTab('register'));
+
+  // Close modal when clicking on the translucent backdrop
+  document.getElementById('auth-modal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('auth-modal')) closeAuthModal();
+  });
+
+  // Login form submission
+  document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const identifier = document.getElementById('login-identifier')?.value.trim();
+    const password = document.getElementById('login-password')?.value;
+    const submitBtn = document.getElementById('login-submit-btn');
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Authenticating...';
+    }
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username_or_email: identifier, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        showAuthAlert(data.message, true);
+        setTimeout(() => {
+          closeAuthModal();
+          setUserLoggedIn(data.user);
+          showToast('success', 'Logged In', `Welcome back, ${data.user.username}! All internships unlocked.`);
+        }, 600);
+      } else {
+        showAuthAlert(data.message || 'Login failed. Please check credentials.');
+      }
+    } catch (err) {
+      showAuthAlert('Unable to reach server. Please try again.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="ph ph-sign-in text-base text-orange-400"></i><span>Log In to Unlock Opportunities</span>`;
+      }
+    }
+  });
+
+  // Register form submission
+  document.getElementById('register-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('reg-username')?.value.trim();
+    const email = document.getElementById('reg-email')?.value.trim();
+    const password = document.getElementById('reg-password')?.value;
+    const submitBtn = document.getElementById('reg-submit-btn');
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Creating Account...';
+    }
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        showAuthAlert(data.message, true);
+        setTimeout(() => {
+          closeAuthModal();
+          setUserLoggedIn(data.user);
+          showToast('success', 'Account Created', `Welcome to InReal, ${data.user.username}! All internships unlocked.`);
+        }, 600);
+      } else {
+        showAuthAlert(data.message || 'Registration failed.');
+      }
+    } catch (err) {
+      showAuthAlert('Unable to reach server. Please try again.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="ph ph-sparkle text-base text-orange-400"></i><span>Create Account & Unlock All</span>`;
+      }
+    }
+  });
+
+  // Logout button
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUserLoggedOut();
+      showToast('info', 'Logged Out', 'You have been logged out. Only first internship is previewable.');
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  });
+}
+

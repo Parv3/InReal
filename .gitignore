@@ -42,6 +42,7 @@ scraper_errors.log
 # Data files (regenerated on each run)
 internships.csv
 internships_log.json
+*.db
 
 # IDE / Editor
 .vscode/
