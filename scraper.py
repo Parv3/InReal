@@ -208,6 +208,9 @@ def process_and_save(source_name: str, raw_listings: list):
         extra.append(f"refreshed {res['updated']} already saved")
     if res["removed"]:
         extra.append(f"removed {res['removed']} that no longer pass the checks")
+    if res["added"] or res["updated"]:
+        from moderation.notify import notify_n8n
+        notify_n8n(source_name)   # n8n checks this site while the next one is being scraped
     logger.info(f"[{source_name}] Analyzed {len(raw_listings)} listings, found {len(valid_listings)} matches, "
                 f"and saved {res['added']} brand new ones!" + (f" ({', '.join(extra)})" if extra else ""))
     return res["added"]
@@ -258,9 +261,16 @@ def report_dry_run(source_name: str, raw_listings: list):
     print("=" * 70)
 
 
+# What the current / last web run has done so far; /api/scrape/status returns it so the
+# dashboard can pop up "Internshala: 12 new internships saved" as each site finishes.
+RUN_PROGRESS = {"run_id": 0, "sites": [], "finished": True, "total_added": 0, "failed": []}
+
+
 def run_scrapers(dry_run=False, config=None, specific_source=None):
     total_added = 0
     failed_sources = []
+    if not dry_run:
+        RUN_PROGRESS.update(run_id=RUN_PROGRESS["run_id"] + 1, sites=[], finished=False, total_added=0, failed=[])
     
     # Default to everything if no config passed
     if config is None:
@@ -312,51 +322,48 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
         logger.warning("No scrapers matched the provided configuration filters!")
         return 0
 
+    import gc
+    import threading
     from concurrent.futures import ThreadPoolExecutor, as_completed
+    visible_chrome = threading.Lock()
+    VISIBLE_CHROME_SOURCES = {"naukri", "foundit"}
 
-    def _scrape_worker(source_name, scraper_func):
+    def run_one(source_name, scraper_func):
         try:
             logger.info(f"🚀 Starting to check {source_name} for new opportunities...")
-            if source_name in ["linkedin", "search"]:
+            if source_name in VISIBLE_CHROME_SOURCES:
+                with visible_chrome:
+                    listings = scraper_func()
+            elif source_name in ["linkedin", "search"]:
                 listings = scraper_func(config=config)
             else:
                 listings = scraper_func()
-            
-            if not dry_run:
-                added = process_and_save(source_name, listings)
-                return source_name, added, None
-            else:
+            if dry_run:
                 report_dry_run(source_name, listings)
-                return source_name, 0, None
-        except Exception as e:
-            logger.exception(f"Failed {source_name}: {e}")
-            return source_name, 0, e
-
-    # Concurrently execute scrapers across a conservative worker pool (2 workers max)
-    # This prevents running too many concurrent headless browser instances which exceed 512MB RAM on free tiers
-    import gc
-    max_workers = min(len(scrapers_to_run), 2)
-    logger.info(f"⚡ Running {len(scrapers_to_run)} scrapers safely using {max_workers} worker threads...")
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_source = {
-            executor.submit(_scrape_worker, src, fn): src
-            for src, fn in scrapers_to_run.items()
-        }
-        for future in as_completed(future_to_source):
-            src_name = future_to_source[future]
-            try:
-                source_name, added, err = future.result()
-                if err is not None:
-                    failed_sources.append(source_name)
-                else:
-                    total_added += added
-            except Exception as e:
-                logger.exception(f"Worker exception for {src_name}: {e}")
-                failed_sources.append(src_name)
-            # Reclaim memory immediately after each scraper finishes
+                return 0
+            return process_and_save(source_name, listings)   # also wakes n8n for this site
+        finally:
             gc.collect()
-            
+
+    workers = 1 if len(scrapers_to_run) == 1 else min(2, len(scrapers_to_run))
+    if workers > 1:
+        logger.info(f"⚡ {len(scrapers_to_run)} sites, {workers} at a time (RAM optimized)")
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(run_one, name, fn): name for name, fn in scrapers_to_run.items()}
+        for fut in as_completed(futures):
+            name = futures[fut]
+            try:
+                added = fut.result()
+                total_added += added
+                if not dry_run:
+                    RUN_PROGRESS["sites"].append({"source": name, "added": added, "ok": True})
+            except Exception as e:
+                logger.exception(f"Failed {name}: {e}")
+                failed_sources.append(name)
+                if not dry_run:
+                    RUN_PROGRESS["sites"].append({"source": name, "added": 0, "ok": False,
+                                                  "error": str(e).splitlines()[0][:160]})
+            gc.collect()
     if not dry_run:
         update_run_history(total_added, failed_sources)
         
@@ -366,6 +373,8 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
     if not dry_run:
         logger.info(f"🎉 Total new internships added today: {total_added}")
     logger.info("========================================")
+    if not dry_run:
+        RUN_PROGRESS.update(finished=True, total_added=total_added, failed=failed_sources)
     return total_added
 
 if __name__ == "__main__":

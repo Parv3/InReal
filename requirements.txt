@@ -1,6 +1,7 @@
 # ── Web Framework ──────────────────────────────────────────────────────────────
 flask
-gunicorn
+waitress          # production server on Windows (python app.py)
+gunicorn          # production server on Linux hosts (Render)
 
 # ── Browser Automation ─────────────────────────────────────────────────────────
 playwright

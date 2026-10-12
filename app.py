@@ -8,21 +8,48 @@ import sys
 import os
 import tempfile
 
-# Lazy import function for scraper
-def get_run_scrapers():
-    try:
-        from scraper import run_scrapers
-        return run_scrapers
-    except Exception as e:
-        print(f"Notice: Scraper dependencies not loaded or missing ({e}). App running in dashboard mode.")
-        return None
-
-from output_handler import pending_moderation, save_verdict
+from scraper import run_scrapers
+from output_handler import moderation_counts, pending_moderation, save_verdict, read_all_rows
 from moderation.env import load_env
 from moderation.link_check import resolve as resolve_link
 
 load_env()
 app = Flask(__name__)
+
+# ---- Who may change data ----
+# Visitors coming through a public tunnel (Cloudflare) or a host like Render can only READ.
+# Writes (scrape, clear, n8n moderation calls) are allowed from this laptop itself, or with the
+# secret INREAL_ADMIN_TOKEN in the X-InReal-Token header.
+# cloudflared connects from 127.0.0.1 too, but it always adds these headers, so a tunnelled
+# request is never mistaken for a local one.
+PROXY_HEADERS = ("Cf-Connecting-Ip", "Cf-Ray", "X-Forwarded-For", "X-Forwarded-Host", "Forwarded", "X-Real-Ip")
+LOOPBACK = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
+PROTECTED = {"/api/scrape", "/api/clear", "/api/alerts/dismiss"}
+
+
+def is_local_request() -> bool:
+    return request.remote_addr in LOOPBACK and not any(request.headers.get(h) for h in PROXY_HEADERS)
+
+
+def has_admin_token() -> bool:
+    import hmac
+    token = os.environ.get("INREAL_ADMIN_TOKEN", "")
+    sent = request.headers.get("X-InReal-Token", "")
+    return bool(token) and hmac.compare_digest(sent, token)
+
+
+@app.before_request
+def guard_writes():
+    path = request.path.rstrip("/")
+    needs_admin = path.startswith("/api/moderation/") and path != "/api/moderation/status"
+    needs_admin |= path in PROTECTED and request.method == "POST"
+    if needs_admin and not (is_local_request() or has_admin_token()):
+        return jsonify({"status": "error", "message": "This is a read-only public view. Run scrapes from the laptop."}), 403
+
+
+@app.route("/api/whoami")
+def whoami():
+    return jsonify({"can_edit": is_local_request() or has_admin_token()})
 DATA_FILE = Path(__file__).parent / "internships.csv"
 PATTERN_INDEX = Path(__file__).parent / "moderation" / "pattern_index.json"
 
@@ -39,10 +66,18 @@ def get_internships():
         return jsonify([])
         
     try:
-        df = pd.read_csv(DATA_FILE)
-        # Safely convert NaN to empty strings for JSON serialization
-        df = df.fillna("")
-        return jsonify(df.to_dict(orient="records"))
+        # Read under the writers' lock: on Windows an open reader makes the writer's file replace fail
+        from output_handler import read_all_rows
+        rows = read_all_rows()
+        for r in rows:
+            for k in ("match_score", "stipend_numeric"):
+                try:
+                    if r.get(k) not in (None, ""):
+                        v = float(r[k])
+                        r[k] = int(v) if v.is_integer() else v
+                except ValueError:
+                    pass
+        return jsonify(rows)
     except Exception as e:
         print(f"Error reading CSV: {e}")
         return jsonify([])
@@ -57,42 +92,12 @@ def trigger_scrape():
     config = request.json if request.is_json else None
         
     def scrape_job(cfg):
-        runner = get_run_scrapers()
-        if runner:
-            runner(dry_run=False, config=cfg)
-            notify_n8n()
-        else:
-            print("Scraper dependencies missing or not installed in this environment.")
+        run_scrapers(dry_run=False, config=cfg)
         
     scraper_t = threading.Thread(target=scrape_job, args=(config,))
     scraper_t.start()
     
     return jsonify({"status": "started", "message": "Scraper started successfully. This might take a while."})
-
-def notify_n8n():
-    """Starts the n8n moderation workflow after a scrape, if INREAL_N8N_WEBHOOK is set in .env."""
-    url = os.environ.get("INREAL_N8N_WEBHOOK", "").strip()
-    if not url:
-        return
-    from loguru import logger
-    try:
-        import requests
-        pending = len(pending_moderation(limit=10_000))
-        if not pending:
-            return
-        r = requests.post(url, json={"event": "scrape_finished", "pending": pending}, timeout=5)
-        if r.status_code == 404:
-            # n8n only registers /webhook/... while the workflow is published (active)
-            logger.warning(f"n8n answered 404 for {url}: open the 'InReal – scam moderation' workflow in n8n "
-                           f"and click Publish, or run it with 'Execute workflow'. {pending} listings are waiting.")
-        elif r.status_code >= 400:
-            logger.warning(f"n8n webhook returned HTTP {r.status_code}: {r.text[:200]}")
-        else:
-            logger.info(f"Scam check started in n8n for {pending} listings")
-    except Exception as e:
-        logger.warning(f"Could not reach n8n at {url} ({type(e).__name__}). Is n8n running? "
-                       f"The workflow's 30-minute schedule will pick the listings up once it is.")
-
 
 # ---- Moderation API, called by the n8n workflow in n8n/inreal_moderation.json ----
 
@@ -102,7 +107,12 @@ def moderation_pending():
         limit = int(request.args.get("limit", 40))
     except ValueError:
         limit = 40
-    return jsonify(pending_moderation(limit))
+    return jsonify(pending_moderation(limit, claim=request.args.get("claim") == "1"))
+
+
+@app.route("/api/moderation/status")
+def moderation_status():
+    return jsonify(moderation_counts())
 
 
 @app.route("/api/moderation/patterns")
@@ -116,10 +126,10 @@ def moderation_patterns():
 def moderation_resolve():
     """Opens one listing's apply link: redirect chain, final domain, status, 'closed' wording."""
     listing_id = request.args.get("id", "")
-    rows = {r["id"]: r for r in pending_moderation(limit=10_000)}
-    row = rows.get(listing_id)
+    from output_handler import _read_rows
+    row = next((r for r in _read_rows() if r.get("id") == listing_id), None)
     if row is None:
-        return jsonify({"id": listing_id, "error": "unknown or already moderated id"}), 404
+        return jsonify({"id": listing_id, "error": "unknown id"}), 404
     return jsonify({"id": listing_id, **resolve_link(row.get("apply_link", ""))})
 
 
@@ -139,9 +149,9 @@ def moderation_verdict():
 @app.route("/api/scrape/status")
 def scrape_status():
     global scraper_t
-    if scraper_t and scraper_t.is_alive():
-        return jsonify({"status": "running"})
-    return jsonify({"status": "idle"})
+    import scraper as scraper_mod
+    running = bool(scraper_t and scraper_t.is_alive())
+    return jsonify({"status": "running" if running else "idle", "progress": scraper_mod.RUN_PROGRESS})
 
 @app.route("/api/logs")
 def get_logs():
@@ -226,4 +236,13 @@ def clear_data():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    if os.environ.get("INREAL_DEBUG") == "1":
+        app.run(debug=True, host="127.0.0.1", port=port)
+    else:
+        try:
+            from waitress import serve
+            host = os.environ.get("HOST", "0.0.0.0")
+            print(f"InReal running on http://{host}:{port}  (waitress, debug off)")
+            serve(app, host=host, port=port, threads=4)
+        except ImportError:
+            app.run(host="0.0.0.0", port=port, debug=False)

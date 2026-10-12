@@ -1,7 +1,11 @@
-// Stage 2a — "Build one-shot judge request" (n8n Code node, runs once for each listing)
-// Builds ONE request for the LLM: rules, one worked example (one-shot), then the listing with
-// the stage-0/1 findings as leads to verify. The answer must follow a fixed JSON schema and
-// quote the post word for word, because the next node throws away any quote it can't find.
+// Stage 2a — "Pack judge mini-batches" (n8n Code node, runs once for ALL listings)
+// Builds one LLM request per mini-batch of posts: rules, one worked example (one-shot), then
+// up to BATCH posts with their stage-0/1 findings as leads to verify. The answer is a fixed
+// JSON schema with one result per post id, and every quote must be copied word for word,
+// because the next node throws away any quote it can't find in THAT post.
+// 300 posts = ~38 calls instead of 300. Works with Azure OpenAI (gpt-4o) or Gemini (Config: judgeProvider).
+
+const BATCH = 8;
 
 const CATEGORIES = ["upfront_fee", "task_scam", "data_harvest", "off_platform_contact",
   "too_good_to_be_true", "pressure", "training_sale", "mlm", "none"];
@@ -15,12 +19,14 @@ const SYSTEM = [
   "deadline pressure to pay; a paid course or certificate sold as an internship; pay that depends on recruiting others.",
   "Not scam signs on their own: small or unknown company, short description, low stipend, remote work, a recruiter posting.",
   "A post that says it does NOT charge fees is a good sign, not a bad one.",
-  "Every evidence quote must be copied EXACTLY from the post (5 to 25 words). If there is no evidence, return an empty list.",
+  "You get several posts, each starting with 'POST <id>'. Judge each one on its own and return exactly one result per post id.",
+  "Every evidence quote must be copied EXACTLY from that same post (5 to 25 words). If there is no evidence, return an empty list.",
   "scam_probability: 0.0 = clearly genuine, 0.5 = cannot tell, 1.0 = clearly a scam. Be calibrated: most posts on job boards are genuine.",
   "The 'automated findings' come from keyword and similarity checks and can be wrong. Confirm or reject them from the text.",
 ].join("\n");
 
 const EXAMPLE_POST = [
+  "POST ex1",
   "Title: Data Science Intern",
   "Company: Brightpath Analytics",
   "Stipend: 25,000/month",
@@ -29,7 +35,8 @@ const EXAMPLE_POST = [
   "Automated findings: upfront_fee (similarity 0.86) | Post asks candidates to use WhatsApp",
 ].join("\n");
 
-const EXAMPLE_ANSWER = {
+const EXAMPLE_RESULT = {
+  id: "ex1",
   scam_probability: 0.93,
   verdict: "scam",
   categories: ["upfront_fee", "off_platform_contact", "pressure"],
@@ -41,10 +48,12 @@ const EXAMPLE_ANSWER = {
   genuine_signs: ["Mentions Python and ML project work"],
   summary: "Asks for a refundable deposit and pushes candidates to WhatsApp with seat pressure: classic deposit scam.",
 };
+const EXAMPLE_ANSWER = { results: [EXAMPLE_RESULT] };
 
-const SCHEMA = {
+const RESULT_SCHEMA = {
   type: "OBJECT",
   properties: {
+    id: { type: "STRING" },
     scam_probability: { type: "NUMBER" },
     verdict: { type: "STRING", enum: ["genuine", "suspicious", "scam"] },
     categories: { type: "ARRAY", items: { type: "STRING", enum: CATEGORIES } },
@@ -55,8 +64,9 @@ const SCHEMA = {
     genuine_signs: { type: "ARRAY", items: { type: "STRING" } },
     summary: { type: "STRING" },
   },
-  required: ["scam_probability", "verdict", "categories", "evidence", "summary"],
+  required: ["id", "scam_probability", "verdict", "categories", "evidence", "summary"],
 };
+const SCHEMA = { type: "OBJECT", properties: { results: { type: "ARRAY", items: RESULT_SCHEMA } }, required: ["results"] };
 
 function findingsLine(item) {
   const parts = (item.stage1.categories || []).map(c => `${c.category} (similarity ${c.similarity}): "${c.chunk}"`);
@@ -64,26 +74,65 @@ function findingsLine(item) {
   return parts.length ? parts.join(" | ") : "none";
 }
 
-function buildRequest(listing, item) {
-  const post = [
+function postBlock(item) {
+  const listing = item.listing;
+  return [
+    `POST ${item.id}`,
     `Title: ${listing.role_title}`,
     `Company: ${listing.company_name}`,
     `Stipend: ${listing.stipend || "not stated"}`,
     `Source: ${listing.source_platform}`,
-    `Text: ${String(listing.description || "(no description was available)").slice(0, 3000)}`,
+    `Text: ${String(listing.description || "(no description was available)").slice(0, 1800)}`,
     `Automated findings: ${findingsLine(item)}`,
   ].join("\n");
+}
+
+// Same rules, example and schema for both providers; only the envelope differs.
+function jsonSchema(t) {        // Gemini's OpenAPI-style schema -> strict JSON Schema for Azure OpenAI
+  if (t.type === "OBJECT") {
+    const props = Object.fromEntries(Object.entries(t.properties).map(([k, v]) => [k, jsonSchema(v)]));
+    return { type: "object", properties: props, required: Object.keys(props), additionalProperties: false };
+  }
+  if (t.type === "ARRAY") return { type: "array", items: jsonSchema(t.items) };
+  const out = { type: t.type.toLowerCase() };
+  if (t.enum) out.enum = t.enum;
+  return out;
+}
+
+function buildRequest(items, provider) {
+  const posts = items.map(postBlock).join("\n\n---\n\n");
+  if (provider === "azure") {
+    return {
+      messages: [
+        { role: "system", content: SYSTEM },
+        { role: "user", content: EXAMPLE_POST },
+        { role: "assistant", content: JSON.stringify(EXAMPLE_ANSWER) },
+        { role: "user", content: posts },
+      ],
+      temperature: 0,
+      max_tokens: 4000,
+      response_format: { type: "json_schema", json_schema: { name: "scam_verdicts", strict: true, schema: jsonSchema(SCHEMA) } },
+    };
+  }
   return {
     systemInstruction: { parts: [{ text: SYSTEM }] },
     contents: [
       { role: "user", parts: [{ text: EXAMPLE_POST }] },
       { role: "model", parts: [{ text: JSON.stringify(EXAMPLE_ANSWER) }] },
-      { role: "user", parts: [{ text: post }] },
+      { role: "user", parts: [{ text: posts }] },
     ],
     generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: SCHEMA },
   };
 }
 
+function packJudge(items, provider) {
+  const out = [];
+  for (let i = 0; i < items.length; i += BATCH) {
+    const group = items.slice(i, i + BATCH);
+    out.push({ posts: group, judgeRequest: buildRequest(group, provider) });
+  }
+  return out;
+}
+
 // ==== n8n glue (below this line runs only inside n8n) ====
-const listing = $('Fetch pending listings').item.json;
-return { json: { ...$json, judgeRequest: buildRequest(listing, $json) } };
+return packJudge($input.all().map(i => i.json), $('Config').first().json.judgeProvider).map(json => ({ json }));

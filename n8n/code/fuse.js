@@ -1,4 +1,5 @@
-// Stage 2b — "Verify evidence + fuse scores" (n8n Code node, runs once for each listing)
+// Stage 2b — "Verify evidence + fuse scores" (n8n Code node, runs once for ALL mini-batches:
+// splits each batch answer back into one verdict per post)
 // The LLM's answer is treated as one witness, not the judge:
 //   1. every quote it gives is searched for in the real post; quotes that aren't there are thrown out
 //   2. a high scam probability with no surviving quote is pulled back towards 0.5 ("can't tell")
@@ -75,9 +76,13 @@ function fuse(listing, item, resp, cfg) {
   }
   reasons.push(...stageReasons(item));
 
+  // Neither AI stage ran (both APIs down / out of quota): don't approve on rules alone,
+  // put the post back in the queue so the next run checks it properly.
+  const nothingRan = pAdj === null && item.stage1 && item.stage1.error;
+  if (nothingRan) reasons.unshift("Both AI checks failed this time; queued again");
   return {
     id: item.id,
-    status: decide(risk, cfg, disagree),
+    status: nothingRan ? "retry" : decide(risk, cfg, disagree),
     scam_risk: Number(Math.min(0.99, Math.max(0, risk)).toFixed(2)),
     reasons,
     decided_by: llm.ok ? "fusion" : "vector_search",
@@ -86,7 +91,44 @@ function fuse(listing, item, resp, cfg) {
   };
 }
 
+// Azure OpenAI chat answer or Gemini answer -> the JSON text the model wrote
+function answerText(resp) {
+  if (resp && resp.choices) {
+    const c = resp.choices[0];
+    if (c.finish_reason === "content_filter") throw new Error("blocked by Azure content filter");
+    if (c.message && c.message.refusal) throw new Error("model refused: " + c.message.refusal);
+    return c.message.content;
+  }
+  return resp.candidates[0].content.parts.map(p => p.text || "").join("");
+}
+
+// One mini-batch answer -> one Gemini-shaped answer per post, so fuse() judges each post alone
+function splitBatch(posts, resp) {
+  let results = null, error = null;
+  try {
+    const text = answerText(resp);
+    results = JSON.parse(text).results || [];
+  } catch (e) {
+    error = resp && resp.error ? resp.error : { message: String(e.message || e) };
+  }
+  return posts.map(p => {
+    if (!results) return { error };
+    const r = results.find(x => String(x.id) === String(p.id));
+    if (!r) return { error: { message: "the LLM returned no result for this post" } };
+    return { candidates: [{ content: { parts: [{ text: JSON.stringify(r) }] } }] };
+  });
+}
+
+function fuseBatches(batches, answers, cfg) {
+  const out = [];
+  batches.forEach((b, i) => {
+    const per = splitBatch(b.posts, answers[i] || {});
+    b.posts.forEach((p, k) => out.push({ verdict: fuse(p.listing, p, per[k], cfg) }));
+  });
+  return out;
+}
+
 // ==== n8n glue (below this line runs only inside n8n) ====
-const listing = $('Fetch pending listings').item.json;
-const item = $('Build one-shot judge request').item.json;
-return { json: { verdict: fuse(listing, item, $json, $('Config').first().json) } };
+const batches = $('Pack judge mini-batches').all().map(i => i.json);
+const answers = $input.all().map(i => i.json);
+return fuseBatches(batches, answers, $('Config').first().json).map(json => ({ json }));
