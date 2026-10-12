@@ -463,9 +463,9 @@
 
           <!-- Dropdown 5: AI Verification / Scam Status -->
           <select id="mod-filter" class="filter-select font-semibold text-slate-800 bg-white border-slate-200">
-            <option value="hide_blocked" selected>All valid (hide scams)</option>
-            <option value="verified">Verified only</option>
+            <option value="verified" selected>Verified only (Strict)</option>
             <option value="verified_review">Verified + Needs review</option>
+            <option value="hide_blocked">All valid (hide scams)</option>
             <option value="blocked">Flagged / Scams</option>
             <option value="all">Everything</option>
           </select>
@@ -512,8 +512,51 @@
 
     <!-- Translucent Card Grid Section -->
     <section class="w-full">
+      
+      <!-- LLM-Style Fast Scraping Live Terminal Banner (Flickering Search Animation) -->
+      <div id="llm-scraper-banner" class="hidden mb-6 glass-panel p-4 rounded-2xl border-l-4 border-l-amber-500 shadow-md bg-gradient-to-r from-amber-50/90 via-white to-amber-50/70 overflow-hidden relative">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-inner">
+              <i class="ph ph-sparkle text-lg animate-spin"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono uppercase tracking-wider font-bold text-amber-800">Scraping Engine Live</span>
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              </div>
+              <div class="flex items-center gap-1.5 mt-0.5 text-xs text-slate-700 font-medium">
+                <span id="llm-flicker-text" class="font-mono text-slate-900 font-semibold transition-all">Scraping from the site: <span class="text-amber-700 font-bold">Internshala</span></span>
+                <span class="inline-block w-1.5 h-3.5 bg-amber-500 animate-pulse"></span>
+              </div>
+            </div>
+          </div>
+          <div class="hidden sm:flex items-center gap-3 text-right">
+            <div>
+              <div class="text-[10px] text-slate-400 uppercase font-mono font-bold">Harvester Stats</div>
+              <div id="llm-stats-readout" class="text-xs font-mono font-bold text-slate-800">Harvesting portals in background...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="listings-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Injected via JavaScript with Real Logos & Corporate Polish -->
+      </div>
+
+      <!-- Load More Action Controls -->
+      <div id="load-more-container" class="mt-8 flex flex-col items-center justify-center text-center">
+        <button 
+          id="load-more-btn" 
+          type="button" 
+          class="px-6 py-3 rounded-2xl bg-slate-900 text-white hover:bg-orange-600 font-bold text-xs shadow-lg hover:shadow-xl transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none group"
+        >
+          <i id="load-more-icon" class="ph-bold ph-plus-circle text-base text-orange-400 group-hover:text-white transition-colors"></i>
+          <span id="load-more-label">Load More (Next Batch of 5)</span>
+        </button>
+        <p id="load-more-info" class="text-[11px] text-slate-400 font-medium mt-2">
+          Only verified, genuine opportunities are shown. Moderating 5 at a time via n8n round-robin.
+        </p>
       </div>
 
       <!-- Empty State with Flat Envelope SVG Illustration -->

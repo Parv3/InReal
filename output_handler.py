@@ -153,16 +153,38 @@ def _is_pending(r: dict, now: datetime) -> bool:
     return False
 
 
-def pending_moderation(limit: int = 40, claim: bool = False) -> list:
+def pending_moderation(limit: int = 5, claim: bool = False) -> list:
     """
-    Listings the n8n pipeline has not judged yet, newest first.
-    claim=True marks them "checking", so a second n8n run started meanwhile (the scraper calls
-    n8n after EACH site, so runs overlap) takes different listings instead of the same ones.
+    Listings the n8n pipeline has not judged yet.
+    Selects items in round-robin fashion across different source platforms (e.g. Internshala, Unstop, Apna...)
+    so when multiple sources are scraped, every source gets fair representation in the 5-item batch.
+    claim=True marks them "checking".
     """
     now = datetime.now()
     with _CSV_LOCK:
         rows = _read_rows()
-        todo = [r for r in rows if _is_pending(r, now)][:max(1, limit)]
+        all_pending = [r for r in rows if _is_pending(r, now)]
+        
+        # Group pending by source_platform for round-robin interleaving
+        from collections import defaultdict
+        by_source = defaultdict(list)
+        for r in all_pending:
+            src = r.get("source_platform") or "unknown"
+            by_source[src].append(r)
+            
+        round_robin = []
+        sources = list(by_source.keys())
+        idx = 0
+        while len(round_robin) < len(all_pending) and sources:
+            src = sources[idx % len(sources)]
+            if by_source[src]:
+                round_robin.append(by_source[src].pop(0))
+            else:
+                sources.remove(src)
+                continue
+            idx += 1
+            
+        todo = round_robin[:max(1, limit)]
         if claim and todo:
             for r in todo:
                 r["moderation_status"] = "checking"

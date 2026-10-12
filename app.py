@@ -190,10 +190,24 @@ def trigger_scrape():
 @app.route("/api/moderation/pending")
 def moderation_pending():
     try:
-        limit = int(request.args.get("limit", 40))
+        limit = int(request.args.get("limit", 5))
     except ValueError:
-        limit = 40
+        limit = 5
+    # Batch size enforced to 5
+    limit = min(limit, 5)
     return jsonify(pending_moderation(limit, claim=request.args.get("claim") == "1"))
+
+
+@app.route("/api/moderation/trigger-batch", methods=["POST"])
+def trigger_moderation_batch():
+    """Triggered when user clicks 'Load More' on the frontend."""
+    from moderation.notify import notify_n8n
+    counts = moderation_counts()
+    pending = counts.get("pending", 0)
+    if pending > 0:
+        notify_n8n("load_more_batch")
+        return jsonify({"status": "started", "pending": pending, "batch_size": 5})
+    return jsonify({"status": "idle", "message": "No pending listings left to moderate."})
 
 
 @app.route("/api/moderation/status")

@@ -208,9 +208,6 @@ def process_and_save(source_name: str, raw_listings: list):
         extra.append(f"refreshed {res['updated']} already saved")
     if res["removed"]:
         extra.append(f"removed {res['removed']} that no longer pass the checks")
-    if res["added"] or res["updated"]:
-        from moderation.notify import notify_n8n
-        notify_n8n(source_name)   # n8n checks this site while the next one is being scraped
     logger.info(f"[{source_name}] Analyzed {len(raw_listings)} listings, found {len(valid_listings)} matches, "
                 f"and saved {res['added']} brand new ones!" + (f" ({', '.join(extra)})" if extra else ""))
     return res["added"]
@@ -388,9 +385,11 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
     logger.info(f"Sources checked: {len(scrapers_to_run) - len(failed_sources)} successful, {len(failed_sources)} failed.")
     if not dry_run:
         logger.info(f"🎉 Total new internships added today: {total_added}")
-    logger.info("========================================")
     if not dry_run:
         RUN_PROGRESS.update(finished=True, total_added=total_added, failed=failed_sources)
+        if total_added > 0:
+            from moderation.notify import notify_n8n
+            notify_n8n("initial_batch")
     return total_added
 
 if __name__ == "__main__":

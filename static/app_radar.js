@@ -9,7 +9,9 @@ let activeStipend = 'all';
 let activeSource = 'all';
 let activeRoleType = 'all';
 let activeExperience = 'all';        // 'all', '0', '1-2', '3+'
-let activeModeration = 'hide_blocked'; // Default: show all valid postings (hide known scams) so pending/new scrapes are immediately visible!
+let activeModeration = 'verified';   // Strict verification: only approved (verified) listings are shown!
+let visibleCount = 5;                // Minimum 5 and maximum 5 shown at a time
+let isModeratingBatch = false;
 let showBookmarkedOnly = false;
 let bookmarks = JSON.parse(localStorage.getItem('inreal_bookmarks') || '[]');
 let activeDrawerJob = null;
@@ -299,7 +301,47 @@ function renderListings(items) {
     emptyState.classList.remove('flex');
   }
 
-  container.innerHTML = items.map((item, index) => {
+  // Minimum 5 and maximum 5 at a time
+  const visibleItems = items.slice(0, visibleCount);
+
+  // Update Load More Button state
+  const loadMoreContainer = document.getElementById('load-more-container');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const loadMoreLabel = document.getElementById('load-more-label');
+  const loadMoreIcon = document.getElementById('load-more-icon');
+  const loadMoreInfo = document.getElementById('load-more-info');
+
+  if (loadMoreContainer) {
+    if (items.length > visibleCount) {
+      // More verified items already in local memory ready to reveal
+      loadMoreContainer.classList.remove('hidden');
+      if (loadMoreBtn) {
+        loadMoreBtn.disabled = false;
+        loadMoreLabel.innerText = `Load More (Next Batch of 5) • Showing ${visibleItems.length} of ${items.length}`;
+      }
+    } else {
+      // Check if there are pending unmoderated items waiting in backend
+      fetch('/api/moderation/status').then(r => r.json()).then(c => {
+        const waiting = (c.pending || 0) + (c.checking || 0);
+        if (waiting > 0) {
+          loadMoreContainer.classList.remove('hidden');
+          if (loadMoreBtn) {
+            loadMoreBtn.disabled = isModeratingBatch;
+            loadMoreLabel.innerText = isModeratingBatch 
+              ? 'Moderating Next Batch with n8n...' 
+              : `Moderate Next Batch of 5 (${waiting} waiting in queue)`;
+          }
+          if (loadMoreInfo) {
+            loadMoreInfo.innerText = `${waiting} scraped opportunities waiting in round-robin queue. Click to trigger next 5.`;
+          }
+        } else {
+          loadMoreContainer.classList.add('hidden');
+        }
+      }).catch(() => {});
+    }
+  }
+
+  container.innerHTML = visibleItems.map((item, index) => {
     const isBookmarked = bookmarks.includes(item.id);
     const skills = (item.required_skills || '').split(',').map(s => s.trim()).filter(Boolean).slice(0, 3);
     const logoSvg = getCompanyLogoSvg(item.company_name);
@@ -693,8 +735,32 @@ function bindEventHandlers() {
       activeExperience = 'all';
     }
 
+    visibleCount = 5;
     applyFiltersAndRender();
   };
+
+  // Wire up Load More Button (Passes batch of 5 to n8n pipeline)
+  document.getElementById('load-more-btn')?.addEventListener('click', async () => {
+    visibleCount += 5;
+    
+    // Trigger n8n for next round-robin batch of 5
+    isModeratingBatch = true;
+    const btn = document.getElementById('load-more-btn');
+    const label = document.getElementById('load-more-label');
+    if (btn) btn.disabled = true;
+    if (label) label.innerText = 'Triggering Next Batch to n8n...';
+
+    try {
+      await fetch('/api/moderation/trigger-batch', { method: 'POST' });
+    } catch (e) {
+      console.warn('Batch trigger error:', e);
+    }
+    
+    // Refresh data and render
+    await loadData();
+    isModeratingBatch = false;
+    applyFiltersAndRender();
+  });
 
   document.getElementById('reset-filters-btn')?.addEventListener('click', resetAll);
   document.getElementById('empty-reset-btn')?.addEventListener('click', resetAll);
@@ -821,12 +887,63 @@ async function pollModeration() {
 
 
 // ==========================================
-// 9. Scrape popups: one per finished site, one summary at the end
+// 9. Scrape popups & Live LLM Search Terminal Animation
 // ==========================================
 let seenRunId = null, seenSites = 0, runAnnounced = true;
+let flickerInterval = null;
+
+const SIMULATED_SITES = ["Internshala", "Unstop", "Naukri", "Apna", "Foundit", "Shine", "Big Tech Careers"];
+
+function startLlmFlickerAnimation(currentSite) {
+  const banner = document.getElementById('llm-scraper-banner');
+  const textEl = document.getElementById('llm-flicker-text');
+  if (!banner || !textEl) return;
+
+  banner.classList.remove('hidden');
+
+  if (flickerInterval) clearInterval(flickerInterval);
+
+  let siteIdx = 0;
+  flickerInterval = setInterval(() => {
+    const activeSite = currentSite || SIMULATED_SITES[siteIdx % SIMULATED_SITES.length];
+    siteIdx++;
+
+    const states = [
+      `Scraping from the site: <span class="text-amber-800 font-bold">${activeSite}</span>...`,
+      `Harvested <span class="text-emerald-700 font-bold font-mono">live endpoints</span> from ${activeSite}`,
+      `Analyzing opportunities from <span class="text-amber-800 font-bold">${activeSite}</span>...`
+    ];
+    const pick = states[Math.floor(Math.random() * states.length)];
+    textEl.innerHTML = pick;
+  }, 900);
+}
+
+function stopLlmFlickerAnimation() {
+  if (flickerInterval) {
+    clearInterval(flickerInterval);
+    flickerInterval = null;
+  }
+  const banner = document.getElementById('llm-scraper-banner');
+  if (banner) banner.classList.add('hidden');
+}
 
 function handleScrapeProgress(progress, isRunning) {
   if (!progress) return;
+
+  const banner = document.getElementById('llm-scraper-banner');
+  const textEl = document.getElementById('llm-flicker-text');
+  const statsEl = document.getElementById('llm-stats-readout');
+
+  if (isRunning) {
+    if (banner) banner.classList.remove('hidden');
+    if (!flickerInterval) startLlmFlickerAnimation();
+    if (statsEl) {
+      statsEl.innerText = `${progress.sites.length} site(s) parsed • ${progress.total_added || 0} scraped`;
+    }
+  } else {
+    stopLlmFlickerAnimation();
+  }
+
   if (seenRunId === null) {            // page just opened: don't replay an old run
     seenRunId = progress.run_id; seenSites = progress.sites.length; runAnnounced = progress.finished;
     return;
@@ -834,9 +951,12 @@ function handleScrapeProgress(progress, isRunning) {
   if (progress.run_id !== seenRunId) { seenRunId = progress.run_id; seenSites = 0; runAnnounced = false; }
   for (const site of progress.sites.slice(seenSites)) {
     const name = site.source.charAt(0).toUpperCase() + site.source.slice(1);
+    if (textEl) {
+      textEl.innerHTML = `Scraped <span class="text-emerald-600 font-bold">${site.added || 0}</span> opportunities from <span class="text-amber-800 font-bold">${name}</span>`;
+    }
     if (site.ok) {
       showToast(site.added ? 'success' : 'info', `${name} scraped`,
-        site.added ? `${site.added} new internship${site.added > 1 ? 's' : ''} saved. n8n is checking them now.`
+        site.added ? `${site.added} new internship${site.added > 1 ? 's' : ''} saved.`
                    : 'No new internships this time.');
     } else {
       showToast('error', `${name} failed`, site.error || 'See the run log.');
@@ -846,8 +966,9 @@ function handleScrapeProgress(progress, isRunning) {
   seenSites = progress.sites.length;
   if (progress.finished && !runAnnounced && !isRunning) {
     runAnnounced = true;
+    stopLlmFlickerAnimation();
     const failed = progress.failed.length ? ` · ${progress.failed.length} site(s) failed` : '';
-    showToast('success', 'Scraping finished', `${progress.total_added} new internships from ${progress.sites.length} site(s)${failed}. Verified ones appear as n8n approves them.`);
+    showToast('success', 'Scraping finished', `${progress.total_added} opportunities scraped in background. Initial round-robin batch of 5 sent to n8n.`);
   }
 }
 
