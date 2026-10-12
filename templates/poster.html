@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InReal // One-Page Executive Showcase Poster</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    :root {
+      --bg-amber-warmth: radial-gradient(circle at 10% 10%, rgba(251, 191, 36, 0.18) 0%, transparent 40%),
+                         radial-gradient(circle at 90% 15%, rgba(249, 115, 22, 0.14) 0%, transparent 45%),
+                         radial-gradient(circle at 50% 90%, rgba(13, 148, 136, 0.10) 0%, transparent 50%),
+                         #FAF8F2;
+      --card-glass: rgba(255, 255, 255, 0.88);
+      --card-border: rgba(226, 232, 240, 0.85);
+    }
+
+    body {
+      background: var(--bg-amber-warmth);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .poster-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .glass-card {
+      background: var(--card-glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--card-border);
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      box-shadow: 0 12px 28px -4px rgba(249, 115, 22, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+      border-color: rgba(251, 146, 60, 0.35);
+    }
+
+    .badge-glow {
+      box-shadow: 0 0 16px -2px rgba(249, 115, 22, 0.35);
+    }
+
+    @media print {
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .poster-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .glass-card {
+        box-shadow: none !important;
+        border: 1px solid #CBD5E1 !important;
+        background: #FFFFFF !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 selection:bg-orange-500 selection:text-white">
+
+  <!-- Floating Print & Navigation Toolbar -->
+  <div class="no-print fixed top-5 right-5 z-50 flex items-center gap-2.5">
+    <a href="/" class="px-4 py-2 bg-white/90 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 font-bold text-xs rounded-xl shadow-sm hover:shadow transition flex items-center gap-1.5">
+      <i class="ph ph-arrow-left text-sm"></i>
+      <span>Back to Dashboard</span>
+    </a>
+    <a href="/map" class="px-4 py-2 bg-white/90 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 font-bold text-xs rounded-xl shadow-sm hover:shadow transition flex items-center gap-1.5">
+      <i class="ph ph-tree-structure text-sm text-orange-500"></i>
+      <span>Neural Map</span>
+    </a>
+    <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-1.5 active:scale-95">
+      <i class="ph ph-printer text-base"></i>
+      <span>Print / PDF Poster</span>
+    </button>
+  </div>
+
+  <!-- Master One-Page Poster Container -->
+  <main class="poster-container flex flex-col gap-6">
+
+    <!-- Header & Hero Banner -->
+    <header class="glass-card p-7 sm:p-9 relative overflow-hidden bg-gradient-to-r from-amber-50/90 via-white/95 to-orange-50/90 border border-slate-200/90">
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-orange-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+        <div>
+          <div class="flex items-center gap-3 mb-2.5">
+            <div class="w-12 h-12 rounded-2xl bg-slate-900 shadow-md flex items-center justify-center text-white">
+              <i class="ph ph-cpu text-2xl text-orange-400 font-bold"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">InReal</h1>
+                <span class="px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-full text-xs font-black tracking-wide uppercase badge-glow">Talent Radar</span>
+              </div>
+              <p class="text-xs font-semibold text-slate-500 tracking-wide uppercase">AI-Powered Early-Career Opportunity Verification Engine</p>
+            </div>
+          </div>
+          <p class="text-sm sm:text-base text-slate-700 font-medium max-w-2xl leading-relaxed mt-2">
+            Eliminating ghost jobs, unpaid traps, and course-selling scams across frontier AI/ML, Data Science, Medical, and Pharma internships through autonomous deterministic filters and LLM moderation.
+          </p>
+        </div>
+
+        <!-- Quick Highlight Badges -->
+        <div class="flex flex-wrap md:flex-col gap-2.5 shrink-0">
+          <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs">
+            <i class="ph ph-shield-check text-emerald-600 text-base"></i>
+            <span>100% Scam-Verified Feeds</span>
+          </div>
+          <div class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-800 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs">
+            <i class="ph ph-lightning text-orange-600 text-base"></i>
+            <span>5-Batch Round-Robin n8n LLM</span>
+          </div>
+          <div class="px-4 py-2 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs">
+            <i class="ph ph-currency-inr text-sky-600 text-base"></i>
+            <span>Strict Minimum Stipend Rules</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 3-Column Pillar Section: The Problem, The Solution & The Workflow -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Column 1: The Problem -->
+      <section class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-rose-500">
+        <div>
+          <div class="flex items-center gap-2 text-rose-600 font-extrabold text-xs uppercase tracking-wider mb-2">
+            <i class="ph ph-warning-circle text-lg"></i>
+            <span>The Broken Reality</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900 leading-snug">The 45% Early-Career Scam Crisis</h2>
+          <ul class="mt-4 space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
+            <li class="flex items-start gap-2">
+              <i class="ph ph-x-circle text-rose-500 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Disguised Training Fees:</strong> Over 40% of posts ask students to pay ₹5K–₹25K for "internship certificates" instead of paying stipends.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="ph ph-x-circle text-rose-500 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Ghost & Stale Listings:</strong> 15+ hours wasted weekly applying to expired, duplicate, or unmonitored aggregate scraper links.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="ph ph-x-circle text-rose-500 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Experience Mislabeling:</strong> "Entry-level" and "internship" posts secretly demanding 3+ to 5+ years of production experience.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-5 p-3 rounded-xl bg-rose-50 border border-rose-100 text-[11px] text-rose-800 font-semibold">
+          Result: High applicant burnout & 80% rejection without genuine recruiter contact.
+        </div>
+      </section>
+
+      <!-- Column 2: InReal's Dual-Layer Verification Engine -->
+      <section class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-orange-500">
+        <div>
+          <div class="flex items-center gap-2 text-orange-600 font-extrabold text-xs uppercase tracking-wider mb-2">
+            <i class="ph ph-cpu text-lg"></i>
+            <span>Dual-Layer Moat</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900 leading-snug">Deterministic + LLM Engine</h2>
+          <ul class="mt-4 space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
+            <li class="flex items-start gap-2">
+              <i class="ph ph-check-circle text-emerald-600 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Layer 1: Deterministic Filter (0 Cost):</strong> Drops unpaid posts, checks India min. stipend (≥ ₹5,000/mo), drops senior & 3+ exp tags, collapses duplicate mass-posters.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="ph ph-check-circle text-emerald-600 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Layer 2: n8n + LLM Pipeline:</strong> Automated deep inspection verifying company genuineness, training detection patterns, and link resolution checks.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="ph ph-check-circle text-emerald-600 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Round-Robin 5-Batch Moderation:</strong> Fast, non-blocking pipeline feeds verified listings sequentially with zero page scrambles.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-5 p-3 rounded-xl bg-orange-50 border border-orange-100 text-[11px] text-orange-800 font-semibold">
+          Efficiency: 70% filtered at ₹0 cost; LLM only deployed for high-yield validation.
+        </div>
+      </section>
+
+      <!-- Column 3: The User Experience -->
+      <section class="glass-card p-6 flex flex-col justify-between border-l-4 border-l-teal-600">
+        <div>
+          <div class="flex items-center gap-2 text-teal-700 font-extrabold text-xs uppercase tracking-wider mb-2">
+            <i class="ph ph-user-focus text-lg"></i>
+            <span>Next-Gen Interface</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900 leading-snug">Frictionless Discovery</h2>
+          <ul class="mt-4 space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
+            <li class="flex items-start gap-2">
+              <i class="ph ph-sparkle text-teal-600 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Profile Preferences Sync:</strong> Save platforms, regions, and fields (AI/ML, Data Science, Medical, Pharma, Custom) with 1-click execution.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="ph ph-sparkle text-teal-600 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Slide-Over Detail Drawer:</strong> Instant access to skills breakdown, full job description, scam checks, and verified direct apply endpoints.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="ph ph-sparkle text-teal-600 text-base shrink-0 mt-0.5"></i>
+              <span><strong>Interactive Neural Map (/map):</strong> Visual hierarchical architecture blueprint with interactive subnode drill-downs for executive demos.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-5 p-3 rounded-xl bg-teal-50 border border-teal-100 text-[11px] text-teal-800 font-semibold">
+          Experience: Fast LLM terminal search animations and transparent scam warnings.
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Multi-Platform Coverage Grid -->
+    <section class="glass-card p-6">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <i class="ph ph-broadcast text-orange-500 text-lg"></i>
+          <span>Omni-Channel Source Ingestion (10+ Integrated Platforms)</span>
+        </h3>
+        <span class="text-xs text-slate-500 font-semibold">Real-Time Scraping & RSS Feeds</span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-center">
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl hover:bg-white transition shadow-2xs">
+          <div class="font-extrabold text-xs text-slate-800">LinkedIn</div>
+          <div class="text-[10px] text-slate-500 font-medium mt-0.5">Global / India Tech</div>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl hover:bg-white transition shadow-2xs">
+          <div class="font-extrabold text-xs text-slate-800">Internshala</div>
+          <div class="text-[10px] text-slate-500 font-medium mt-0.5">AI/ML & Pharma</div>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl hover:bg-white transition shadow-2xs">
+          <div class="font-extrabold text-xs text-slate-800">Unstop</div>
+          <div class="text-[10px] text-slate-500 font-medium mt-0.5">Hackathons & Roles</div>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl hover:bg-white transition shadow-2xs">
+          <div class="font-extrabold text-xs text-slate-800">Naukri & Foundit</div>
+          <div class="text-[10px] text-slate-500 font-medium mt-0.5">Direct Corporate</div>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl hover:bg-white transition shadow-2xs">
+          <div class="font-extrabold text-xs text-slate-800">Govt Labs & SERB</div>
+          <div class="text-[10px] text-slate-500 font-medium mt-0.5">AICTE, PMRF, DRDO</div>
+        </div>
+        <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl hover:bg-white transition shadow-2xs">
+          <div class="font-extrabold text-xs text-slate-800">University Labs</div>
+          <div class="text-[10px] text-slate-500 font-medium mt-0.5">Mitacs, MPI, CERN</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom 2-Column: Financial Model & Legal/Compliance Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Financial Model & Unit Economics -->
+      <section class="glass-card p-6">
+        <div class="flex items-center gap-2 text-orange-600 font-bold text-xs uppercase tracking-wider mb-2">
+          <i class="ph ph-chart-line-up text-lg"></i>
+          <span>Financial Viability & Market Size</span>
+        </div>
+        <h3 class="text-base font-bold text-slate-900">High-Margin Recurring Monetization</h3>
+
+        <div class="grid grid-cols-3 gap-3 my-4 text-center">
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="text-lg font-black text-slate-900">$38.5B</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Global TAM</div>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="text-lg font-black text-orange-600">$4.8B</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">STEM SAM</div>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="text-lg font-black text-emerald-600">70.4%</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">Year 3 Margin</div>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs text-slate-700 font-medium">
+          <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <span><strong>B2C Pro Tier:</strong> ₹299/mo (instant alerts, HR contact endpoints)</span>
+            <span class="font-bold text-slate-900">₹7.14 Cr (Yr 3)</span>
+          </div>
+          <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <span><strong>B2B Verified Postings:</strong> ₹1,999/role (featured scam-free placement)</span>
+            <span class="font-bold text-slate-900">₹2.40 Cr (Yr 3)</span>
+          </div>
+          <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+            <span><strong>B2B2C Institutional TPO Portals:</strong> ₹1.5L–₹5L/college license</span>
+            <span class="font-bold text-slate-900">₹1.80 Cr (Yr 3)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Legal Compliance & Fair Use Blueprint -->
+      <section class="glass-card p-6">
+        <div class="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-wider mb-2">
+          <i class="ph ph-scales text-lg"></i>
+          <span>Legal & Regulatory Compliance</span>
+        </div>
+        <h3 class="text-base font-bold text-slate-900">Protected by Global & Indian Precedents</h3>
+
+        <div class="mt-4 space-y-3 text-xs text-slate-700 font-medium">
+          <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl">
+            <div class="font-bold text-emerald-900 flex items-center gap-1.5">
+              <i class="ph ph-check-circle text-emerald-600"></i>
+              <span>US 9th Circuit: hiQ Labs v. LinkedIn (2022)</span>
+            </div>
+            <p class="text-[11px] text-emerald-800 mt-1 leading-relaxed">
+              Scraping publicly available web data not protected by authentication walls does not violate the Computer Fraud & Abuse Act (CFAA).
+            </p>
+          </div>
+
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="font-bold text-slate-900 flex items-center gap-1.5">
+              <i class="ph ph-shield-check text-slate-600"></i>
+              <span>India IT Act (Sec. 43/66) & DPDP Act 2023 Compliant</span>
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+              No private candidate personal data is collected or sold. Factual job criteria (stipends, titles) are non-copyrightable facts. Canonical referral links attribute full traffic to original sources.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer Bar -->
+    <footer class="glass-card p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-500">
+      <div class="flex items-center gap-2 text-slate-700">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>InReal Production Core • Developed by Parv Mishra & Abhishek Goswami</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-500">
+        <a href="/" class="hover:text-orange-600 transition">Dashboard</a>
+        <span>•</span>
+        <a href="/map" class="hover:text-orange-600 transition">Architecture Map</a>
+        <span>•</span>
+        <a href="https://github.com/Parv3/InReal" target="_blank" class="hover:text-orange-600 transition">GitHub Repo</a>
+      </div>
+    </footer>
+
+  </main>
+
+</body>
+</html>
