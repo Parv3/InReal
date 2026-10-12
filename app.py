@@ -142,6 +142,10 @@ scraper_t = None
 def index():
     return render_template("index.html")
 
+@app.route("/map")
+def blueprint_map():
+    return render_template("map.html")
+
 @app.route("/api/internships")
 def get_internships():
     if not DATA_FILE.exists():

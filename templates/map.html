@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InReal // System Architecture & Pipeline Blueprint</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              yellow: '#FBBF24',
+              orange: '#F97316',
+              blue: '#2563EB',
+              teal: '#0D9488',
+              emerald: '#059669',
+              slate: '#0F172A',
+              rose: '#E11D48',
+              purple: '#9333EA',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-amber-warmth: radial-gradient(circle at 10% 10%, rgba(251, 191, 36, 0.18) 0%, transparent 45%),
+                         radial-gradient(circle at 90% 15%, rgba(249, 115, 22, 0.14) 0%, transparent 40%),
+                         radial-gradient(circle at 50% 85%, rgba(13, 148, 136, 0.12) 0%, transparent 50%),
+                         #FFFDF7;
+    }
+
+    body {
+      background: var(--bg-amber-warmth);
+      background-attachment: fixed;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.02);
+    }
+
+    .node-card {
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .node-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 20px 35px -10px rgba(245, 158, 11, 0.25), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    .node-card.active {
+      border-color: #F59E0B !important;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25), 0 20px 40px -10px rgba(245, 158, 11, 0.3) !important;
+      transform: scale(1.04);
+      background: #FFFFFF;
+    }
+
+    .sub-node {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+      animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes popIn {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .connecting-line {
+      stroke-dasharray: 6;
+      animation: dash 30s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -1000;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-200">
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-amber-100/80 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-slate-900 font-bold shadow-md shadow-amber-400/30 hover:scale-105 transition-transform">
+          <i class="ph-bold ph-radar text-2xl"></i>
+        </a>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg font-extrabold tracking-tight text-slate-900">InReal</h1>
+            <span class="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-200">BLUEPRINT</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">Interactive Architecture & Workflow Presentation</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <a href="/" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white/90 border border-slate-200 hover:bg-slate-50 transition-all flex items-center space-x-1.5 shadow-sm">
+          <i class="ph ph-arrow-left font-bold"></i>
+          <span>Live Radar Dashboard</span>
+        </a>
+        <button onclick="resetSelection()" class="px-3 py-2 rounded-xl text-xs font-semibold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-all flex items-center space-x-1.5">
+          <i class="ph ph-arrows-clockwise font-bold"></i>
+          <span>Reset View</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Blueprint Workspace -->
+  <main class="max-w-7xl mx-auto w-full px-6 py-8 flex-1 flex flex-col justify-center">
+
+    <!-- Introductory Banner -->
+    <div class="text-center mb-10 max-w-3xl mx-auto">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold mb-3 shadow-sm">
+        <i class="ph-fill ph-sparkle text-amber-500"></i>
+        <span>Click any node to expand granular pipeline stages</span>
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">System Workflow Blueprint</h2>
+      <p class="text-sm text-slate-600 mt-2">
+        A seamless 4-tier engine: Multi-source web scraping ➔ Memoryless data processing ➔ Async n8n AI moderation pipeline ➔ SQLite authenticated frontend.
+      </p>
+    </div>
+
+    <!-- PRIMARY PIPELINE TIERS (Top-Level Nodes) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10" id="nodes-container">
+      
+      <!-- Tier 1: Scrapers -->
+      <div id="node-1" onclick="selectNode(1)" class="node-card glass-panel rounded-2xl p-6 border-2 border-transparent">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl shadow-inner">
+            <i class="ph-bold ph-globe"></i>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-bold border border-amber-200">STAGE 01</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Target Scrapers</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mb-4">Parallel bots harvesting live internships from 10+ Indian & global platforms.</p>
+        <div class="flex items-center text-xs font-bold text-amber-600 group">
+          <span>Explore Sub-components</span>
+          <i class="ph-bold ph-caret-right ml-1 transition-transform group-hover:translate-x-1"></i>
+        </div>
+      </div>
+
+      <!-- Tier 2: Memoryless Engine -->
+      <div id="node-2" onclick="selectNode(2)" class="node-card glass-panel rounded-2xl p-6 border-2 border-transparent">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl shadow-inner">
+            <i class="ph-bold ph-cpu"></i>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 font-bold border border-orange-200">STAGE 02</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Clean Pipeline</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mb-4">Memoryless processing wiping caches on every execution for 100% fresh results.</p>
+        <div class="flex items-center text-xs font-bold text-orange-600 group">
+          <span>Explore Sub-components</span>
+          <i class="ph-bold ph-caret-right ml-1 transition-transform group-hover:translate-x-1"></i>
+        </div>
+      </div>
+
+      <!-- Tier 3: n8n AI Moderation -->
+      <div id="node-3" onclick="selectNode(3)" class="node-card glass-panel rounded-2xl p-6 border-2 border-transparent">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-2xl shadow-inner">
+            <i class="ph-bold ph-shield-check"></i>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 font-bold border border-teal-200">STAGE 03</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">n8n AI Moderation</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mb-4">Azure & Gemini AI vector search, link resolver, and GPT-4o scam judge.</p>
+        <div class="flex items-center text-xs font-bold text-teal-600 group">
+          <span>Explore Sub-components</span>
+          <i class="ph-bold ph-caret-right ml-1 transition-transform group-hover:translate-x-1"></i>
+        </div>
+      </div>
+
+      <!-- Tier 4: Frontend & Auth -->
+      <div id="node-4" onclick="selectNode(4)" class="node-card glass-panel rounded-2xl p-6 border-2 border-transparent">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl shadow-inner">
+            <i class="ph-bold ph-user-circle-gear"></i>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold border border-blue-200">STAGE 04</span>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-1">Frontend & Auth</h3>
+        <p class="text-xs text-slate-500 leading-relaxed mb-4">SQLite auth session, gated 1st-item preview, and experience level filters.</p>
+        <div class="flex items-center text-xs font-bold text-blue-600 group">
+          <span>Explore Sub-components</span>
+          <i class="ph-bold ph-caret-right ml-1 transition-transform group-hover:translate-x-1"></i>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EXPANDED GRANULAR SUB-NODES CONTAINER -->
+    <div id="sub-nodes-panel" class="mt-10 hidden">
+      <div class="glass-panel rounded-3xl p-8 border border-amber-200/90 shadow-xl relative overflow-hidden">
+        <!-- Background Glow Accent -->
+        <div id="accent-glow" class="absolute -right-20 -top-20 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/80">
+          <div>
+            <span id="sub-tier-badge" class="text-xs font-mono px-2.5 py-1 rounded-full font-bold bg-amber-100 text-amber-800">STAGE DRILLDOWN</span>
+            <h3 id="sub-panel-title" class="text-2xl font-extrabold text-slate-900 mt-2">Granular Components</h3>
+            <p id="sub-panel-desc" class="text-xs text-slate-500 mt-1">Deep-dive into how this module operates internally.</p>
+          </div>
+          <button onclick="resetSelection()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+            <i class="ph-bold ph-x text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Dynamic Grid of Sub-Nodes -->
+        <div id="sub-nodes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Presentation Footer -->
+  <footer class="glass-panel border-t border-amber-100/80 px-6 py-4 text-center mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-semibold text-slate-700">InReal Architecture Map</span>
+        <span>• Complete Execution Pipeline</span>
+      </div>
+      <p class="font-mono">Created for Project Presentation & Review</p>
+    </div>
+  </footer>
+
+  <script>
+    const subNodeData = {
+      1: {
+        title: "Target Scraper Network (Stage 01)",
+        desc: "Playwright stealth browsers & direct REST adapters collecting real opportunities in parallel.",
+        badge: "STAGE 01 // DATA HARVESTING",
+        badgeBg: "bg-amber-100 text-amber-800 border border-amber-200",
+        nodes: [
+          {
+            icon: "ph-building-office",
+            title: "Internshala & Unstop",
+            desc: "Custom headless Playwright bots extracting stipend, location, duration, and direct apply URLs.",
+            tag: "DOM Scraping"
+          },
+          {
+            icon: "ph-briefcase",
+            title: "Naukri, Apna & Foundit",
+            desc: "Anti-bot stealth bypass parsing job requirements, tags, and verified recruiter accounts.",
+            tag: "Stealth Browser"
+          },
+          {
+            icon: "ph-sparkle",
+            title: "Big Tech & Global",
+            desc: "Scrapers targeting Google Research, Microsoft, Meta AI, Apple, and NVIDIA career portals.",
+            tag: "API & Direct Portals"
+          },
+          {
+            icon: "ph-lightning",
+            title: "RAM Optimizer & Concurrency",
+            desc: "Limits parallel Chromium workers to 2, preventing OS memory spikes on local machines.",
+            tag: "Resource Guard"
+          }
+        ]
+      },
+      2: {
+        title: "Memoryless Execution Engine (Stage 02)",
+        desc: "Pure stateless execution wiping historical records so each run processes end-to-end afresh.",
+        badge: "STAGE 02 // DATA INGESTION",
+        badgeBg: "bg-orange-100 text-orange-800 border border-orange-200",
+        nodes: [
+          {
+            icon: "ph-trash",
+            title: "Wipe Previous Data",
+            desc: "Clears CSV storage and log history at the start of every run; zero stale memory retention.",
+            tag: "Zero-Memory Policy"
+          },
+          {
+            icon: "ph-funnel",
+            title: "Strict Deduplication",
+            desc: "Evaluates duplicate company posts and combines identical listings into single enriched records.",
+            tag: "Normalizer"
+          },
+          {
+            icon: "ph-shield-warning",
+            title: "Heuristic Rules Pre-Check",
+            desc: "Evaluates UPI patterns, contact flags, and uncredited course warnings before moderation.",
+            tag: "Signal Parser"
+          },
+          {
+            icon: "ph-bell-ringing",
+            title: "n8n Webhook Dispatch",
+            desc: "Dispatches HTTP POST to http://localhost:5678/webhook/inreal-moderate immediately after each source.",
+            tag: "Async Dispatcher"
+          }
+        ]
+      },
+      3: {
+        title: "n8n AI Moderation Pipeline (Stage 03)",
+        desc: "3-tier verification protecting applicants from scams, unpaid courses, and deceptive employers.",
+        badge: "STAGE 03 // SCAM DETECTION",
+        badgeBg: "bg-teal-100 text-teal-800 border border-teal-200",
+        nodes: [
+          {
+            icon: "ph-link",
+            title: "Apply Link Resolver",
+            desc: "Tests redirect chains, detects link shorteners, broken SSL certs, and 404/closed listings.",
+            tag: "HTTP Prober"
+          },
+          {
+            icon: "ph-chart-polar",
+            title: "Vector Search & Embeddings",
+            desc: "Compares posts against 50+ scam patterns and genuine phrases via Azure / Gemini vectors.",
+            tag: "Cosine Similarity"
+          },
+          {
+            icon: "ph-brain",
+            title: "GPT-4o Strict Schema Judge",
+            desc: "Analyzes post text, verifies exact quote evidence, and outputs calibrated scam probability.",
+            tag: "LLM Judge"
+          },
+          {
+            icon: "ph-check-circle",
+            title: "Verdict Fusion & Save",
+            desc: "Merges AI + rules, writing final verdicts (approved, review, blocked) back to Flask /api/moderation/verdict.",
+            tag: "Verdicts Sync"
+          }
+        ]
+      },
+      4: {
+        title: "Frontend Dashboard & User Gate (Stage 04)",
+        desc: "Modern reactive radar interface with SQLite user sessions and tailored experience levels.",
+        badge: "STAGE 04 // USER EXPERIENCE",
+        badgeBg: "bg-blue-100 text-blue-800 border border-blue-200",
+        nodes: [
+          {
+            icon: "ph-database",
+            title: "SQLite User Auth",
+            desc: "Persistent user database with hashed passwords, session cookies, and login/register modals.",
+            tag: "auth_db.py"
+          },
+          {
+            icon: "ph-lock-key",
+            title: "First-Item Preview Gate",
+            desc: "Unauthenticated guests see 1 preview card; all others blurred with frosted glass unlock prompt.",
+            tag: "Content Gating"
+          },
+          {
+            icon: "ph-graduation-cap",
+            title: "Experience Segmenting",
+            desc: "Saves user experience (0 Exp, 1-2 Yrs, 3+ Yrs) in profile to match appropriate opportunities.",
+            tag: "Preference Tag"
+          },
+          {
+            icon: "ph-sliders-horizontal",
+            title: "Real-time Live Radar",
+            desc: "Shows moderation badges (Verified, Under Review, Blocked Scam) and live progress toasts.",
+            tag: "app_radar.js"
+          }
+        ]
+      }
+    };
+
+    let selectedNodeId = null;
+
+    function selectNode(id) {
+      if (selectedNodeId === id) {
+        resetSelection();
+        return;
+      }
+
+      selectedNodeId = id;
+
+      // Update Top Nodes Active Styles
+      for (let i = 1; i <= 4; i++) {
+        const node = document.getElementById(`node-${i}`);
+        if (i === id) {
+          node.classList.add('active');
+        } else {
+          node.classList.remove('active');
+        }
+      }
+
+      // Populate Sub-nodes Panel
+      const data = subNodeData[id];
+      const panel = document.getElementById('sub-nodes-panel');
+      const title = document.getElementById('sub-panel-title');
+      const desc = document.getElementById('sub-panel-desc');
+      const badge = document.getElementById('sub-tier-badge');
+      const grid = document.getElementById('sub-nodes-grid');
+
+      title.innerText = data.title;
+      desc.innerText = data.desc;
+      badge.innerText = data.badge;
+      badge.className = `text-xs font-mono px-2.5 py-1 rounded-full font-bold ${data.badgeBg}`;
+
+      grid.innerHTML = '';
+      data.nodes.forEach((sub, index) => {
+        const card = document.createElement('div');
+        card.className = 'sub-node glass-panel bg-white/95 rounded-2xl p-5 border border-slate-200/80 shadow-md hover:shadow-lg transition-shadow';
+        card.style.animationDelay = `${index * 80}ms`;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-xl shadow-xs">
+              <i class="ph-bold ${sub.icon}"></i>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-700 border border-slate-200">${sub.tag}</span>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900 mb-1">${sub.title}</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">${sub.desc}</p>
+        `;
+        grid.appendChild(card);
+      });
+
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function resetSelection() {
+      selectedNodeId = null;
+      for (let i = 1; i <= 4; i++) {
+        const node = document.getElementById(`node-${i}`);
+        if (node) node.classList.remove('active');
+      }
+      const panel = document.getElementById('sub-nodes-panel');
+      if (panel) panel.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
