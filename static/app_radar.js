@@ -635,24 +635,6 @@ function bindEventHandlers() {
     });
   });
 
-  // Experience Level Radio Group (0 experience, 1-2 years, 3+ years)
-  document.querySelectorAll('input[name="experience_level"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      activeExperience = e.target.value;
-      // Update visual styles of radio labels
-      document.querySelectorAll('#experience-radio-group label').forEach(lbl => {
-        lbl.classList.remove('bg-white', 'shadow-xs', 'text-slate-900');
-        lbl.classList.add('text-slate-600');
-      });
-      const checkedLabel = e.target.closest('label');
-      if (checkedLabel) {
-        checkedLabel.classList.add('bg-white', 'shadow-xs', 'text-slate-900');
-        checkedLabel.classList.remove('text-slate-600');
-      }
-      applyFiltersAndRender();
-    });
-  });
-
   // Saved Bookmarks Button
   document.getElementById('filter-bookmarks-btn')?.addEventListener('click', () => {
     showBookmarkedOnly = !showBookmarkedOnly;
@@ -705,17 +687,10 @@ function bindEventHandlers() {
       allStipend.classList.add('active');
     }
 
-    activeExperience = 'all';
-    const allExpRadio = document.querySelector('input[name="experience_level"][value="all"]');
-    if (allExpRadio) allExpRadio.checked = true;
-    document.querySelectorAll('#experience-radio-group label').forEach(lbl => {
-      lbl.classList.remove('bg-white', 'shadow-xs', 'text-slate-900');
-      lbl.classList.add('text-slate-600');
-    });
-    const defaultExpLabel = document.getElementById('exp-label-all');
-    if (defaultExpLabel) {
-      defaultExpLabel.classList.add('bg-white', 'shadow-xs', 'text-slate-900');
-      defaultExpLabel.classList.remove('text-slate-600');
+    if (currentUser && currentUser.experience) {
+      activeExperience = currentUser.experience;
+    } else {
+      activeExperience = 'all';
     }
 
     applyFiltersAndRender();
@@ -922,6 +897,7 @@ function setUserLoggedIn(user) {
   const profilePill = document.getElementById('user-profile-pill');
   const displayName = document.getElementById('user-display-name');
   const avatarInitial = document.getElementById('user-avatar-initial');
+  const expBadge = document.getElementById('user-experience-badge');
 
   if (loginBtn) loginBtn.classList.add('hidden');
   if (profilePill) {
@@ -930,6 +906,14 @@ function setUserLoggedIn(user) {
   }
   if (displayName) displayName.innerText = user.username || 'User';
   if (avatarInitial) avatarInitial.innerText = (user.username || 'U').charAt(0).toUpperCase();
+  if (expBadge) {
+    const expVal = user.experience || '0';
+    const expLabels = { '0': '0 Exp', '1-2': '1-2 Yrs', '3+': '3+ Yrs' };
+    expBadge.innerText = expLabels[expVal] || `${expVal} Exp`;
+  }
+
+  // Sync user's experience with the listings filter
+  activeExperience = user.experience || 'all';
 
   // Re-render listings now that all cards are unlocked
   applyFiltersAndRender();
@@ -1070,6 +1054,8 @@ function bindAuthHandlers() {
     const username = document.getElementById('reg-username')?.value.trim();
     const email = document.getElementById('reg-email')?.value.trim();
     const password = document.getElementById('reg-password')?.value;
+    const expRadio = document.querySelector('input[name="reg_experience"]:checked');
+    const experience = expRadio ? expRadio.value : '0';
     const submitBtn = document.getElementById('reg-submit-btn');
 
     if (submitBtn) {
@@ -1081,7 +1067,7 @@ function bindAuthHandlers() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
+        body: JSON.stringify({ username, email, password, experience })
       });
       const data = await res.json();
       if (res.ok && data.status === 'success') {

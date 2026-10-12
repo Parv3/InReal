@@ -62,8 +62,9 @@ def auth_register():
     username = data.get("username", "")
     email = data.get("email", "")
     password = data.get("password", "")
+    experience = data.get("experience", "0")
 
-    ok, message = auth_db.register_user(username, email, password)
+    ok, message = auth_db.register_user(username, email, password, experience)
     if not ok:
         return jsonify({"status": "error", "message": message}), 400
     
@@ -73,6 +74,7 @@ def auth_register():
         session["user_id"] = user["id"]
         session["username"] = user["username"]
         session["email"] = user["email"]
+        session["experience"] = user.get("experience", experience)
 
     return jsonify({
         "status": "success",
@@ -94,6 +96,7 @@ def auth_login():
     session["user_id"] = user["id"]
     session["username"] = user["username"]
     session["email"] = user["email"]
+    session["experience"] = user.get("experience", "0")
 
     return jsonify({
         "status": "success",
@@ -124,7 +127,8 @@ def auth_me():
         "user": {
             "id": user["id"],
             "username": user["username"],
-            "email": user["email"]
+            "email": user["email"],
+            "experience": user.get("experience", "0")
         }
     })
 

@@ -13,14 +13,21 @@ def init_db():
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                experience TEXT DEFAULT '0',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # In case the table already existed without experience column, perform lightweight migration
+        cursor.execute("PRAGMA table_info(users)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if "experience" not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN experience TEXT DEFAULT '0'")
         conn.commit()
 
-def register_user(username: str, email: str, password: str):
+def register_user(username: str, email: str, password: str, experience: str = "0"):
     username = username.strip()
     email = email.strip().lower()
+    experience = (experience or "0").strip()
     if not username or not email or not password:
         return False, "Username, email, and password are required."
     
@@ -29,8 +36,8 @@ def register_user(username: str, email: str, password: str):
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)",
-                (username, email, password_hash)
+                "INSERT INTO users (username, email, password_hash, experience) VALUES (?, ?, ?, ?)",
+                (username, email, password_hash, experience)
             )
             conn.commit()
             return True, "User registered successfully."
@@ -62,7 +69,8 @@ def authenticate_user(username_or_email: str, password: str):
                 return {
                     "id": user["id"],
                     "username": user["username"],
-                    "email": user["email"]
+                    "email": user["email"],
+                    "experience": user["experience"] if "experience" in user.keys() else "0"
                 }, None
             return None, "Invalid credentials. Please verify username and password."
     except Exception as e:
@@ -73,7 +81,7 @@ def get_user_by_id(user_id: int):
         with sqlite3.connect(DB_PATH) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute("SELECT id, username, email FROM users WHERE id = ?", (user_id,))
+            cursor.execute("SELECT id, username, email, experience FROM users WHERE id = ?", (user_id,))
             user = cursor.fetchone()
             if user:
                 return dict(user)
