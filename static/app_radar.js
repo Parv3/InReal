@@ -824,24 +824,169 @@ function bindEventHandlers() {
     if (activeDrawerJob) toggleBookmark(activeDrawerJob.id);
   });
 
-  // Opportunity Modal (Triggered by "Submit an Opportunity")
+  // Opportunity Modal (Triggered by "Search Opportunity" & Profile Preferences)
   const modal = document.getElementById('scrape-config-modal');
-  document.getElementById('trigger-scrape-btn')?.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-  });
-  document.getElementById('close-config-btn')?.addEventListener('click', () => {
-    modal.classList.add('hidden');
+  const otherCheckbox = document.getElementById('field-other-checkbox');
+  const otherFieldContainer = document.getElementById('other-field-container');
+  const customFieldInput = document.getElementById('custom-field-input');
+
+  // Toggle custom text field when "Other" is checked
+  otherCheckbox?.addEventListener('change', () => {
+    if (otherCheckbox.checked) {
+      otherFieldContainer?.classList.remove('hidden');
+      customFieldInput?.focus();
+    } else {
+      otherFieldContainer?.classList.add('hidden');
+    }
   });
 
+  // Helper for batch checking checkboxes
+  const setCheckboxes = (containerId, checked) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.checked = checked;
+      // If toggling fields and it's the other checkbox, sync the input container
+      if (cb.id === 'field-other-checkbox') {
+        otherFieldContainer?.classList.toggle('hidden', !checked);
+      }
+    });
+  };
+
+  // Select All & Clear All button handlers
+  document.getElementById('select-all-sources-btn')?.addEventListener('click', () => setCheckboxes('sources-checkbox-grid', true));
+  document.getElementById('clear-all-sources-btn')?.addEventListener('click', () => setCheckboxes('sources-checkbox-grid', false));
+  document.getElementById('select-all-fields-btn')?.addEventListener('click', () => setCheckboxes('fields-checkbox-grid', true));
+  document.getElementById('clear-all-fields-btn')?.addEventListener('click', () => setCheckboxes('fields-checkbox-grid', false));
+  document.getElementById('select-all-regions-btn')?.addEventListener('click', () => setCheckboxes('regions-checkbox-grid', true));
+  document.getElementById('clear-all-regions-btn')?.addEventListener('click', () => setCheckboxes('regions-checkbox-grid', false));
+
+  // Function to apply a config object to the modal form
+  const applyConfigToModal = (cfg) => {
+    if (!cfg || typeof cfg !== 'object') return;
+    if (Array.isArray(cfg.sources)) {
+      document.querySelectorAll('#sources-checkbox-grid input[name="sources"]').forEach(cb => {
+        cb.checked = cfg.sources.includes(cb.value);
+      });
+    }
+    if (Array.isArray(cfg.regions)) {
+      document.querySelectorAll('#regions-checkbox-grid input[name="regions"]').forEach(cb => {
+        cb.checked = cfg.regions.includes(cb.value);
+      });
+    }
+    if (Array.isArray(cfg.fields)) {
+      document.querySelectorAll('#fields-checkbox-grid input[name="fields"]').forEach(cb => {
+        cb.checked = cfg.fields.includes(cb.value);
+      });
+    }
+    if (cfg.custom_field !== undefined && customFieldInput) {
+      customFieldInput.value = cfg.custom_field || '';
+    }
+    if (otherCheckbox) {
+      otherFieldContainer?.classList.toggle('hidden', !otherCheckbox.checked);
+    }
+  };
+
+  // Function to read current config from the modal form
+  const getCurrentModalConfig = () => {
+    const checkedValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+    return {
+      sources: checkedValues('sources'),
+      fields: checkedValues('fields'),
+      regions: checkedValues('regions'),
+      custom_field: (customFieldInput?.value || '').trim()
+    };
+  };
+
+  // Open modal pre-filled with saved profile preferences (or defaults)
+  const openOpportunityModal = async () => {
+    // If user is logged in, attempt to fetch user's saved preferences
+    if (currentUser) {
+      try {
+        const res = await fetch('/api/user/preferences');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.preferences && Object.keys(data.preferences).length > 0) {
+            applyConfigToModal(data.preferences);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load preferences from backend:', e);
+      }
+    } else {
+      // Unauthenticated fallback: check localStorage
+      const cached = localStorage.getItem('inreal_opportunity_config');
+      if (cached) {
+        try {
+          applyConfigToModal(JSON.parse(cached));
+        } catch (e) {}
+      }
+    }
+    modal?.classList.remove('hidden');
+  };
+
+  // Trigger from Header 'Search Opportunity' button
+  document.getElementById('trigger-scrape-btn')?.addEventListener('click', openOpportunityModal);
+
+  // Trigger from Profile Popover 'Search Preferences' button
+  document.getElementById('profile-preferences-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('user-profile-menu')?.classList.add('hidden');
+    openOpportunityModal();
+  });
+
+  document.getElementById('close-config-btn')?.addEventListener('click', () => {
+    modal?.classList.add('hidden');
+  });
+
+  // Save to Profile button handler
+  document.getElementById('save-profile-pref-btn')?.addEventListener('click', async () => {
+    const config = getCurrentModalConfig();
+    const feedbackMsg = document.getElementById('config-feedback-msg');
+    
+    // Always persist to local cache as well
+    localStorage.setItem('inreal_opportunity_config', JSON.stringify(config));
+
+    if (!currentUser) {
+      showToast('info', 'Preferences Saved Locally', 'Log in to sync preferences permanently with your account.');
+      if (feedbackMsg) {
+        feedbackMsg.className = 'p-2.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 block';
+        feedbackMsg.innerText = 'Saved to browser cache. Sign in to sync with your account permanently.';
+        setTimeout(() => feedbackMsg.classList.add('hidden'), 4000);
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        showToast('success', 'Profile Preferences Saved', 'Your choices have been saved to your account!');
+        if (feedbackMsg) {
+          feedbackMsg.className = 'p-2.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+          feedbackMsg.innerText = '✓ All choices successfully saved to your profile!';
+          setTimeout(() => feedbackMsg.classList.add('hidden'), 3500);
+        }
+      } else {
+        showToast('error', 'Save Failed', data.message || 'Could not save preferences.');
+      }
+    } catch (err) {
+      console.error('Save error:', err);
+      showToast('error', 'Error', 'Failed to save preferences to server.');
+    }
+  });
+
+  // Submit sweep form
   document.getElementById('scrape-config-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    modal.classList.add('hidden');
+    modal?.classList.add('hidden');
 
-    const checkedValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-    const config = {
-      regions: checkedValues('regions'),
-      sources: checkedValues('sources')
-    };
+    const config = getCurrentModalConfig();
+    localStorage.setItem('inreal_opportunity_config', JSON.stringify(config));
 
     try {
       const res = await fetch('/api/scrape', {
@@ -850,6 +995,7 @@ function bindEventHandlers() {
         body: JSON.stringify(config)
       });
       if (res.status === 403) showToast('info', 'View-only link', 'Scraping can only be started on the host laptop.');
+      else showToast('info', 'Sweep Initiated', 'Scraping opportunity feeds with your selected configuration...');
     } catch (err) {
       console.error(err);
     }

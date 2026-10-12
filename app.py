@@ -128,9 +128,38 @@ def auth_me():
             "id": user["id"],
             "username": user["username"],
             "email": user["email"],
-            "experience": user.get("experience", "0")
+            "experience": user.get("experience", "0"),
+            "preferences": user.get("preferences", "")
         }
     })
+
+
+@app.route("/api/user/preferences", methods=["GET", "POST"])
+def user_preferences():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"status": "error", "message": "Authentication required."}), 401
+
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        import json
+        pref_str = json.dumps(data)
+        ok, msg = auth_db.update_user_preferences(user_id, pref_str)
+        if ok:
+            return jsonify({"status": "success", "message": "Preferences saved successfully.", "preferences": data})
+        return jsonify({"status": "error", "message": msg}), 500
+
+    # GET
+    user = auth_db.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"status": "error", "message": "User not found."}), 404
+    import json
+    pref_str = user.get("preferences") or "{}"
+    try:
+        pref = json.loads(pref_str)
+    except Exception:
+        pref = {}
+    return jsonify({"status": "success", "preferences": pref})
 
 DATA_FILE = Path(__file__).parent / "internships.csv"
 PATTERN_INDEX = Path(__file__).parent / "moderation" / "pattern_index.json"

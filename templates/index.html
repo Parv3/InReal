@@ -222,13 +222,24 @@
         </div>
       </div>
 
-      <!-- Header Right Controls: Live Status Indicator & Google-style Profile Avatar -->
-      <div class="flex items-center gap-3">
+      <!-- Header Right Controls: Live Status Indicator, Search Opportunity Button & Google-style Profile Avatar -->
+      <div class="flex items-center gap-2.5">
         <!-- Live System Status Indicator (Visible on all viewports) -->
         <div id="status-indicator-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 shadow-xs">
           <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span id="scraper-status-text" class="text-[11px] font-bold">System Ready</span>
         </div>
+
+        <!-- Prominent 'Search Opportunity' Button -->
+        <button 
+          id="trigger-scrape-btn" 
+          type="button" 
+          class="glass-btn glass-btn-primary px-3.5 py-1.5 flex items-center gap-1.5 text-xs font-bold shadow-sm transition hover:shadow-md"
+          title="Configure and launch opportunity discovery sweep"
+        >
+          <i class="ph ph-magnifying-glass-plus text-base text-orange-400"></i>
+          <span>Search Opportunity</span>
+        </button>
 
         <!-- User Authentication & Google-style Profile Avatar Dropdown (Far Right) -->
         <div id="auth-nav-container" class="relative">
@@ -251,7 +262,7 @@
             <!-- Google-style Account Floating Popover Menu -->
             <div 
               id="user-profile-menu" 
-              class="hidden absolute right-0 mt-3 w-68 glass-panel rounded-2xl shadow-2xl border border-slate-200/90 py-3.5 px-4 z-50 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150"
+              class="hidden absolute right-0 mt-3 w-72 glass-panel rounded-2xl shadow-2xl border border-slate-200/90 py-3.5 px-4 z-50 text-slate-800 animate-in fade-in slide-in-from-top-2 duration-150"
             >
               <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-white flex items-center justify-center font-extrabold text-base shadow-sm border border-white" id="menu-avatar-initial">
@@ -271,12 +282,27 @@
                 </span>
               </div>
 
+              <!-- Profile Opportunity Preferences Settings Trigger -->
+              <div class="py-1 border-t border-slate-100">
+                <button 
+                  id="profile-preferences-btn" 
+                  type="button" 
+                  class="w-full py-2 px-2.5 text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-700 rounded-xl transition flex items-center justify-between group"
+                >
+                  <div class="flex items-center gap-2">
+                    <i class="ph ph-sliders-horizontal text-base text-orange-500 group-hover:scale-110 transition-transform"></i>
+                    <span>Search Preferences</span>
+                  </div>
+                  <span class="text-[10px] bg-slate-100 group-hover:bg-orange-100 text-slate-500 group-hover:text-orange-700 px-1.5 py-0.5 rounded font-bold">Edit</span>
+                </button>
+              </div>
+
               <!-- Logout Button with Open Door Icon -->
               <div class="pt-2 border-t border-slate-100">
                 <button 
                   id="logout-btn" 
                   type="button" 
-                  class="w-full py-2.5 px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center justify-center gap-2 group"
+                  class="w-full py-2 px-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center justify-center gap-2 group"
                 >
                   <i class="ph-bold ph-door-open text-base text-rose-500 group-hover:scale-110 transition-transform"></i>
                   <span>Sign out of InReal</span>
@@ -720,51 +746,130 @@
     </div>
   </div>
 
-  <!-- Translucent Scraper Config Modal (Replaced button trigger: Submit an Opportunity) -->
-  <div id="scrape-config-modal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="glass-panel max-w-md w-full p-6 shadow-2xl">
+  <!-- Translucent Scraper Config Modal (Triggered by: Search Opportunity & Profile Preferences) -->
+  <div id="scrape-config-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-lg w-full p-6 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div>
-          <h3 class="text-sm font-bold text-slate-900">Submit an Opportunity / Sweep Feeds</h3>
-          <p class="text-[11px] text-slate-500">Configure target platforms and regions for opportunity discovery</p>
+          <h3 id="scrape-config-modal-title" class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <i class="ph ph-sliders-horizontal text-orange-500 text-base"></i>
+            <span>Opportunity Sweep Configuration</span>
+          </h3>
+          <p class="text-[11px] text-slate-500">Customize target platforms, domains & regions or sync with your profile</p>
         </div>
-        <button id="close-config-btn" class="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500">
+        <button id="close-config-btn" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition">
           <i class="ph ph-x text-base"></i>
         </button>
       </div>
 
       <form id="scrape-config-form" class="mt-4 space-y-4 text-xs font-medium">
+        
+        <!-- Section 1: Target Platforms with Select All -->
         <div>
-          <label class="font-bold text-slate-700 block mb-2">Target Geographic Regions</label>
-          <div class="grid grid-cols-3 gap-2">
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="india" checked> India</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="usa" checked> USA</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="europe" checked> Europe</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="remote" checked> Remote</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="regions" value="worldwide" checked> Global</label>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="ph ph-globe text-slate-400"></i>
+              <span>Target Platforms & Feeds</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <button type="button" id="select-all-sources-btn" class="text-[11px] font-bold text-orange-600 hover:text-orange-700">Select All</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" id="clear-all-sources-btn" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600">Clear</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="sources-checkbox-grid">
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="internshala" checked> Internshala</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="unstop" checked> Unstop</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="naukri" checked> Naukri</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="shine" checked> Shine</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="foundit" checked> Foundit</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="apna" checked> Apna</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="bigtech" checked> Big Tech</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="government" checked> Labs/Govt</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="universities" checked> University RSS</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="sources" value="remotive" checked> Remotive/WWR</label>
           </div>
         </div>
 
+        <!-- Section 2: Fields & Research Domains (including Medical, Pharma, Other) with Select All -->
         <div>
-          <label class="font-bold text-slate-700 block mb-2">Target Feeds & Platforms</label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="linkedin" checked> LinkedIn</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="internshala" checked> Internshala</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="unstop" checked> Unstop</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="naukri" checked> Naukri</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="shine" checked> Shine</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="foundit" checked> Foundit</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="apna" checked> Apna</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="bigtech" checked> Big Tech</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="government" checked> Labs/Govt</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="universities" checked> University RSS</label>
-            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white"><input type="checkbox" name="sources" value="remotive" checked> Remotive/WWR</label>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="ph ph-briefcase text-slate-400"></i>
+              <span>Target Fields & Specializations</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <button type="button" id="select-all-fields-btn" class="text-[11px] font-bold text-orange-600 hover:text-orange-700">Select All</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" id="clear-all-fields-btn" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600">Clear</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="fields-checkbox-grid">
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="fields" value="ai_ml" checked> AI & Machine Learning</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="fields" value="data_science" checked> Data Science & Analytics</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="fields" value="medical" checked> Medical & Healthcare</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="fields" value="pharma" checked> Pharma & Clinical Trials</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="fields" value="robotics" checked> Robotics & Hardware</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="fields" value="other" id="field-other-checkbox"> Other Custom Domain</label>
+          </div>
+          <!-- Custom Domain Text Input (Reveals when 'Other' is checked) -->
+          <div id="other-field-container" class="mt-2.5 hidden">
+            <label class="text-[11px] text-slate-500 font-semibold block mb-1">Specify Other Field / Keywords:</label>
+            <input 
+              type="text" 
+              id="custom-field-input" 
+              name="custom_field" 
+              placeholder="e.g. Biomedical Devices, Quantum Computing, Neuroscience..." 
+              class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 font-medium"
+            >
           </div>
         </div>
 
-        <button type="submit" class="w-full py-2.5 glass-btn glass-btn-primary text-xs font-bold transition mt-2">
-          Launch Opportunity Sweep
-        </button>
+        <!-- Section 3: Geographic Regions with Select All -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="ph ph-map-pin text-slate-400"></i>
+              <span>Target Geographic Regions</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <button type="button" id="select-all-regions-btn" class="text-[11px] font-bold text-orange-600 hover:text-orange-700">Select All</button>
+              <span class="text-slate-300">|</span>
+              <button type="button" id="clear-all-regions-btn" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600">Clear</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="regions-checkbox-grid">
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="regions" value="india" checked> India</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="regions" value="usa" checked> USA</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="regions" value="europe" checked> Europe</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="regions" value="remote" checked> Remote</label>
+            <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-white text-[11px] font-medium"><input type="checkbox" name="regions" value="worldwide" checked> Global</label>
+          </div>
+        </div>
+
+        <!-- Feedback message banner -->
+        <div id="config-feedback-msg" class="hidden p-2.5 rounded-lg text-xs font-semibold"></div>
+
+        <!-- Action Buttons: Save to Profile & Launch Sweep -->
+        <div class="pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center gap-2.5">
+          <button 
+            type="button" 
+            id="save-profile-pref-btn" 
+            class="w-full sm:w-auto px-4 py-2.5 border border-slate-200 hover:border-orange-300 hover:bg-orange-50/50 text-slate-700 hover:text-orange-800 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs"
+          >
+            <i class="ph ph-floppy-disk text-base text-orange-500"></i>
+            <span>Save to My Profile</span>
+          </button>
+          <button 
+            type="submit" 
+            id="launch-sweep-btn" 
+            class="flex-1 w-full py-2.5 glass-btn glass-btn-primary text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm"
+          >
+            <i class="ph ph-rocket-launch text-base text-white"></i>
+            <span>Launch Opportunity Sweep</span>
+          </button>
+        </div>
       </form>
     </div>
   </div>

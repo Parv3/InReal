@@ -11,6 +11,9 @@ INCLUDE_KEYWORDS = [
     "ai agent", "agentic", "ai developer", "ai development",
     "transformer", "diffusion model", "multimodal", "robotics ai",
     "speech recognition", "recommendation system", "ai intern", "aiml",
+    # Medical, Healthcare & Pharma domains
+    "medical", "healthcare", "pharma", "pharmaceutical", "biomedical", "bioinformatics",
+    "clinical", "computational biology", "genomics", "health tech",
     # Skill tags that only show up on real ML work
     "pytorch", "tensorflow", "keras", "scikit-learn", "opencv",
     "hugging face", "langchain",
@@ -23,6 +26,7 @@ CORE_ML_SKILLS = [
     "machine learning", "deep learning", "neural network", "natural language processing",
     "nlp", "computer vision", "data science", "reinforcement learning", "llm",
     "pytorch", "tensorflow", "keras", "scikit-learn", "opencv", "hugging face", "langchain",
+    "bioinformatics", "computational biology", "clinical research", "pharmacology",
 ]
 # A title with a bare "AI" counts only next to one of these words
 # ("AI Research Intern" yes; "AI Video Editor", "AI Web Development" no).
@@ -98,11 +102,15 @@ def internship_rejection_reason(title: str, skills: list, source: str = "", labe
 
     if is_ai_ml_title(title_lower):
         return None
-    # No AI/ML in the title: the skills must show at least two real ML skills
+    # No AI/ML in the title: the skills must show at least two real domain/ML skills
     core = [s for s in skills_lower if any(k in s for k in CORE_ML_SKILLS)]
     if len(core) >= 2:
         return None
-    return "Not an AI/ML role"
+    # If custom domain keywords or medical/pharma match title or skills
+    domain_kw = ["medical", "healthcare", "pharma", "pharmaceutical", "biomedical", "bioinformatics", "clinical"]
+    if any(k in title_lower or any(k in s for s in skills_lower) for k in domain_kw):
+        return None
+    return "Not an AI/ML or specialized domain role"
 
 
 # Words that only say "AI" in a general way. On their own they are not enough when the
