@@ -105,23 +105,17 @@ def sync_listings(kept: list, dropped_ids: list) -> dict:
 
         for item in kept:
             rec = _record(item)
+            # Full fresh pipeline: no cached moderation status or prediction memory
+            for k in MODERATION_FIELDS:
+                rec[k] = ""
+            rec["is_new"] = True
+            
             old = by_id.get(item["id"])
             if old is not None:
-                changed = False
-                # includes a description arriving for a row saved before descriptions were stored
-                content_changed = any(str(old.get(k, "") or "") != str(rec.get(k, "") or "") for k in CONTENT_FIELDS)
-                for k, v in rec.items():
-                    if k in keep_as_is:
-                        continue
-                    if str(old.get(k, "") or "") != str(v if v is not None else ""):
-                        old[k] = v
-                        changed = True
-                if content_changed and old.get("moderation_status"):
-                    for k in MODERATION_FIELDS:
-                        old[k] = ""
-                updated += changed
-            elif item["id"] not in seen_ids:
-                rec["is_new"] = True
+                # Update existing row with fresh data and reset moderation
+                old.update(rec)
+                updated += 1
+            else:
                 rows.append(rec)
                 by_id[item["id"]] = rec
                 seen_ids.add(item["id"])

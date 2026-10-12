@@ -283,7 +283,7 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
     
     logger.info(f"🚀 Starting selective scraper with config: {config}")
     
-    # Clear old popup alerts from a previous run
+    # Clear old popup alerts, memory logs and CSV data from a previous run
     from pathlib import Path
     alert_file = Path(__file__).parent / "scraper_alerts.json"
     if alert_file.exists():
@@ -291,6 +291,22 @@ def run_scrapers(dry_run=False, config=None, specific_source=None):
             alert_file.unlink()
         except OSError:
             pass
+
+    # Memory element removal: wipe previous data & logs on every run
+    if not dry_run:
+        csv_f = Path(__file__).parent / "internships.csv"
+        log_f = Path(__file__).parent / "internships_log.json"
+        try:
+            from output_handler import _CSV_LOCK, CSV_HEADERS, save_log
+            with _CSV_LOCK:
+                if csv_f.exists():
+                    with open(csv_f, "w", newline="", encoding="utf-8") as f:
+                        import csv
+                        writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
+                        writer.writeheader()
+                save_log({"last_run": None, "total_scraped": 0, "seen_ids": [], "run_history": []})
+        except Exception as e:
+            logger.warning(f"Could not reset memory data: {e}")
     
     req_regions = set([r.lower() for r in config.get("regions", [])])
     req_sources = set([s.lower() for s in config.get("sources", [])])
